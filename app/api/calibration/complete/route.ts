@@ -90,9 +90,9 @@ export async function POST(req: Request) {
 
     // SIGNAL 1: Baseline Consistency (40% weight)
     // Compare calibration responses vs baseline vocabulary richness
-    const responses: any[] = session.responses || [];
-    const calWords = responses.reduce((s: number, r: any) => s + (r.wordCount || 0), 0);
-    const calText = responses.map((r: any) => r.content || "").join(" ");
+    const responses: { wordCount?: number; content?: string }[] = session.responses || [];
+    const calWords = responses.reduce((s: number, r: { wordCount?: number }) => s + (r.wordCount || 0), 0);
+    const calText = responses.map((r: { content?: string }) => r.content || "").join(" ");
     const calVocabWords = calText.toLowerCase().split(/\s+/).filter(Boolean);
     const calVocabRichness = calVocabWords.length > 0
       ? new Set(calVocabWords).size / calVocabWords.length

@@ -37,10 +37,10 @@ async function getData() {
 
     return {
       userId: user.id,
-      myMentorship: myMentorshipData as any,
-      myMentees: myMenteesData as any || [],
+      myMentorship: myMentorshipData as Record<string, unknown>,
+      myMentees: (myMenteesData as Record<string, unknown>[]) || [],
       eligibleToMentor,
-      availableMentors: mentors as any || []
+      availableMentors: (mentors as Record<string, unknown>[]) || []
     };
   } catch {
     return empty;

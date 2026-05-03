@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { buildCalibrationPrompts } from "@/lib/calibration/prompts";
 
-export async function POST(_req: NextRequest) {
+export async function POST() {
   try {
     const { createClient } = await import("@/lib/supabase/server");
     const supabase = createClient();

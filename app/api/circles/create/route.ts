@@ -1,14 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-function generateInviteCode() {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let result = "";
-  for (let i = 0; i < 6; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
-}
+
 
 export async function POST(req: Request) {
   try {
@@ -75,7 +68,7 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ success: true, circle, inviteCode });
-  } catch (err) {
+  } catch (_err) {
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

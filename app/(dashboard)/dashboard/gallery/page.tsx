@@ -22,7 +22,7 @@ async function getData() {
         const match = (entry.content || "").match(/\[Attached File: (.*?)\]/);
         if (match) {
           const fileUrl = match[1];
-          let caption = entry.content.replace(/\[Attached File: .*?\]/, '').trim();
+          const caption = entry.content.replace(/\[Attached File: .*?\]/, '').trim();
           
           let item_type = "photo";
           if (fileUrl.endsWith(".webm") || fileUrl.endsWith(".mp3")) item_type = "voice";
@@ -33,10 +33,10 @@ async function getData() {
             user_id: entry.user_id,
             file_url: fileUrl,
             file_type: "image/png", 
-            item_type: item_type as any, 
+            item_type: item_type as "photo" | "voice" | "document", 
             caption: caption || entry.title || undefined,
             created_at: entry.created_at,
-            source: entry.is_forge_entry ? "forge" : "direct_upload" as any
+            source: entry.is_forge_entry ? "forge" : "direct_upload" as "forge" | "direct_upload"
           });
         }
       }

@@ -17,7 +17,6 @@ export async function POST(req: Request) {
       userMessageCount,
       dependencyFlags,
       topics,
-      sessionContext,
       sessionDurationSeconds
     } = body;
 

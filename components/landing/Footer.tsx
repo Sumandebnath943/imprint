@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+
 
 function XIcon() {
   return (
@@ -104,7 +104,7 @@ export default function Footer() {
                 Protecting cognitive identity in the age of AI.
               </h2>
               <p className="text-[15px] text-white/40 mb-10 max-w-[400px]">
-                Let's build something authentic.
+                Let&apos;s build something authentic.
               </p>
 
               {/* Glowing CTA */}

@@ -59,7 +59,7 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ success: true, circle });
-  } catch (err) {
+  } catch (_err) {
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

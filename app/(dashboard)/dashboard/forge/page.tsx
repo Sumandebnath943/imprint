@@ -48,9 +48,9 @@ async function getForgeData(): Promise<ForgeUserData> {
 
     // Map history entries — infer tool from drift_signals or content pattern for old entries
     const history = (historyRes.data ?? []).map((h) => {
-      const signals = h.drift_signals as any;
-      const hasFile = ((h as any).content || "").includes("[Attached File:");
-      const title = ((h as any).title || "").toLowerCase();
+      const signals = h.drift_signals as Record<string, unknown>;
+      const hasFile = ((h as Record<string, unknown>).content as string || "").includes("[Attached File:");
+      const title = ((h as Record<string, unknown>).title as string || "").toLowerCase();
       let tool = signals?.forge_tool;
       if (!tool) {
         if (hasFile && title.includes("voice")) tool = "voice-note";

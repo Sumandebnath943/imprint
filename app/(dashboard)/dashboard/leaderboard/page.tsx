@@ -37,7 +37,7 @@ async function getData() {
     // Format the rankings to ensure latest_drift is just the single most recent score
     // PostgREST returns an array for the join, we only need the first one (we should logically order it by created_at desc, 
     // but the query builder syntax for that on joined tables requires some tricky formatting. For now, we take [0]).
-    const rankings: RankedProfile[] = (rankingsData ?? []).map((r: any) => ({
+    const rankings: RankedProfile[] = (rankingsData ?? []).map((r: RankedProfile & { latest_drift: { score: number }[] }) => ({
       ...r,
       latest_drift: Array.isArray(r.latest_drift) && r.latest_drift.length > 0 ? r.latest_drift[0] : null
     }));
