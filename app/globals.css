@@ -1,27 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Base Reset ─────────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --font-space-grotesk: 'Space Grotesk', Inter, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
+  background-color: #080808;
+  color: #ffffff;
+  font-family: var(--font-space-grotesk);
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #080808;
+  color: #ffffff;
+  font-family: var(--font-space-grotesk);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+/* ─── Custom Scrollbar ────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ff5500;
+  border-radius: 100px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ff7a30;
+}
+
+/* ─── Focus Styles ────────────────────────────────────────── */
+*:focus {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: 2px solid rgba(255, 85, 0, 0.5);
+  outline-offset: 2px;
+}
+
+/* ─── Text Selection ──────────────────────────────────────── */
+::selection {
+  background-color: #ff5500;
+  color: #ffffff;
+}
+
+::-moz-selection {
+  background-color: #ff5500;
+  color: #ffffff;
+}
+
+/* ─── Base Typography ─────────────────────────────────────── */
+* {
+  box-sizing: border-box;
+}
+
+/* ─── Utility Classes ─────────────────────────────────────── */
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .text-imprint-gradient {
+    background: linear-gradient(135deg, #ff5500 0%, #ff7a30 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .bg-surface-card {
+    background-color: #111111;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 16px;
+  }
+
+  .glow-orange {
+    box-shadow: 0 0 60px rgba(255, 85, 0, 0.25);
+  }
+
+  .transition-smooth {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
