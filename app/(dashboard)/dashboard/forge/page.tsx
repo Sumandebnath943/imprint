@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import ForgeClient from "@/components/forge/ForgeClient";
 import type { ForgeUserData } from "@/lib/forge/types";
 
@@ -83,5 +84,9 @@ async function getForgeData(): Promise<ForgeUserData> {
 
 export default async function ForgePage() {
   const userData = await getForgeData();
-  return <ForgeClient userData={userData} />;
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#040404]" />}>
+      <ForgeClient userData={userData} />
+    </Suspense>
+  );
 }
