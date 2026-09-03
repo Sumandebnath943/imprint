@@ -221,7 +221,10 @@ export default function MentorsClient({ userId, myMentorship, myMentees, eligibl
             </motion.div>
           ))}
           {availableMentors.length === 0 && (
-            <div className="rounded-[16px] p-8 text-center" style={{ background: "#111111", border: "1px dashed rgba(255,255,255,0.10)" }}>
+            // Spans the grid rather than occupying a single column. Without
+            // col-span it rendered as a lone third-width card against an
+            // otherwise empty row, unlike every other empty state in the app.
+            <div className="col-span-full rounded-[16px] p-10 text-center" style={{ background: "#111111", border: "1px dashed rgba(255,255,255,0.10)" }}>
               <p className="text-[15px] text-white mb-2">No mentors are open right now.</p>
               <p className="text-sm mb-5" style={{ color: "rgba(255,255,255,0.40)" }}>
                 Mentors appear here once they open their doors. If your IMPRINT
