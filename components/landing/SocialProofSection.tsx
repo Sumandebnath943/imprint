@@ -32,7 +32,7 @@ const TESTIMONIALS: Testimonial[] = [
 
 export default function SocialProofSection() {
   return (
-    <section className="relative py-32 overflow-hidden" style={{ background: "#080808" }}>
+    <section id="testimonials" className="relative py-32 overflow-hidden" style={{ background: "#080808" }}>
       <div className="max-w-[1440px] mx-auto px-6 md:px-12">
         {/* Header */}
         <div className="mb-16">

@@ -45,7 +45,7 @@ function DriftScoreCard() {
 
 export default function ImprintScoreSection() {
   return (
-    <section className="relative py-32 overflow-hidden" style={{ background: "#080808" }}>
+    <section id="score" className="relative py-32 overflow-hidden" style={{ background: "#080808" }}>
       {/* Ghost text */}
       <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none select-none" style={{ fontSize: "clamp(100px,14vw,180px)", fontWeight: 700, color: "#FFFFFF", opacity: 0.04, lineHeight: 1, letterSpacing: "-0.04em", whiteSpace: "nowrap" }}>
         SCORE

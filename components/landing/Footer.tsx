@@ -28,29 +28,38 @@ function InstagramIcon() {
 }
 
 
+// Every entry resolves to a real destination — a section on this page or a
+// route that exists. The previous list carried 13 href="#" links (Pricing,
+// FAQs, Contact, Blog, Careers, Press, Testimonials, Vault, Drift Score and
+// three social icons), which went nowhere when clicked. "About" was among
+// them, even though /about has always existed. Anything without a
+// destination is left out rather than shipped dead; add entries back as the
+// pages get built.
+// Retained so the social row can be restored by filling SOCIAL_LINKS below.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const SOCIAL_ICONS = { x: XIcon, instagram: InstagramIcon, linkedin: LinkedinIcon };
+
+/**
+ * Social profiles. These were three href="#" icons that did nothing when
+ * clicked; the row hides itself while this is empty, so nothing dead ships.
+ * Add the real URLs and it returns exactly as designed:
+ *   { Icon: SOCIAL_ICONS.x, href: "https://x.com/…", label: "X / Twitter" },
+ */
+const SOCIAL_LINKS: { Icon: () => JSX.Element; href: string; label: string }[] = [];
+
 const FOOTER_LINKS = {
   Product: [
     { label: "How It Works", href: "#how-it-works" },
     { label: "The Engine", href: "#engine" },
-    { label: "Drift Score", href: "#" },
-    { label: "Vault", href: "#" },
-  ],
-  "For You": [
-    { label: "Writers", href: "#" },
-    { label: "Developers", href: "#" },
-    { label: "Designers", href: "#" },
-    { label: "All Professions", href: "#" },
+    { label: "Drift Score", href: "#score" },
+    { label: "Built For", href: "#for-you" },
+    { label: "Courses", href: "/courses" },
   ],
   Company: [
-    { label: "About", href: "#" },
-    { label: "Blog", href: "#" },
-    { label: "Careers", href: "#" },
-    { label: "Press", href: "#" },
-  ],
-  Legal: [
-    { label: "Privacy", href: "#" },
-    { label: "Terms", href: "#" },
-    { label: "Data Policy", href: "#" },
+    { label: "About", href: "/about" },
+    { label: "Testimonials", href: "#testimonials" },
+    { label: "Sign In", href: "/signin" },
+    { label: "Begin Your Imprint", href: "/signup" },
   ],
 };
 
@@ -128,21 +137,6 @@ export default function Footer() {
                       </a>
                     </li>
                   ))}
-                  <li>
-                    <a href="#" className="text-white/60 hover:text-white transition-colors flex items-center gap-3 text-[14px]">
-                      <span className="w-1 h-1 rounded-full bg-white/30" /> Pricing
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="text-white/60 hover:text-white transition-colors flex items-center gap-3 text-[14px]">
-                      <span className="w-1 h-1 rounded-full bg-white/30" /> FAQs
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="text-white/60 hover:text-white transition-colors flex items-center gap-3 text-[14px]">
-                      <span className="w-1 h-1 rounded-full bg-white/30" /> Contact
-                    </a>
-                  </li>
                 </ul>
               </div>
               
@@ -157,11 +151,6 @@ export default function Footer() {
                       </a>
                     </li>
                   ))}
-                  <li>
-                    <a href="#" className="text-white/60 hover:text-white transition-colors flex items-center gap-3 text-[14px]">
-                      <span className="w-1 h-1 rounded-full bg-white/30" /> Testimonials
-                    </a>
-                  </li>
                 </ul>
               </div>
             </div>
@@ -172,23 +161,23 @@ export default function Footer() {
             <p className="text-[13px] text-white/60 mb-6 md:mb-0">
               © 2026 IMPRINT. All rights reserved.
             </p>
-            <div className="flex items-center gap-5">
-              {[
-                { Icon: XIcon, href: "#", label: "X / Twitter" },
-                { Icon: InstagramIcon, href: "#", label: "Instagram" },
-                { Icon: LinkedinIcon, href: "#", label: "LinkedIn" },
-              ].map(({ Icon, href, label }) => (
-                <a
-                  key={label}
-                  href={href}
-                  aria-label={label}
-                  className="w-8 h-8 flex items-center justify-center transition-colors hover:text-white"
-                  style={{ color: "rgba(255,255,255,0.58)" }}
-                >
-                  <Icon />
-                </a>
-              ))}
-            </div>
+            {SOCIAL_LINKS.length > 0 && (
+              <div className="flex items-center gap-5">
+                {SOCIAL_LINKS.map(({ Icon, href, label }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    aria-label={label}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-8 h-8 flex items-center justify-center transition-colors hover:text-white"
+                    style={{ color: "rgba(255,255,255,0.58)" }}
+                  >
+                    <Icon />
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
 
         </div>
