@@ -67,27 +67,29 @@ export default async function ProfilePage() {
     else break;
   }
 
-  // ── AI independence ─────────────────────────────────────────────────────
-  // Previously hardcoded to its maximum, so every profile showed a full bar.
-  // Earned the same way as the other three components: from activity, so a
-  // new account starts at zero. Independent work counts for it — Mirror
-  // sessions where you never asked it to decide, entries written unaided —
-  // and every dependency flag the Mirror raised counts against it.
+  // ── IMPRINT score breakdown ─────────────────────────────────────────────
   const sessions = mirrorSessions ?? [];
-  const entries = journalEntries ?? [];
-
-  const independentSessions = sessions.filter((s) => (s.dependency_flags ?? 0) === 0).length;
-  const unaidedEntries = entries.filter((e) => !e.has_ai_assistance).length;
   const totalDependencyFlags = sessions.reduce((sum, s) => sum + (s.dependency_flags ?? 0), 0);
 
-  const aiIndependence = Math.max(
-    0,
-    Math.min(200, (independentSessions + unaidedEntries) * 20 - totalDependencyFlags * 10)
-  );
+  // These four are the exact components /api/calibration/complete sums into
+  // profiles.imprint_score. The profile previously derived its own breakdown
+  // from different inputs — skill *count* rather than average strength, the
+  // journal streak rather than total active days — so the four bars could
+  // never add up to the score printed above them.
+  const avgSkillStrength = (skills ?? []).length
+    ? (skills ?? []).reduce((sum, s) => sum + (s.strength_level ?? 0), 0) / (skills ?? []).length
+    : 0;
+
+  const scoreComponents = {
+    vaultStrength: Math.min(250, Math.round(avgSkillStrength * 2.5)),
+    calibrationRecord: Math.min((calibrationsCount ?? 0) * 50, 300),
+    journalConsistency: Math.min(activeDays * 8, 250),
+    aiIndependence: Math.max(200 - totalDependencyFlags * 5, 0),
+  };
 
   const stats = {
     calibrations: calibrationsCount ?? 0,
-    aiIndependence,
+    scoreComponents,
     streak,
     skillsTracked: (skills || []).length,
     vaultChallenges: completedChallenges.length,

@@ -82,7 +82,10 @@ export default async function PublicCredentialPage({ params }: { params: { code:
   const dScore = profile.latest_drift_score ?? 0;
 
   const dColor = dScore < 40 ? "#00D97E" : dScore < 60 ? "#FFB800" : dScore < 80 ? "#FF5500" : "#FF2D2D";
-  const dLabel = dScore < 40 ? "Anchored" : dScore < 60 ? "Stable" : dScore < 80 ? "Drifting" : "Critical";
+  // Same four labels and thresholds the dashboard uses. This previously
+  // read Anchored/Stable/Drifting/Critical, so a score of 50 was "Stable"
+  // on the shareable credential and "Drifting" everywhere else in the app.
+  const dLabel = dScore < 40 ? "Anchored" : dScore < 60 ? "Drifting" : dScore < 80 ? "Critical" : "Crisis";
   const iLabel = imprintScore >= 800 ? "Anchored" : imprintScore >= 600 ? "Strong" : imprintScore >= 400 ? "Solid" : imprintScore >= 200 ? "Building" : "Establishing";
   const iColor = imprintScore >= 800 ? "#00D97E" : imprintScore >= 600 ? "#00D97E" : imprintScore >= 400 ? "#FFB800" : imprintScore >= 200 ? "#FF5500" : "#FF2D2D";
 

@@ -55,10 +55,16 @@ export default function DriftHistoryChart({ allScores, currentColor }: DriftHist
 
   const chartData = useMemo(() => {
     const filtered = filterByRange(allScores, range);
-    return filtered.map((s) => ({
-      week: new Date(s.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-      score: s.score,
-    }));
+    // allScores arrives newest-first — every other consumer on the page wants
+    // that order — but a chart plots array order left to right, so passing it
+    // through unsorted drew time backwards: the oldest reading sat on the
+    // right and an improving score appeared to be climbing.
+    return [...filtered]
+      .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+      .map((s) => ({
+        week: new Date(s.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+        score: s.score,
+      }));
   }, [allScores, range]);
 
   const scores = chartData.map((d) => d.score);

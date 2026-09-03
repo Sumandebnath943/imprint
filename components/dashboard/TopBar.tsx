@@ -29,8 +29,27 @@ const PAGE_TITLES: Record<string, string> = {
   "/dashboard/circles": "Circles",
   "/dashboard/courses": "Courses",
   "/dashboard/profile": "Profile",
+  "/dashboard/profile/credential": "Identity Credential",
   "/dashboard/settings": "Settings",
+  "/dashboard/leaderboard": "Leaderboard",
+  "/dashboard/mentors": "Mentors",
+  "/dashboard/mirror/history": "Mirror History",
 };
+
+/**
+ * Longest matching prefix, so nested routes inherit their section's title
+ * instead of falling through to "Dashboard". Leaderboard, Mentors and the
+ * nested credential and mirror-history pages all showed "Dashboard" before.
+ */
+function titleFor(pathname: string): string {
+  let best = "";
+  for (const route of Object.keys(PAGE_TITLES)) {
+    if ((pathname === route || pathname.startsWith(route + "/")) && route.length > best.length) {
+      best = route;
+    }
+  }
+  return best ? PAGE_TITLES[best] : "Dashboard";
+}
 
 interface TopBarProps {
   profile: DashboardProfile | null;
@@ -120,7 +139,7 @@ export default function TopBar({ profile, driftScore, sidebarWidth }: TopBarProp
     return () => document.removeEventListener("mousedown", onDown);
   }, [notifOpen]);
 
-  const title = PAGE_TITLES[pathname] ?? "Dashboard";
+  const title = titleFor(pathname);
   const score = driftScore?.score ?? 0;
   const driftColor = getDriftColor(score);
 

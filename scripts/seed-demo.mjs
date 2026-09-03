@@ -188,6 +188,24 @@ const MIRROR = [
 
 // ── 4. Seed ─────────────────────────────────────────────────────────────────
 
+/**
+ * The same four components /api/calibration/complete sums into
+ * profiles.imprint_score. Computed here rather than hardcoded so the profile's
+ * breakdown bars actually add up to the score shown above them.
+ */
+function computeImprintScore() {
+  const avgSkillStrength = SKILLS.reduce((s, k) => s + k[2], 0) / SKILLS.length;
+  const journalDays = new Set(JOURNAL.map(([days]) => days)).size;
+  const dependencyFlags = MIRROR.reduce((s, m) => s + m[3], 0);
+
+  return Math.max(0, Math.min(1000, Math.round(
+    Math.min(avgSkillStrength * 2.5, 250) +
+    Math.min(DRIFT.length * 50, 300) +
+    Math.min(journalDays * 8, 250) +
+    Math.max(200 - dependencyFlags * 5, 0)
+  )));
+}
+
 async function seed() {
   const userId = await findOrCreateUser();
   await wipe(userId);
@@ -207,7 +225,7 @@ async function seed() {
       ai_use_context: ["writing", "coding", "research"],
       onboarding_completed: true,
       onboarding_step: 6,
-      imprint_score: 742,
+      imprint_score: computeImprintScore(),
       bio: "Building things that do not need me to explain them twice.",
       location: "Rotterdam",
       credential_public: true,
@@ -266,11 +284,14 @@ async function seed() {
         score_label: labelFor(score),
         calibration_session_id: sessions[i].id,
         delta_from_previous: i === 0 ? 0 : score - DRIFT[i - 1][1],
+        // Drift contributors, higher = worse, matching what
+        // /api/calibration/complete writes. They roughly reconstruct the
+        // score under its own weights (0.40/0.25/0.20/0.15).
         contributing_signals: {
-          vocabulary_richness_delta: +(score * 0.42).toFixed(1),
-          avg_sentence_length_delta: +(score * 0.31).toFixed(1),
-          reasoning_depth_delta: +(score * 0.38).toFixed(1),
-          response_time_delta: +(score * 0.19).toFixed(1),
+          baseline_divergence: Math.min(100, Math.round(score * 1.1)),
+          vault_inactivity: Math.min(100, Math.round(score * 0.9)),
+          ai_dependence: Math.min(100, Math.round(score * 0.7)),
+          journal_irregularity: Math.min(100, Math.round(score * 1.2)),
         },
         week_number: week,
         year,

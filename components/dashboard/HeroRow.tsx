@@ -133,6 +133,17 @@ export default function HeroRow({ driftScore, nextChallenge, calibration }: Hero
   const color = getDriftColor(score);
   const signals = driftScore?.contributing_signals ?? {};
 
+  // Stored signals are drift contributors (higher = worse). The card frames
+  // them as the qualities drift erodes, so each is inverted for display.
+  const hasSignals =
+    signals.baseline_divergence !== undefined ||
+    signals.vault_inactivity !== undefined ||
+    signals.ai_dependence !== undefined;
+  const invert = (v: number | undefined) => Math.round(100 - Math.max(0, Math.min(100, v ?? 0)));
+  const consistency = invert(signals.baseline_divergence);
+  const vaultActivity = invert(signals.vault_inactivity);
+  const aiIndependence = invert(signals.ai_dependence);
+
   const calDue = calibration?.next_due_at ? daysUntil(calibration.next_due_at) : null;
   const calOverdue = calDue !== null && calDue === 0;
 
@@ -187,24 +198,28 @@ export default function HeroRow({ driftScore, nextChallenge, calibration }: Hero
               What&apos;s affecting your score
             </p>
             <div className="flex flex-col gap-5">
-              <SignalBar
-                label="Baseline Consistency"
-                value={signals.baseline_consistency ?? 85}
-                color={color}
-                delay={0.3}
-              />
-              <SignalBar
-                label="Vault Activity"
-                value={signals.vault_activity ?? 60}
-                color="#FF5500"
-                delay={0.5}
-              />
-              <SignalBar
-                label="AI Independence"
-                value={signals.ai_independence ?? 72}
-                color={signals.ai_independence !== undefined && signals.ai_independence < 50 ? "#FF2D2D" : "#00D97E"}
-                delay={0.7}
-              />
+              {hasSignals ? (
+                <>
+                  <SignalBar label="Baseline Consistency" value={consistency} color={color} delay={0.3} />
+                  <SignalBar label="Vault Activity" value={vaultActivity} color="#FF5500" delay={0.5} />
+                  <SignalBar
+                    label="AI Independence"
+                    value={aiIndependence}
+                    color={aiIndependence < 50 ? "#FF2D2D" : "#00D97E"}
+                    delay={0.7}
+                  />
+                </>
+              ) : (
+                // Signals only exist once a calibration has been completed.
+                // Previously this showed 85/60/72 — hardcoded fallbacks that
+                // read as real measurements to anyone who had never calibrated.
+                <div
+                  className="rounded-xl px-4 py-5 text-sm"
+                  style={{ background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.45)" }}
+                >
+                  Complete a calibration to see what&apos;s moving your score.
+                </div>
+              )}
             </div>
 
             {/* Bottom message */}

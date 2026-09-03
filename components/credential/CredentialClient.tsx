@@ -38,10 +38,20 @@ export default function CredentialClient({ profile, driftScore, stats }: Credent
   const [regenerating, setRegenerating] = useState(false);
   const [origin, setOrigin] = useState("");
 
-  // window is not available during SSR; resolve the real origin after mount so
-  // the share link and embed snippet point at this deployment rather than a
-  // hardcoded domain.
-  useEffect(() => setOrigin(window.location.origin), []);
+  // Resolved after mount rather than during render. `window` does not exist
+  // during SSR, and the server formats dates in its own locale and timezone,
+  // so rendering either inline threw "Text content does not match
+  // server-rendered HTML" and made React discard the server tree and re-render
+  // the entire page on the client.
+  const [today, setToday] = useState("");
+  const [todayShort, setTodayShort] = useState("");
+
+  useEffect(() => {
+    setOrigin(window.location.origin);
+    const now = new Date();
+    setToday(now.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }));
+    setTodayShort(now.toLocaleDateString());
+  }, []);
 
   const verificationCode = profile.credential_code || `IMPRINT-${profile.id?.substring(0,8).toUpperCase()}-XXXXXX`;
   const shareUrl = `${origin}/credential/${verificationCode}`;
@@ -50,7 +60,10 @@ export default function CredentialClient({ profile, driftScore, stats }: Credent
   const dScore = driftScore?.score || 0;
   
   const dColor = dScore < 40 ? "#00D97E" : dScore < 60 ? "#FFB800" : dScore < 80 ? "#FF5500" : "#FF2D2D";
-  const dLabel = dScore < 40 ? "Anchored" : dScore < 60 ? "Stable" : dScore < 80 ? "Drifting" : "Critical";
+  // Same four labels and thresholds the dashboard uses. This previously
+  // read Anchored/Stable/Drifting/Critical, so a score of 50 was "Stable"
+  // on the shareable credential and "Drifting" everywhere else in the app.
+  const dLabel = dScore < 40 ? "Anchored" : dScore < 60 ? "Drifting" : dScore < 80 ? "Critical" : "Crisis";
   const iLabel = imprintScore >= 800 ? "Anchored" : imprintScore >= 600 ? "Strong" : imprintScore >= 400 ? "Solid" : imprintScore >= 200 ? "Building" : "Establishing";
   const iColor = imprintScore >= 800 ? "#00D97E" : imprintScore >= 600 ? "#00D97E" : imprintScore >= 400 ? "#FFB800" : imprintScore >= 200 ? "#FF5500" : "#FF2D2D";
 
@@ -273,7 +286,7 @@ export default function CredentialClient({ profile, driftScore, stats }: Credent
 
               {/* FOOTER VERIFICATION */}
               <div className="text-center mb-6">
-                <span className="block text-[12px] text-white/30 mb-2">Verified {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
+                <span className="block text-[12px] text-white/30 mb-2">Verified {today}</span>
                 <span className="block text-[11px] text-white/20 font-mono mb-1">{verificationCode}</span>
                 <span className="block text-[10px] text-white/30">
                   Verify at {origin.replace(/^https?:\/\//, "")}/credential/{verificationCode}
@@ -286,7 +299,7 @@ export default function CredentialClient({ profile, driftScore, stats }: Credent
           </div>
           
           <div className="mt-4 text-center">
-            <span className="block text-[12px] text-white/40 mb-1">Last generated: {new Date().toLocaleDateString()}</span>
+            <span className="block text-[12px] text-white/40 mb-1">Last generated: {todayShort}</span>
             <button
               onClick={handleRegenerate}
               disabled={regenerating}

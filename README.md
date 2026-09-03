@@ -37,23 +37,27 @@ signals:
 **3 — Calibration.** On a recurring cadence you answer the same modules again.
 Each response is compared against its own baseline, per module.
 
-**4 — Drift Score.** The per-module deltas are combined into a weighted
-composite on a 0–100 scale:
+**4 — Drift Score.** Four signals are combined into a weighted composite on a
+0–100 scale, where **higher means further from yourself**:
 
-```
-composite = 0.4·Δvocabulary + 0.3·Δsentence_length + 0.2·Δreasoning_depth + 0.1·Δresponse_time
-```
+| Signal | Weight | What it measures |
+| --- | --- | --- |
+| Baseline divergence | 40% | How far this calibration's vocabulary richness and sentence length sit from your baseline |
+| Vault inactivity | 25% | Share of your tracked skills not practised in the last 14 days |
+| AI dependence | 20% | Dependency flags the Mirror raised in the last 14 days |
+| Journal irregularity | 15% | Share of the last 14 days with no entry |
 
-where reasoning depth is itself `0.6·Δvocabulary + 0.4·Δsentence_length`.
-Vocabulary richness carries the heaviest weight because it degrades earliest
-and most visibly under delegation.
+Baseline divergence carries the heaviest weight because language degrades
+earliest and most visibly under delegation. The dashboard presents each
+signal inverted — as the quality drift erodes — so a fuller bar always
+reads as better.
 
 | Score | Label |
 | --- | --- |
 | 0–39 | **Anchored** |
 | 40–59 | **Drifting** |
 | 60–79 | **Critical** |
-| 80–100 | **Crisis** |
+| 80–100 | **Identity Crisis** |
 
 The score is directionless by design — it measures *distance* from your
 baseline, not improvement or decline against anyone else.

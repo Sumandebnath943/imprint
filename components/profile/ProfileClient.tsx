@@ -28,7 +28,13 @@ interface ProfileClientProps {
   latestDriftScore: { score: number; status: string; date: string } | null;
   stats: {
     calibrations: number;
-    aiIndependence: number;
+    // The four components profiles.imprint_score is the sum of.
+    scoreComponents: {
+      vaultStrength: number;
+      calibrationRecord: number;
+      journalConsistency: number;
+      aiIndependence: number;
+    };
     streak: number;
     skillsTracked: number;
     vaultChallenges: number;
@@ -132,11 +138,10 @@ export default function ProfileClient({
   const driftColor = getZoneColor(driftScore);
   const imprintStatus = getImprintLabel(profile?.imprint_score || 0);
 
-  // Derived scores for widget (max 1000 total)
-  const vaultStrength = Math.min(250, stats.skillsTracked * 25);
-  const calibrationRecord = Math.min(300, stats.calibrations * 50);
-  const identityStreak = Math.min(250, stats.streak * 8);
-  const aiIndependence = stats.aiIndependence;
+  // Computed server-side from the same inputs as the stored score, so these
+  // four always sum to the IMPRINT score displayed above them.
+  const { vaultStrength, calibrationRecord, journalConsistency, aiIndependence } =
+    stats.scoreComponents;
 
   const handleSave = async () => {
     setSaving(true);
@@ -213,7 +218,11 @@ export default function ProfileClient({
                 <div className="flex items-center gap-2 text-[13px]" style={{ color: "rgba(255,255,255,0.35)" }}>
                   <span>IMPRINT member since {memberSinceDate}</span>
                   <span>·</span>
-                  <span>{stats.daysActive} days preserving identity</span>
+                  {/* daysActive counts distinct days with activity, not elapsed
+                      time. Beside "member since June" the old wording — "days
+                      preserving identity" — read as membership length, so an
+                      account 74 days old appeared to claim it was 6 days old. */}
+                  <span>{stats.daysActive} active {stats.daysActive === 1 ? "day" : "days"}</span>
                 </div>
               </div>
             </div>
@@ -290,7 +299,7 @@ export default function ProfileClient({
               {[
                 { name: "Vault Strength", val: vaultStrength, max: 250, icon: <Shield size={16} color="#00D97E"/>, color: "#00D97E" },
                 { name: "Calibration Record", val: calibrationRecord, max: 300, icon: <Activity size={16} color="#FF5500"/>, color: "#FF5500" },
-                { name: "Identity Streak", val: identityStreak, max: 250, icon: <Flame size={16} color="#FFB800"/>, color: "#FFB800" },
+                { name: "Journal Consistency", val: journalConsistency, max: 250, icon: <Flame size={16} color="#FFB800"/>, color: "#FFB800" },
                 { name: "AI Independence", val: aiIndependence, max: 200, icon: <Brain size={16} color="#4FC3F7"/>, color: "#4FC3F7" },
               ].map(c => (
                 <div key={c.name} className="flex flex-col gap-2">

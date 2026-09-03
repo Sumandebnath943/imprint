@@ -46,8 +46,11 @@ export default function BeliefsClient({ beliefs: initial, userId }: BeliefsClien
 
   // Stats
   const totalChanged = beliefs.filter((b) => b.change_log.length > 0).length;
+  // confidence_level is stored 1–10, but this is rendered as a percentage and
+  // drives a progress bar, so scale it. Without the ×10 an average confidence
+  // of 7.5/10 displayed as "8%" with a nearly empty bar.
   const avgConf = beliefs.length > 0
-    ? Math.round(beliefs.reduce((s, b) => s + b.confidence_level, 0) / beliefs.length) : 0;
+    ? Math.round((beliefs.reduce((s, b) => s + b.confidence_level, 0) / beliefs.length) * 10) : 0;
   const thisMonth = beliefs.filter((b) => (Date.now() - new Date(b.first_recorded).getTime()) < 30 * 86400000).length;
 
   // Filter

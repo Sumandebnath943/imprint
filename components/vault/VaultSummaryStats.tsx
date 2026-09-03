@@ -17,7 +17,15 @@ export function VaultSummaryStats({ skills, decayedStrengths }: SummaryStatsProp
   const avg = total > 0
     ? Math.round(Object.values(decayedStrengths).reduce((s, v) => s + v, 0) / total)
     : 0;
-  const decaying = skills.filter((s) => (decayedStrengths[s.id] ?? s.strength_level) < 50).length;
+  // A skill needs attention if it has decayed below healthy strength OR has
+  // gone unpractised long enough that its card shows "⚠ Weakening" (7+ days,
+  // per getDecayStatus). Counting strength alone let the summary claim "All
+  // skills healthy" on the same screen as two cards flagged as weakening.
+  const decaying = skills.filter(
+    (s) =>
+      (decayedStrengths[s.id] ?? s.strength_level) < 50 ||
+      getDaysSinceExercised(s.last_exercised) >= 7
+  ).length;
   const avgColor = getStrengthColor(avg);
 
   const lastDays = skills.length > 0

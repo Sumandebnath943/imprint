@@ -16,10 +16,13 @@ export interface DashboardDriftScore {
   score: number;
   score_label: string;
   delta_from_previous: number;
+  // Drift contributors, 0–100, higher = more drift. The UI presents them
+  // inverted, as the positive quality each one erodes.
   contributing_signals: {
-    baseline_consistency?: number;
-    vault_activity?: number;
-    ai_independence?: number;
+    baseline_divergence?: number;
+    vault_inactivity?: number;
+    ai_dependence?: number;
+    journal_irregularity?: number;
   };
   created_at: string;
 }

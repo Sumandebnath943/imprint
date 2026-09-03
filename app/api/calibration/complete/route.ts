@@ -7,12 +7,22 @@ function getWeekNumber(d: Date): number {
   return Math.ceil((((d.getTime() - start.getTime()) / 86400000) + start.getDay() + 1) / 7);
 }
 
-// Helper: score label from drift score (0 = anchored, 100 = critical)
+/**
+ * Score label from drift score (0 = anchored, 100 = crisis).
+ *
+ * These four values are the only ones drift_scores.score_label permits, and
+ * the thresholds match getDriftLabel() in lib/dashboard/types.ts so the stored
+ * label and the displayed one always agree.
+ *
+ * This previously returned "stable" for 21–45, which is not in the column's
+ * CHECK constraint: any calibration landing in that band failed to insert and
+ * the user got a 500 with their completed session discarded.
+ */
 function getScoreLabel(score: number): string {
-  if (score <= 20) return "anchored";
-  if (score <= 45) return "stable";
-  if (score <= 65) return "drifting";
-  return "critical";
+  if (score < 40) return "anchored";
+  if (score < 60) return "drifting";
+  if (score < 80) return "critical";
+  return "crisis";
 }
 
 export async function POST(req: Request) {
@@ -88,8 +98,8 @@ export async function POST(req: Request) {
 
     // ── 3. Calculate each of the 4 signals (0–100 scale, higher = more drift) ──
 
-    // SIGNAL 1: Baseline Consistency (40% weight)
-    // Compare calibration responses vs baseline vocabulary richness
+    // SIGNAL 1: Baseline divergence (40% weight)
+    // How far this calibration's language sits from the user's baseline.
     const responses: { wordCount?: number; content?: string }[] = session.responses || [];
     const calWords = responses.reduce((s: number, r: { wordCount?: number }) => s + (r.wordCount || 0), 0);
     const calText = responses.map((r: { content?: string }) => r.content || "").join(" ");
@@ -114,48 +124,55 @@ export async function POST(req: Request) {
     const sentLenDivergence = avgBaselineSentLen > 0
       ? Math.abs(calAvgSentLen - avgBaselineSentLen) / avgBaselineSentLen
       : 0;
-    const baselineConsistency = Math.min(100, Math.round((vocabDivergence * 50 + sentLenDivergence * 50) * 100));
+    const baselineDivergence = Math.min(100, Math.round((vocabDivergence * 50 + sentLenDivergence * 50) * 100));
 
-    // SIGNAL 2: Vault Activity (25% weight)
-    // Low activity in past 14 days = high drift
+    // SIGNAL 2: Vault inactivity (25% weight)
+    // Share of tracked skills NOT practised in the past 14 days.
     const vaultSkills = vaultData.data || [];
     const cutoff14 = Date.now() - 14 * 86400000;
     const recentlyPracticed = vaultSkills.filter(
       (s) => new Date(s.last_exercised).getTime() >= cutoff14
     ).length;
-    const vaultActivity = vaultSkills.length > 0
+    const vaultInactivity = vaultSkills.length > 0
       ? Math.round(100 - (recentlyPracticed / vaultSkills.length) * 100)
       : 50; // Default 50 if no skills
 
-    // SIGNAL 3: AI Independence (20% weight)
-    // Dependency flags in past 14 days
+    // SIGNAL 3: AI dependence (20% weight)
+    // Dependency flags the Mirror raised in the past 14 days.
     const totalFlags = (mirrorData.data || []).reduce(
       (s, m) => s + (m.dependency_flags || 0), 0
     );
-    const aiIndependence = Math.min(100, totalFlags * 10); // each flag adds 10 drift points
+    const aiDependence = Math.min(100, totalFlags * 10); // each flag adds 10 drift points
 
-    // SIGNAL 4: Journal Regularity (15% weight)
-    // 14 days, max 14 entries = 100% regular
+    // SIGNAL 4: Journal irregularity (15% weight)
+    // Share of the past 14 days with no entry.
     const journalDays = new Set(
       (journalData.data || []).map((j) => new Date(j.created_at).toDateString())
     ).size;
-    const journalRegularity = Math.round(Math.max(0, 100 - (journalDays / 14) * 100));
+    const journalIrregularity = Math.round(Math.max(0, 100 - (journalDays / 14) * 100));
 
     // ── 4. Weighted drift score ─────────────────────────────────────────────
     const drift_score_produced = Math.round(
-      baselineConsistency * 0.40 +
-      vaultActivity        * 0.25 +
-      aiIndependence       * 0.20 +
-      journalRegularity    * 0.15
+      baselineDivergence  * 0.40 +
+      vaultInactivity     * 0.25 +
+      aiDependence        * 0.20 +
+      journalIrregularity * 0.15
     );
     const finalDriftScore = Math.max(0, Math.min(100, drift_score_produced));
     const score_label = getScoreLabel(finalDriftScore);
 
+    // Named for what they actually measure. All four are drift *contributors*
+    // — higher is worse — but they were stored under the names of their
+    // opposites (baselineConsistency for divergence, aiIndependence for
+    // dependence), so every consumer read them backwards. They are snake_case
+    // now to match the key the dashboard reads; the camelCase keys never
+    // matched, so the dashboard fell back to hardcoded placeholder
+    // percentages for every user on every account.
     const contributing_signals = {
-      baselineConsistency,
-      vaultActivity,
-      aiIndependence,
-      journalRegularity,
+      baseline_divergence: baselineDivergence,
+      vault_inactivity: vaultInactivity,
+      ai_dependence: aiDependence,
+      journal_irregularity: journalIrregularity,
     };
 
     const comparison_vs_baseline = {
