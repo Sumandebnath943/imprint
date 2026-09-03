@@ -30,7 +30,7 @@ function IndicatorPill({ label, status }: { label: string; status: IndicatorStat
   const s = map[status];
   return (
     <div className="flex items-center justify-between py-1.5">
-      <span className="text-xs" style={{ color: "rgba(255,255,255,0.40)" }}>{label}</span>
+      <span className="text-xs" style={{ color: "rgba(255,255,255,0.66)" }}>{label}</span>
       <span className="text-xs rounded-full px-2 py-0.5 font-medium" style={{ background: s.bg, border: `1px solid ${s.border}`, color: s.color }}>{s.text}</span>
     </div>
   );
@@ -52,11 +52,11 @@ export default function MirrorLeftPanel({
       {/* Header */}
       <div className="mb-7">
         <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: "rgba(255,120,50,0.90)" }}>THE MIRROR</p>
-        <p className="text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>Reflection Chamber</p>
+        <p className="text-xs" style={{ color: "rgba(255,255,255,0.54)" }}>Reflection Chamber</p>
       </div>
 
       {/* Context selector */}
-      <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.30)" }}>Reflecting On</p>
+      <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.58)" }}>Reflecting On</p>
       <div className="flex flex-wrap gap-2 mb-3">
         {CONTEXTS.map((c) => {
           const sel = selectedContext === c;
@@ -90,11 +90,11 @@ export default function MirrorLeftPanel({
 
       {/* Mirror rules */}
       <div className="my-5" style={{ height: 1, background: "rgba(255,255,255,0.05)" }} />
-      <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.30)" }}>Mirror Rules</p>
+      <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.58)" }}>Mirror Rules</p>
       {["The Mirror only asks questions.", "It never answers, decides, or writes for you.", "Your thinking is the only output that matters."].map((r) => (
         <div key={r} className="flex items-start gap-2 mb-2">
           <span className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: "rgba(255,120,50,0.70)" }} />
-          <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.40)", lineHeight: 1.8 }}>{r}</p>
+          <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.66)", lineHeight: 1.8 }}>{r}</p>
         </div>
       ))}
 
@@ -102,19 +102,19 @@ export default function MirrorLeftPanel({
       {isActive && (
         <>
           <div className="my-5" style={{ height: 1, background: "rgba(255,255,255,0.05)" }} />
-          <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: "rgba(255,255,255,0.30)" }}>This Session</p>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: "rgba(255,255,255,0.58)" }}>This Session</p>
           <div className="flex flex-col gap-4 mb-2">
             <div>
               <p className="font-bold text-white" style={{ fontSize: 24 }}>{stats.questionCount}</p>
-              <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>questions asked by Mirror</p>
+              <p className="text-xs" style={{ color: "rgba(255,255,255,0.62)" }}>questions asked by Mirror</p>
             </div>
             <div>
               <p className="font-bold" style={{ fontSize: 24, color: "rgba(255,120,50,0.90)" }}>{stats.userCount}</p>
-              <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>thoughts explored by you</p>
+              <p className="text-xs" style={{ color: "rgba(255,255,255,0.62)" }}>thoughts explored by you</p>
             </div>
             <div>
               <p className="font-bold" style={{ fontSize: 24, color: depFlagColor }}>{stats.dependencyFlags}</p>
-              <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>times you asked AI to decide</p>
+              <p className="text-xs" style={{ color: "rgba(255,255,255,0.62)" }}>times you asked AI to decide</p>
               {stats.dependencyFlags >= 1 && stats.dependencyFlags <= 2 && (
                 <p className="text-xs mt-1" style={{ color: "#FFB800" }}>Stay in control.</p>
               )}
@@ -126,7 +126,7 @@ export default function MirrorLeftPanel({
 
           {/* Baseline comparison */}
           <div className="my-5" style={{ height: 1, background: "rgba(255,255,255,0.05)" }} />
-          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.30)" }}>vs Your Baseline</p>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.58)" }}>vs Your Baseline</p>
           <IndicatorPill label="Vocabulary" status={vocabStatus} />
           <IndicatorPill label="Reasoning depth" status={depthStatus} />
           <IndicatorPill label="Language pattern" status={langStatus} />
@@ -137,7 +137,7 @@ export default function MirrorLeftPanel({
       {pastSessions.length > 0 && (
         <div className="mt-auto pt-5">
           <div className="mb-3" style={{ height: 1, background: "rgba(255,255,255,0.05)" }} />
-          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.30)" }}>Past Sessions</p>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.58)" }}>Past Sessions</p>
           <div className="flex flex-col gap-3">
             {pastSessions.slice(0, 4).map((s) => (
               <div key={s.id} className="rounded-xl p-3 cursor-pointer transition-all"
@@ -148,8 +148,8 @@ export default function MirrorLeftPanel({
                 <p className="text-xs font-medium text-white mb-0.5">
                   {new Date(s.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                 </p>
-                <p className="text-xs mb-0.5" style={{ color: "rgba(255,255,255,0.40)" }}>{(s.topics ?? []).join(", ")}</p>
-                <p className="text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>
+                <p className="text-xs mb-0.5" style={{ color: "rgba(255,255,255,0.66)" }}>{(s.topics ?? []).join(", ")}</p>
+                <p className="text-xs" style={{ color: "rgba(255,255,255,0.54)" }}>
                   {s.ai_question_count}q · {s.user_message_count} messages · {formatTime(s.session_duration_seconds)}
                 </p>
                 {s.dependency_flags > 0 && (

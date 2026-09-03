@@ -57,7 +57,7 @@ export default function ForgeLeftPanel({
       {/* Header */}
       <div className="mb-8">
         <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: "#FF5500" }}>THE FORGE</p>
-        <p className="text-xs" style={{ color: "rgba(255,255,255,0.30)" }}>Zero-Silicon Workspace</p>
+        <p className="text-xs" style={{ color: "rgba(255,255,255,0.58)" }}>Zero-Silicon Workspace</p>
       </div>
 
       {/* Session indicator */}
@@ -77,7 +77,7 @@ export default function ForgeLeftPanel({
       )}
 
       {/* Tools */}
-      <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.30)" }}>Tools</p>
+      <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.58)" }}>Tools</p>
       <div className="flex flex-col gap-1 mb-6">
         {TOOLS.map(({ id, icon: Icon, name, desc }) => {
           const active = activeTool === id;
@@ -106,7 +106,7 @@ export default function ForgeLeftPanel({
                     <span className="text-xs px-1.5 py-0.5 rounded-full font-medium" style={{ background: "rgba(255,85,0,0.20)", color: "#FF5500" }}>Due</span>
                   )}
                 </div>
-                <p className="text-xs truncate" style={{ color: "rgba(255,255,255,0.35)" }}>{desc}</p>
+                <p className="text-xs truncate" style={{ color: "rgba(255,255,255,0.62)" }}>{desc}</p>
               </div>
             </button>
           );
@@ -120,7 +120,7 @@ export default function ForgeLeftPanel({
       <AnimatePresence mode="wait">
         {activeTool === "timed-write" && !isActive && (
           <motion.div key="timed-config" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
-            <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.30)" }}>Duration</p>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.58)" }}>Duration</p>
             <div className="flex flex-wrap gap-2 mb-3">
               {DURATIONS.map((d) => {
                 const sel = timerDuration === d * 60;
@@ -154,7 +154,7 @@ export default function ForgeLeftPanel({
             {challenge ? (
               <div className="rounded-xl p-4" style={{ background: "rgba(255,85,0,0.06)", border: "1px solid rgba(255,85,0,0.15)" }}>
                 <p className="font-semibold text-white mb-2" style={{ fontSize: 13 }}>{challenge.title}</p>
-                {challenge.description && <p className="text-xs leading-relaxed mb-3" style={{ color: "rgba(255,255,255,0.45)", lineHeight: 1.6 }}>{challenge.description}</p>}
+                {challenge.description && <p className="text-xs leading-relaxed mb-3" style={{ color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{challenge.description}</p>}
                 <div className="flex gap-2 flex-wrap">
                   {challenge.skill_name && (
                     <span className="text-xs rounded-full px-2 py-0.5" style={{ background: "rgba(255,85,0,0.15)", color: "#FF5500" }}>{challenge.skill_name}</span>
@@ -167,14 +167,14 @@ export default function ForgeLeftPanel({
                 </div>
               </div>
             ) : (
-              <p className="text-xs text-center" style={{ color: "rgba(255,255,255,0.35)" }}>No challenge assigned yet.</p>
+              <p className="text-xs text-center" style={{ color: "rgba(255,255,255,0.62)" }}>No challenge assigned yet.</p>
             )}
           </motion.div>
         )}
 
         {activeTool === "memory-recall" && !isActive && (
           <motion.div key="memory-config" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
-            <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.30)" }}>Choose a topic from memory</p>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.58)" }}>Choose a topic from memory</p>
             <div className="flex flex-col gap-2">
               {topics.map((t) => {
                 const isSel = selectedMemoryTopic === t;
@@ -210,7 +210,7 @@ export default function ForgeLeftPanel({
       {history.length > 0 && (
         <div className="mt-auto pt-6">
           <div className="mb-3" style={{ height: 1, background: "rgba(255,255,255,0.06)" }} />
-          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.30)" }}>Recent Sessions</p>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.58)" }}>Recent Sessions</p>
           <div className="flex flex-col gap-2">
             {history.slice(0, 5).map((h, i) => {
               const toolLabel = h.tool.replace(/-/g, " ");
@@ -219,12 +219,12 @@ export default function ForgeLeftPanel({
                 ? (h.tool === "voice-note" ? "voice recording" : "file upload")
                 : `${h.words} words`;
               return (
-                <div key={i} className="flex items-start gap-2 text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
-                  <span style={{ color: "rgba(255,255,255,0.20)" }}>·</span>
+                <div key={i} className="flex items-start gap-2 text-xs" style={{ color: "rgba(255,255,255,0.62)" }}>
+                  <span style={{ color: "rgba(255,255,255,0.50)" }}>·</span>
                   <div>
                     <span className="capitalize" style={{ color: "rgba(255,255,255,0.55)" }}>{toolLabel}</span>
                     <span> — {detail}</span>
-                    <div style={{ color: "rgba(255,255,255,0.25)" }}>{h.date}</div>
+                    <div style={{ color: "rgba(255,255,255,0.54)" }}>{h.date}</div>
                   </div>
                 </div>
               );

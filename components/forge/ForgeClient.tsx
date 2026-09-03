@@ -272,7 +272,7 @@ export default function ForgeClient({ userData }: ForgeClientProps) {
               <button onClick={() => { setContent(draftBanner.content); setActiveTool(draftBanner.tool); setDraftBanner(null); }}
                 className="text-sm font-medium" style={{ color: "#FF5500" }}>Recover</button>
               <button onClick={() => { localStorage.removeItem(LS_KEY_PREFIX + userData.userId); setDraftBanner(null); }}
-                className="text-sm" style={{ color: "rgba(255,255,255,0.40)" }}>Discard</button>
+                className="text-sm" style={{ color: "rgba(255,255,255,0.66)" }}>Discard</button>
             </div>
           </motion.div>
         )}
@@ -310,14 +310,14 @@ export default function ForgeClient({ userData }: ForgeClientProps) {
                 style={{ fontSize: 180, fontWeight: 700, color: "#FFFFFF", opacity: 0.03 }}>FORGE</div>
 
               <div className="relative z-10 text-center flex flex-col items-center gap-5">
-                <p className="text-xs font-medium uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.25)" }}>IMPRINT</p>
+                <p className="text-xs font-medium uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.54)" }}>IMPRINT</p>
                 {practiceSkillName ? (
                   <>
                     <h2 className="font-bold leading-none" style={{ fontSize: "clamp(36px,5vw,56px)" }}>
                       <span className="text-white">Practicing: </span>
                       <span style={{ color: "#FF5500" }}>{practiceSkillName}</span>
                     </h2>
-                    <p className="text-base max-w-sm" style={{ color: "rgba(255,255,255,0.40)", lineHeight: 1.7 }}>
+                    <p className="text-base max-w-sm" style={{ color: "rgba(255,255,255,0.66)", lineHeight: 1.7 }}>
                       Choose a tool from the left to start.<br />This session will boost your skill.
                     </p>
                   </>
@@ -327,7 +327,7 @@ export default function ForgeClient({ userData }: ForgeClientProps) {
                       <span className="text-white">What will you </span>
                       <span style={{ color: "#FF5500" }}>make today?</span>
                     </h2>
-                    <p className="text-base max-w-sm" style={{ color: "rgba(255,255,255,0.40)", lineHeight: 1.7 }}>
+                    <p className="text-base max-w-sm" style={{ color: "rgba(255,255,255,0.66)", lineHeight: 1.7 }}>
                       Choose a tool from the left.<br />Sit down. Start. No AI here.
                     </p>
                   </>
@@ -341,7 +341,7 @@ export default function ForgeClient({ userData }: ForgeClientProps) {
                     whileHover={{ boxShadow: "0 0 40px rgba(255,85,0,0.08)", borderColor: "rgba(255,85,0,0.40)" }}>
                     <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "#FF5500" }}>Vault Challenge Due</p>
                     <p className="font-semibold text-white text-xl mb-2">{userData.activeChallenge.title}</p>
-                    <p className="text-sm mb-5" style={{ color: "rgba(255,255,255,0.45)" }}>
+                    <p className="text-sm mb-5" style={{ color: "rgba(255,255,255,0.72)" }}>
                       {userData.activeChallenge.due_date
                         ? `Due ${formatDate(userData.activeChallenge.due_date)}`
                         : "No due date"}

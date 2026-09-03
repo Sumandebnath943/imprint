@@ -54,11 +54,11 @@ export default function ForgeSketch({ onSave }: ForgeSketchProps) {
                 background: isDragging ? "rgba(255,85,0,0.04)" : "rgba(255,255,255,0.02)",
               }}
             >
-              <PenTool size={40} style={{ color: "rgba(255,255,255,0.20)" }} />
+              <PenTool size={40} style={{ color: "rgba(255,255,255,0.50)" }} />
               <div className="text-center">
                 <p className="text-lg font-medium mb-1" style={{ color: "rgba(255,255,255,0.55)" }}>Drop your sketch or photo here</p>
-                <p className="text-sm mb-3" style={{ color: "rgba(255,255,255,0.30)" }}>or click to browse</p>
-                <p className="text-xs" style={{ color: "rgba(255,255,255,0.20)" }}>Handwriting, sketches, drawings · JPG, PNG, PDF · Max 10MB</p>
+                <p className="text-sm mb-3" style={{ color: "rgba(255,255,255,0.58)" }}>or click to browse</p>
+                <p className="text-xs" style={{ color: "rgba(255,255,255,0.50)" }}>Handwriting, sketches, drawings · JPG, PNG, PDF · Max 10MB</p>
               </div>
             </div>
             <input ref={inputRef} type="file" accept="image/*,.pdf" className="hidden"
@@ -79,7 +79,7 @@ export default function ForgeSketch({ onSave }: ForgeSketchProps) {
               </button>
             </div>
             {/* File info */}
-            <p className="text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>
+            <p className="text-sm" style={{ color: "rgba(255,255,255,0.62)" }}>
               {file.name} · {(file.size / 1024).toFixed(0)} KB
             </p>
             {/* Caption */}

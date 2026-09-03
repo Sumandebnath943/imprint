@@ -54,7 +54,7 @@ function MirrorBubble({ msg }: { msg: MirrorMessageType }) {
             {msg.content}
           </p>
         </div>
-        <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.20)" }}>{time}</p>
+        <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.50)" }}>{time}</p>
       </div>
     </motion.div>
   );
@@ -71,7 +71,7 @@ function UserBubble({ msg }: { msg: MirrorMessageType }) {
         style={{ background: "rgba(255,85,0,0.08)", border: "1px solid rgba(255,85,0,0.15)" }}>
         <p style={{ fontSize: 16, color: "rgba(255,255,255,0.80)", lineHeight: 1.7 }}>{msg.content}</p>
       </div>
-      <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.20)" }}>{time}</p>
+      <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.50)" }}>{time}</p>
     </motion.div>
   );
 }

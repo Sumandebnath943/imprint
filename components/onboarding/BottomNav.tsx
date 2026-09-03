@@ -49,7 +49,7 @@ export default function BottomNav({
       </div>
 
       {/* Step indicator */}
-      <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
+      <p className="text-xs" style={{ color: "rgba(255,255,255,0.62)" }}>
         Step {step} of {total}
       </p>
 

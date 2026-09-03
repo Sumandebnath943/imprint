@@ -103,7 +103,7 @@ export default function Footer() {
               <h2 className="text-[32px] md:text-[44px] font-medium text-white/90 leading-[1.1] tracking-tight mb-4 max-w-[480px]">
                 Protecting cognitive identity in the age of AI.
               </h2>
-              <p className="text-[15px] text-white/40 mb-10 max-w-[400px]">
+              <p className="text-[15px] text-white/65 mb-10 max-w-[400px]">
                 Let&apos;s build something authentic.
               </p>
 
@@ -169,7 +169,7 @@ export default function Footer() {
 
           {/* Bottom Bar: Copyright & Socials */}
           <div className="flex flex-col md:flex-row justify-between items-center mt-auto pt-8">
-            <p className="text-[13px] text-white/30 mb-6 md:mb-0">
+            <p className="text-[13px] text-white/60 mb-6 md:mb-0">
               © 2026 IMPRINT. All rights reserved.
             </p>
             <div className="flex items-center gap-5">
@@ -183,7 +183,7 @@ export default function Footer() {
                   href={href}
                   aria-label={label}
                   className="w-8 h-8 flex items-center justify-center transition-colors hover:text-white"
-                  style={{ color: "rgba(255,255,255,0.30)" }}
+                  style={{ color: "rgba(255,255,255,0.58)" }}
                 >
                   <Icon />
                 </a>

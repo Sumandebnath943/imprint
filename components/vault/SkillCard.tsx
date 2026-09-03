@@ -71,7 +71,7 @@ export default function SkillCard({ skill, decayedStrength, hasActiveChallenge, 
       </div>
 
       {/* Cluster badge */}
-      <span className="text-xs rounded-full" style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.30)", padding: "2px 8px" }}>
+      <span className="text-xs rounded-full" style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.58)", padding: "2px 8px" }}>
         {skill.cluster.replace(/_/g, " ")}
       </span>
 
@@ -96,7 +96,7 @@ export default function SkillCard({ skill, decayedStrength, hasActiveChallenge, 
 
       {/* Decay indicator row */}
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
+        <span className="text-xs" style={{ color: "rgba(255,255,255,0.62)" }}>
           Last practiced: {getRelativeTime(skill.last_exercised)}
         </span>
         <span className="text-xs font-medium" style={{ color: decayStatus.color }}>{decayStatus.label}</span>
@@ -104,7 +104,7 @@ export default function SkillCard({ skill, decayedStrength, hasActiveChallenge, 
 
       {/* Times practiced + dots */}
       <div className="flex items-center justify-between mb-1">
-        <span className="text-xs" style={{ color: "rgba(255,255,255,0.30)" }}>{skill.times_practiced} sessions completed</span>
+        <span className="text-xs" style={{ color: "rgba(255,255,255,0.58)" }}>{skill.times_practiced} sessions completed</span>
         <div className="flex gap-1">
           {dots.map((filled, i) => (
             <div key={i} className="w-1.5 h-1.5 rounded-full"
@@ -138,7 +138,7 @@ export default function SkillCard({ skill, decayedStrength, hasActiveChallenge, 
               Challenge
             </button>
             <button onClick={() => onDetails(skill)}
-              className="text-xs ml-auto" style={{ color: "rgba(255,255,255,0.35)" }}>
+              className="text-xs ml-auto" style={{ color: "rgba(255,255,255,0.62)" }}>
               Details →
             </button>
           </motion.div>

@@ -204,13 +204,13 @@ export default function CircleDetail({ circle, userId, onClose }: CircleDetailPr
       initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", damping: 25, stiffness: 200 }}>
       {/* Header */}
       <div className="shrink-0 px-10 py-6" style={{ background: "#0D0D0D", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-        <button onClick={onClose} className="flex items-center gap-1.5 text-sm mb-4 transition-all hover:text-white" style={{ color: "rgba(255,255,255,0.40)" }}>
+        <button onClick={onClose} className="flex items-center gap-1.5 text-sm mb-4 transition-all hover:text-white" style={{ color: "rgba(255,255,255,0.66)" }}>
           <ArrowLeft size={16} /> My Circles
         </button>
         <div className="flex items-start justify-between">
           <div>
             <h1 className="font-bold text-white text-3xl mb-1">{circle.name}</h1>
-            <p className="text-sm" style={{ color: "rgba(255,255,255,0.40)" }}>{circle.cluster_focus} · {members.length} members</p>
+            <p className="text-sm" style={{ color: "rgba(255,255,255,0.66)" }}>{circle.cluster_focus} · {members.length} members</p>
           </div>
           <div className="flex gap-2">
             <button onClick={() => navigator.clipboard.writeText(circle.invite_code)} className="rounded-full h-10 px-4 text-sm font-medium transition-all hover:bg-white/5" style={{ border: "1px solid rgba(255,255,255,0.20)", color: "rgba(255,255,255,0.70)" }}>
@@ -276,7 +276,7 @@ export default function CircleDetail({ circle, userId, onClose }: CircleDetailPr
             <div>
               {/* Composer */}
               <div className="rounded-2xl p-5 mb-8" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
-                <p className="text-sm mb-3" style={{ color: "rgba(255,255,255,0.40)" }}>Post a check-in</p>
+                <p className="text-sm mb-3" style={{ color: "rgba(255,255,255,0.66)" }}>Post a check-in</p>
                 <div className="flex gap-2 flex-wrap mb-4">
                   {CHECKIN_TYPES.map(t => (
                     <button key={t} onClick={() => setCType(t)} className="rounded-full text-xs px-3 py-1.5 transition-all" style={{ background: cType === t ? "#FF5500" : "#1A1A1A", border: cType === t ? "1px solid #FF5500" : "1px solid rgba(255,255,255,0.08)", color: cType === t ? "white" : "rgba(255,255,255,0.55)" }}>{t}</button>
@@ -300,7 +300,7 @@ export default function CircleDetail({ circle, userId, onClose }: CircleDetailPr
               {/* Feed Items */}
               {checkins.length === 0 ? (
                 <div className="text-center py-12">
-                  <p className="text-sm" style={{ color: "rgba(255,255,255,0.40)" }}>No check-ins yet. Be the first.</p>
+                  <p className="text-sm" style={{ color: "rgba(255,255,255,0.66)" }}>No check-ins yet. Be the first.</p>
                 </div>
               ) : (
                 checkins.map(ci => (
@@ -311,7 +311,7 @@ export default function CircleDetail({ circle, userId, onClose }: CircleDetailPr
                         <span className="text-sm font-medium text-white">{ci.profiles?.full_name || "Unknown"}</span>
                         <span className="text-xs rounded-full px-2 py-0.5" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.50)" }}>{ci.checkin_type}</span>
                       </div>
-                      <span className="text-xs" style={{ color: "rgba(255,255,255,0.30)" }}>{relTime(ci.created_at)}</span>
+                      <span className="text-xs" style={{ color: "rgba(255,255,255,0.58)" }}>{relTime(ci.created_at)}</span>
                     </div>
                     <p className="text-[15px] mb-3" style={{ color: "rgba(255,255,255,0.85)", lineHeight: 1.6 }}>{ci.content}</p>
                     {ci.drift_score_shared !== null && (
@@ -358,7 +358,7 @@ export default function CircleDetail({ circle, userId, onClose }: CircleDetailPr
                     <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium" style={{ background: "rgba(255,255,255,0.08)", color: "white" }}>{m.profile?.full_name?.charAt(0) || "?"}</div>
                     <div>
                       <p className="text-sm font-medium text-white">{m.profile?.full_name || "Unknown"}</p>
-                      <p className="text-xs" style={{ color: "rgba(255,255,255,0.40)" }}>Joined {formatDate(m.joined_at)}</p>
+                      <p className="text-xs" style={{ color: "rgba(255,255,255,0.66)" }}>Joined {formatDate(m.joined_at)}</p>
                     </div>
                   </div>
                   <span className="text-xs rounded-full px-2 py-0.5" style={{ background: m.role === "admin" ? "rgba(255,85,0,0.15)" : "transparent", color: m.role === "admin" ? "#FF5500" : "rgba(255,255,255,0.30)", border: m.role === "admin" ? "none" : "1px solid rgba(255,255,255,0.15)" }}>
@@ -368,8 +368,8 @@ export default function CircleDetail({ circle, userId, onClose }: CircleDetailPr
               ))}
               {members.length < circle.member_limit && (
                 <div className="p-5 text-center" style={{ borderTop: "1px dashed rgba(255,255,255,0.10)" }}>
-                  <p className="text-sm mb-1" style={{ color: "rgba(255,255,255,0.40)" }}>+ Invite someone</p>
-                  <p className="text-xs font-mono" style={{ color: "rgba(255,255,255,0.25)" }}>{circle.invite_code}</p>
+                  <p className="text-sm mb-1" style={{ color: "rgba(255,255,255,0.66)" }}>+ Invite someone</p>
+                  <p className="text-xs font-mono" style={{ color: "rgba(255,255,255,0.54)" }}>{circle.invite_code}</p>
                 </div>
               )}
             </div>
@@ -379,7 +379,7 @@ export default function CircleDetail({ circle, userId, onClose }: CircleDetailPr
             <div className="rounded-2xl overflow-hidden" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
               <div className="p-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)", background: "#0D0D0D" }}>
                 <p className="text-sm font-medium text-white">{circle.name} Rankings</p>
-                <p className="text-xs" style={{ color: "rgba(255,255,255,0.40)" }}>Based on IMPRINT Score</p>
+                <p className="text-xs" style={{ color: "rgba(255,255,255,0.66)" }}>Based on IMPRINT Score</p>
               </div>
               {members.sort((a,b) => (b.profile?.imprint_score || 0) - (a.profile?.imprint_score || 0)).map((m, i) => (
                 <div key={m.id} className="flex items-center justify-between p-4" style={{ borderBottom: i < members.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none", background: m.user_id === userId ? "rgba(255,85,0,0.05)" : "transparent" }}>
@@ -395,7 +395,7 @@ export default function CircleDetail({ circle, userId, onClose }: CircleDetailPr
 
           {activeTab === "Challenges" && (
             <div className="text-center py-12">
-              <p className="text-sm" style={{ color: "rgba(255,255,255,0.40)" }}>No active challenges. Admins can assign circle challenges.</p>
+              <p className="text-sm" style={{ color: "rgba(255,255,255,0.66)" }}>No active challenges. Admins can assign circle challenges.</p>
             </div>
           )}
         </div>

@@ -18,7 +18,7 @@ function StatRow({ value, label, color = "white" }: { value: string; label: stri
   return (
     <div className="py-3 border-b" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
       <p className="font-bold" style={{ fontSize: 20, color }}>{value}</p>
-      <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>{label}</p>
+      <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.62)" }}>{label}</p>
     </div>
   );
 }
@@ -29,7 +29,7 @@ function IndicatorPill({ label, status }: { label: string; status: "good" | "war
   const statusText = status === "good" ? "Matching" : status === "warn" ? "Diverging" : "Drift";
   return (
     <div className="flex items-center justify-between py-2">
-      <span className="text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>{label}</span>
+      <span className="text-xs" style={{ color: "rgba(255,255,255,0.72)" }}>{label}</span>
       <span className="text-xs rounded-full px-2 py-0.5 font-medium" style={{ background: c.bg, border: `1px solid ${c.border}`, color: c.text }}>{statusText}</span>
     </div>
   );
@@ -46,7 +46,7 @@ export default function ForgeRightPanel({ open, onToggle, content, elapsed, isAc
       <button onClick={onToggle}
         className="absolute top-4 -left-4 z-20 w-7 h-7 rounded-full flex items-center justify-center transition-all"
         style={{ background: "#1A1A1A", border: "1px solid rgba(255,255,255,0.10)" }}>
-        {open ? <ChevronRight size={12} style={{ color: "rgba(255,255,255,0.40)" }} /> : <ChevronLeft size={12} style={{ color: "rgba(255,255,255,0.40)" }} />}
+        {open ? <ChevronRight size={12} style={{ color: "rgba(255,255,255,0.66)" }} /> : <ChevronLeft size={12} style={{ color: "rgba(255,255,255,0.66)" }} />}
       </button>
 
       <div
@@ -63,7 +63,7 @@ export default function ForgeRightPanel({ open, onToggle, content, elapsed, isAc
       {open && (
         <div className="flex-1 overflow-y-auto p-5" style={{ scrollbarWidth: "none" }}>
           {/* Current session stats */}
-          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.30)" }}>This Session</p>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.58)" }}>This Session</p>
           {isActive ? (
             <>
               <StatRow value={String(words)} label="words written" />
@@ -75,18 +75,18 @@ export default function ForgeRightPanel({ open, onToggle, content, elapsed, isAc
                   <div className="h-full rounded-full transition-all duration-500"
                     style={{ background: paceStatus === "good" ? "#00D97E" : "#FF5500", width: `${Math.min(100, (wpm / 50) * 100)}%` }} />
                 </div>
-                <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.25)" }}>vs 50 WPM target</p>
+                <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.54)" }}>vs 50 WPM target</p>
               </div>
             </>
           ) : (
-            <p className="text-xs py-4" style={{ color: "rgba(255,255,255,0.30)" }}>Start a session to see live stats.</p>
+            <p className="text-xs py-4" style={{ color: "rgba(255,255,255,0.58)" }}>Start a session to see live stats.</p>
           )}
 
           {/* Baseline comparison */}
           {isActive && words > 10 && (
             <div className="mt-6">
               <div className="mb-3" style={{ height: 1, background: "rgba(255,255,255,0.05)" }} />
-              <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.30)" }}>vs Your Baseline</p>
+              <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.58)" }}>vs Your Baseline</p>
               <IndicatorPill label="Vocabulary" status={wpm > 20 ? "good" : "warn"} />
               <IndicatorPill label="Rhythm" status={words > baselineWordCount * 0.5 ? "good" : "warn"} />
               <IndicatorPill label="Depth" status={words > baselineWordCount * 0.8 ? "good" : words > baselineWordCount * 0.4 ? "warn" : "bad"} />
@@ -97,7 +97,7 @@ export default function ForgeRightPanel({ open, onToggle, content, elapsed, isAc
           {history.length > 0 && (
             <div className="mt-6">
               <div className="mb-3" style={{ height: 1, background: "rgba(255,255,255,0.05)" }} />
-              <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.30)" }}>Forge History</p>
+              <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.58)" }}>Forge History</p>
               <div className="flex flex-col gap-2">
                 {history.slice(0, 5).map((h) => {
                   const d = new Date(h.created_at);
@@ -116,7 +116,7 @@ export default function ForgeRightPanel({ open, onToggle, content, elapsed, isAc
                       onMouseOver={(e) => (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)"}
                       onMouseOut={(e) => (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.02)"}>
                       <p className="text-xs font-medium text-white mb-1">{label}</p>
-                      <p className="text-xs mb-1.5" style={{ color: "rgba(255,255,255,0.35)" }}>
+                      <p className="text-xs mb-1.5" style={{ color: "rgba(255,255,255,0.62)" }}>
                         {h.word_count > 0 ? `${h.word_count} words` : formatTime(h.time_spent_seconds)}
                       </p>
                       {signals && signals.vocabulary_delta !== undefined && (

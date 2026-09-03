@@ -324,7 +324,7 @@ export default function MirrorClient({ userData }: MirrorClientProps) {
             <div className="flex gap-3">
               <button onClick={restoreDraft} className="text-sm font-medium" style={{ color: "rgba(255,120,50,0.90)" }}>Continue</button>
               <button onClick={() => { localStorage.removeItem(LS_KEY(userData.userId)); setDraftBanner(false); }}
-                className="text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>Start fresh</button>
+                className="text-sm" style={{ color: "rgba(255,255,255,0.62)" }}>Start fresh</button>
             </div>
           </motion.div>
         )}
@@ -373,13 +373,13 @@ export default function MirrorClient({ userData }: MirrorClientProps) {
                   <span className="text-white">What do you want </span><br />
                   <span style={{ color: "rgba(255,120,50,0.90)" }}>to think through?</span>
                 </h2>
-                <p className="text-base max-w-md leading-relaxed" style={{ color: "rgba(255,255,255,0.40)", lineHeight: 1.7 }}>
+                <p className="text-base max-w-md leading-relaxed" style={{ color: "rgba(255,255,255,0.66)", lineHeight: 1.7 }}>
                   The Mirror will ask you questions.<br />It will not answer them.<br />
                   You&apos;ll leave knowing more about what you actually think.
                 </p>
 
                 {!selectedContext ? (
-                  <p className="italic" style={{ fontSize: 14, color: "rgba(255,255,255,0.30)" }}>Select a context from the left to begin.</p>
+                  <p className="italic" style={{ fontSize: 14, color: "rgba(255,255,255,0.58)" }}>Select a context from the left to begin.</p>
                 ) : (
                   <div className="flex flex-col items-center gap-4 mt-2">
                     <span className="text-sm rounded-full px-4 py-1.5 font-medium" style={{ background: "rgba(255,120,50,0.12)", border: "1px solid rgba(255,120,50,0.30)", color: "rgba(255,120,50,0.90)" }}>
@@ -406,7 +406,7 @@ export default function MirrorClient({ userData }: MirrorClientProps) {
                 <span className="text-xs rounded-full px-3 py-1 font-medium" style={{ background: "rgba(255,120,50,0.12)", border: "1px solid rgba(255,120,50,0.25)", color: "rgba(255,120,50,0.90)" }}>
                   Reflecting on: {selectedContext === "Something Else" ? customTopic || "open" : selectedContext}
                 </span>
-                <span className="font-mono text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>{formatTime(elapsed)}</span>
+                <span className="font-mono text-sm" style={{ color: "rgba(255,255,255,0.62)" }}>{formatTime(elapsed)}</span>
                 <div className="flex items-center gap-3">
                   {dependencyFlags > 0 && (
                     <span className="text-xs rounded-full px-2 py-0.5" style={{ background: "rgba(255,184,0,0.12)", border: "1px solid rgba(255,184,0,0.25)", color: "#FFB800" }}>
@@ -457,7 +457,7 @@ export default function MirrorClient({ userData }: MirrorClientProps) {
                     onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.08)")}
                   />
                   {charCount > 100 && (
-                    <span className="absolute bottom-3 right-14 text-xs" style={{ color: "rgba(255,255,255,0.20)" }}>
+                    <span className="absolute bottom-3 right-14 text-xs" style={{ color: "rgba(255,255,255,0.50)" }}>
                       {charCount}/{MAX_CHARS}
                     </span>
                   )}
@@ -473,7 +473,7 @@ export default function MirrorClient({ userData }: MirrorClientProps) {
                     <ArrowUp size={16} style={{ color: canSend ? "white" : "rgba(255,120,50,0.70)" }} />
                   </button>
                 </div>
-                <p className="text-center mt-2 text-xs" style={{ color: "rgba(255,255,255,0.20)" }}>
+                <p className="text-center mt-2 text-xs" style={{ color: "rgba(255,255,255,0.50)" }}>
                   The Mirror asks questions. It never answers.
                 </p>
               </div>

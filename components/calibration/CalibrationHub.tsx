@@ -55,7 +55,7 @@ export default function CalibrationHub({ pageData, onBegin }: HubProps) {
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="flex items-start justify-between mb-8">
           <div>
             <h1 className="font-bold text-white mb-1" style={{ fontSize: 32 }}>Calibration</h1>
-            <p style={{ fontSize: 15, color: "rgba(255,255,255,0.40)" }}>Bi-weekly identity check-in.</p>
+            <p style={{ fontSize: 15, color: "rgba(255,255,255,0.66)" }}>Bi-weekly identity check-in.</p>
           </div>
           {isDue ? (
             <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.5 }}
@@ -81,24 +81,24 @@ export default function CalibrationHub({ pageData, onBegin }: HubProps) {
               <p className="font-bold text-white mb-1" style={{ fontSize: 48, lineHeight: 1 }}>
                 Session {nextSessionNumber}
               </p>
-              <p className="mb-4" style={{ fontSize: 16, color: "rgba(255,255,255,0.40)" }}>
+              <p className="mb-4" style={{ fontSize: 16, color: "rgba(255,255,255,0.66)" }}>
                 {sessionCount === 0 ? "Your first calibration" : `Calibration ${nextSessionNumber} of your ongoing record`}
               </p>
 
               {sessionCount === 0 ? (
-                <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.45)", lineHeight: 1.7, maxWidth: 320 }}>
+                <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.72)", lineHeight: 1.7, maxWidth: 320 }}>
                   Establishes your first real Drift Score.<br />Compared against your Baseline Imprint.
                 </p>
               ) : isDue ? (
                 <div className="mb-6">
                   <p className="font-semibold mb-1" style={{ fontSize: 24, color: "#FF5500" }}>Due Now</p>
-                  <p className="text-sm" style={{ color: "rgba(255,255,255,0.40)" }}>Your score needs updating.</p>
+                  <p className="text-sm" style={{ color: "rgba(255,255,255,0.66)" }}>Your score needs updating.</p>
                 </div>
               ) : (
                 <div className="flex items-center gap-4 mb-6">
                   <div>
                     <p className="font-bold text-white" style={{ fontSize: 64, lineHeight: 1 }}>{daysUntilNext}</p>
-                    <p style={{ fontSize: 16, color: "rgba(255,255,255,0.40)" }}>days until next session</p>
+                    <p style={{ fontSize: 16, color: "rgba(255,255,255,0.66)" }}>days until next session</p>
                   </div>
                   <CycleRing daysElapsed={daysSinceLast} />
                 </div>
@@ -111,7 +111,7 @@ export default function CalibrationHub({ pageData, onBegin }: HubProps) {
                   {sessionCount === 0 ? "Begin Session 1 →" : isDue ? "Begin Calibration →" : "Begin Early →"}
                 </button>
                 {!isDue && sessionCount > 0 && (
-                  <p className="text-sm" style={{ color: "rgba(255,255,255,0.30)" }}>Available in {daysUntilNext} days</p>
+                  <p className="text-sm" style={{ color: "rgba(255,255,255,0.58)" }}>Available in {daysUntilNext} days</p>
                 )}
               </div>
             </div>
@@ -120,7 +120,7 @@ export default function CalibrationHub({ pageData, onBegin }: HubProps) {
             {latestDriftScore !== null && (
               <div className="flex flex-col items-center justify-center px-8"
                 style={{ borderLeft: "1px solid rgba(255,255,255,0.07)", borderRight: "1px solid rgba(255,255,255,0.07)" }}>
-                <p className="text-xs uppercase tracking-widest mb-4" style={{ color: "rgba(255,255,255,0.30)" }}>Last Score</p>
+                <p className="text-xs uppercase tracking-widest mb-4" style={{ color: "rgba(255,255,255,0.58)" }}>Last Score</p>
                 <DriftRing score={latestDriftScore} size={120} strokeWidth={8} showCenter />
                 {previousDriftScore !== null && (() => {
                   // Drift measures distance from baseline, so a fall is an
@@ -129,7 +129,7 @@ export default function CalibrationHub({ pageData, onBegin }: HubProps) {
                   const delta = latestDriftScore - previousDriftScore;
                   if (delta === 0) {
                     return (
-                      <p className="text-xs mt-2" style={{ color: "rgba(255,255,255,0.35)" }}>
+                      <p className="text-xs mt-2" style={{ color: "rgba(255,255,255,0.62)" }}>
                         No change since last session
                       </p>
                     );
@@ -140,7 +140,7 @@ export default function CalibrationHub({ pageData, onBegin }: HubProps) {
                     </p>
                   );
                 })()}
-                <p className="mt-3 text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
+                <p className="mt-3 text-xs" style={{ color: "rgba(255,255,255,0.62)" }}>
                   Session {sessionCount} · {lastCompleted ? formatScoreDate(lastCompleted.completed_at!) : ""}
                 </p>
               </div>
@@ -154,9 +154,9 @@ export default function CalibrationHub({ pageData, onBegin }: HubProps) {
                 { label: "Best Score", value: bestSession ? String(bestSession.drift_score_produced ?? 0) : "—", color: "#00D97E", sub: bestSession ? `Session ${bestSession.session_number} · ${formatScoreDate(bestSession.completed_at!)}` : undefined },
               ].map((stat) => (
                 <div key={stat.label}>
-                  <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "rgba(255,255,255,0.30)" }}>{stat.label}</p>
+                  <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "rgba(255,255,255,0.58)" }}>{stat.label}</p>
                   <p className="font-bold" style={{ fontSize: 36, color: stat.color, lineHeight: 1 }}>{stat.value}</p>
-                  {stat.sub && <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.30)" }}>{stat.sub}</p>}
+                  {stat.sub && <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.58)" }}>{stat.sub}</p>}
                 </div>
               ))}
             </div>
@@ -185,13 +185,13 @@ export default function CalibrationHub({ pageData, onBegin }: HubProps) {
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }}>
           <div className="flex items-center gap-3 mb-5">
             <h2 className="font-semibold text-white" style={{ fontSize: 20 }}>Session History</h2>
-            <span className="text-sm" style={{ color: "rgba(255,255,255,0.40)" }}>{sessionCount} sessions completed</span>
+            <span className="text-sm" style={{ color: "rgba(255,255,255,0.66)" }}>{sessionCount} sessions completed</span>
           </div>
 
           {sessionCount === 0 ? (
             <div className="rounded-2xl py-16 text-center" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
-              <p className="text-sm mb-2" style={{ color: "rgba(255,255,255,0.35)" }}>No sessions yet.</p>
-              <p className="text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>Your calibration history will appear here after your first session.</p>
+              <p className="text-sm mb-2" style={{ color: "rgba(255,255,255,0.62)" }}>No sessions yet.</p>
+              <p className="text-xs" style={{ color: "rgba(255,255,255,0.54)" }}>Your calibration history will appear here after your first session.</p>
             </div>
           ) : (
             <div className="flex flex-col gap-4">
@@ -211,7 +211,7 @@ export default function CalibrationHub({ pageData, onBegin }: HubProps) {
                         #{session.session_number}
                       </span>
                       <p className="font-medium text-white" style={{ fontSize: 16 }}>{formatScoreDate(session.completed_at!)}</p>
-                      <p className="text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>Completed session</p>
+                      <p className="text-sm" style={{ color: "rgba(255,255,255,0.62)" }}>Completed session</p>
                     </div>
                     {/* Center */}
                     <div className="text-center">
@@ -222,7 +222,7 @@ export default function CalibrationHub({ pageData, onBegin }: HubProps) {
                           {delta <= 0 ? `↓ ${Math.abs(delta)} improved` : `↑ ${delta} worsened`}
                         </p>
                       )}
-                      {delta === null && <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.30)" }}>First session</p>}
+                      {delta === null && <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.58)" }}>First session</p>}
                     </div>
                     {/* Right — signal bars */}
                     <div className="flex flex-col gap-2 min-w-40">
@@ -232,7 +232,7 @@ export default function CalibrationHub({ pageData, onBegin }: HubProps) {
                         { label: "AI Indep.", val: signals.aiIndependence ?? 80 },
                       ].map(({ label, val }) => (
                         <div key={label} className="flex items-center gap-2">
-                          <span className="text-xs w-14" style={{ color: "rgba(255,255,255,0.40)" }}>{label}</span>
+                          <span className="text-xs w-14" style={{ color: "rgba(255,255,255,0.66)" }}>{label}</span>
                           <div className="w-16 h-1 rounded-full" style={{ background: "rgba(255,255,255,0.08)" }}>
                             <div className="h-full rounded-full" style={{ width: `${val}%`, background: color }} />
                           </div>

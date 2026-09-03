@@ -50,14 +50,14 @@ function LockedView({ capsule }: { capsule: TimeCapsule }) {
 
         <div>
           <h2 className="font-semibold text-white mb-1" style={{ fontSize: 24 }}>{capsule.title || "Untitled Capsule"}</h2>
-          <p className="text-sm" style={{ color: "rgba(255,255,255,0.40)" }}>Sealed on {fmtDate(capsule.created_at)}</p>
+          <p className="text-sm" style={{ color: "rgba(255,255,255,0.66)" }}>Sealed on {fmtDate(capsule.created_at)}</p>
         </div>
 
         <div className="relative flex items-center justify-center">
           <ArcRing pct={pct} />
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span className="font-bold text-white" style={{ fontSize: 36, lineHeight: 1 }}>{days}</span>
-            <span className="text-sm" style={{ color: "rgba(255,255,255,0.40)" }}>days</span>
+            <span className="text-sm" style={{ color: "rgba(255,255,255,0.66)" }}>days</span>
           </div>
         </div>
 
@@ -67,7 +67,7 @@ function LockedView({ capsule }: { capsule: TimeCapsule }) {
 
         {capsule.drift_score_at_writing !== undefined && capsule.drift_score_at_writing !== null && (
           <div className="rounded-xl px-4 py-2" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
-            <span className="text-xs" style={{ color: "rgba(255,255,255,0.40)" }}>Drift Score when written: </span>
+            <span className="text-xs" style={{ color: "rgba(255,255,255,0.66)" }}>Drift Score when written: </span>
             <span className="text-sm font-semibold" style={{ color: getZoneColor(capsule.drift_score_at_writing) }}>
               {capsule.drift_score_at_writing} — {getZoneShortLabel(capsule.drift_score_at_writing)}
             </span>
@@ -120,7 +120,7 @@ function UnlockedView({ capsule, currentDriftScore, onReply, onDelete }: Unlocke
             initial={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.6 }}>
             <Unlock size={48} style={{ color: "#00D97E", marginBottom: 24 }} />
             <h2 className="font-medium text-white mb-2 text-center" style={{ fontSize: 18 }}>Your capsule has been waiting for you.</h2>
-            <p className="text-sm mb-8 text-center" style={{ color: "rgba(255,255,255,0.45)" }}>
+            <p className="text-sm mb-8 text-center" style={{ color: "rgba(255,255,255,0.72)" }}>
               Written {daysSinceWriting} days ago, sealed until today.
             </p>
             <button onClick={handleReveal}
@@ -135,7 +135,7 @@ function UnlockedView({ capsule, currentDriftScore, onReply, onDelete }: Unlocke
       {/* Top bar */}
       <div className="flex items-center justify-between px-10 shrink-0"
         style={{ height: 56, background: "rgba(10,10,10,0.95)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-        <div className="flex items-center gap-3 text-sm" style={{ color: "rgba(255,255,255,0.40)" }}>
+        <div className="flex items-center gap-3 text-sm" style={{ color: "rgba(255,255,255,0.66)" }}>
           <span>{fmtDate(capsule.created_at)}</span>
           <span>·</span>
           <span>Unlocked {fmtDate(capsule.unlock_date)}</span>
@@ -149,7 +149,7 @@ function UnlockedView({ capsule, currentDriftScore, onReply, onDelete }: Unlocke
           <button onClick={() => setShowDelete(true)}
             className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:bg-red-500/10"
             style={{ border: "1px solid rgba(255,255,255,0.08)" }}>
-            <Trash2 size={13} style={{ color: "rgba(255,255,255,0.35)" }} />
+            <Trash2 size={13} style={{ color: "rgba(255,255,255,0.62)" }} />
           </button>
         </div>
       </div>
@@ -158,7 +158,7 @@ function UnlockedView({ capsule, currentDriftScore, onReply, onDelete }: Unlocke
       {driftThen !== null && driftThen !== undefined && (
         <div className="flex items-center gap-4 px-10 py-3 shrink-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
           <div className="flex items-center gap-2 text-xs">
-            <span style={{ color: "rgba(255,255,255,0.40)" }}>Drift when written:</span>
+            <span style={{ color: "rgba(255,255,255,0.66)" }}>Drift when written:</span>
             <span className="font-semibold rounded-full px-2 py-0.5"
               style={{ background: `${getZoneColor(driftThen)}18`, color: getZoneColor(driftThen) }}>
               {driftThen}
@@ -166,7 +166,7 @@ function UnlockedView({ capsule, currentDriftScore, onReply, onDelete }: Unlocke
           </div>
           {driftNow !== null && driftNow !== undefined && (
             <div className="flex items-center gap-2 text-xs">
-              <span style={{ color: "rgba(255,255,255,0.40)" }}>Drift now:</span>
+              <span style={{ color: "rgba(255,255,255,0.66)" }}>Drift now:</span>
               <span className="font-semibold rounded-full px-2 py-0.5"
                 style={{ background: `${getZoneColor(driftNow)}18`, color: getZoneColor(driftNow) }}>
                 {driftNow}
@@ -207,7 +207,7 @@ function UnlockedView({ capsule, currentDriftScore, onReply, onDelete }: Unlocke
             <motion.div className="rounded-2xl p-7 text-center" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.08)", width: 320 }}
               onClick={(e) => e.stopPropagation()} initial={{ scale: 0.94 }} animate={{ scale: 1 }}>
               <p className="font-medium text-white mb-2" style={{ fontSize: 18 }}>Delete this letter?</p>
-              <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.40)", lineHeight: 1.6 }}>This letter is gone forever.</p>
+              <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.66)", lineHeight: 1.6 }}>This letter is gone forever.</p>
               <button onClick={() => onDelete(capsule.id)}
                 className="w-full rounded-full h-11 text-white mb-3" style={{ background: "#FF2D2D" }}>Delete</button>
               <button onClick={() => setShowDelete(false)}

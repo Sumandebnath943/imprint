@@ -41,7 +41,7 @@ function CustomTooltip({ active, payload, label }: any) {
   const color = getZoneColor(score);
   return (
     <div className="rounded-xl px-4 py-3" style={{ background: "#1A1A1A", border: "1px solid rgba(255,255,255,0.10)", fontFamily: "Space Grotesk, sans-serif" }}>
-      <p className="text-xs mb-1" style={{ color: "rgba(255,255,255,0.45)" }}>{label}</p>
+      <p className="text-xs mb-1" style={{ color: "rgba(255,255,255,0.72)" }}>{label}</p>
       <p className="font-bold" style={{ fontSize: 20, color }}>{score}</p>
       <p className="text-xs" style={{ color }}>{getZoneShortLabel(score)}</p>
     </div>
@@ -81,7 +81,7 @@ export default function DriftHistoryChart({ allScores, currentColor }: DriftHist
       <div className="flex items-start justify-between mb-6 flex-wrap gap-4">
         <div>
           <h2 className="font-semibold text-white mb-1" style={{ fontSize: 18 }}>Score History</h2>
-          <p className="text-sm" style={{ color: "rgba(255,255,255,0.40)" }}>How your drift has moved over time</p>
+          <p className="text-sm" style={{ color: "rgba(255,255,255,0.66)" }}>How your drift has moved over time</p>
         </div>
         <div className="flex gap-2">
           {RANGE_LABELS.map(({ value, label }) => {
@@ -128,7 +128,7 @@ export default function DriftHistoryChart({ allScores, currentColor }: DriftHist
           </ComposedChart>
         </ResponsiveContainer>
       ) : (
-        <div className="flex items-center justify-center h-56 text-sm" style={{ color: "rgba(255,255,255,0.30)" }}>
+        <div className="flex items-center justify-center h-56 text-sm" style={{ color: "rgba(255,255,255,0.58)" }}>
           No history data for this range.
         </div>
       )}
@@ -137,19 +137,19 @@ export default function DriftHistoryChart({ allScores, currentColor }: DriftHist
       {chartData.length > 1 && (
         <div className="flex gap-8 mt-5 pt-5 flex-wrap" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
           <div>
-            <p className="text-xs mb-1" style={{ color: "rgba(255,255,255,0.40)" }}>Lowest score (best)</p>
+            <p className="text-xs mb-1" style={{ color: "rgba(255,255,255,0.66)" }}>Lowest score (best)</p>
             <p className="font-semibold" style={{ fontSize: 20, color: getZoneColor(minScore) }}>{minScore}</p>
-            {minEntry && <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>{formatScoreDate(minEntry.created_at)}</p>}
+            {minEntry && <p className="text-xs" style={{ color: "rgba(255,255,255,0.62)" }}>{formatScoreDate(minEntry.created_at)}</p>}
           </div>
           <div>
-            <p className="text-xs mb-1" style={{ color: "rgba(255,255,255,0.40)" }}>Highest score (worst)</p>
+            <p className="text-xs mb-1" style={{ color: "rgba(255,255,255,0.66)" }}>Highest score (worst)</p>
             <p className="font-semibold" style={{ fontSize: 20, color: getZoneColor(maxScore) }}>{maxScore}</p>
-            {maxEntry && <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>{formatScoreDate(maxEntry.created_at)}</p>}
+            {maxEntry && <p className="text-xs" style={{ color: "rgba(255,255,255,0.62)" }}>{formatScoreDate(maxEntry.created_at)}</p>}
           </div>
           <div>
-            <p className="text-xs mb-1" style={{ color: "rgba(255,255,255,0.40)" }}>Average score</p>
+            <p className="text-xs mb-1" style={{ color: "rgba(255,255,255,0.66)" }}>Average score</p>
             <p className="font-semibold text-white" style={{ fontSize: 20 }}>{avgScore}</p>
-            <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>across {allScores.length} calibrations</p>
+            <p className="text-xs" style={{ color: "rgba(255,255,255,0.62)" }}>across {allScores.length} calibrations</p>
           </div>
         </div>
       )}

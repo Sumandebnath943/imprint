@@ -117,7 +117,7 @@ export default function CirclesClient({ userId, circles, memberships }: CirclesC
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="flex items-start justify-between mb-8">
           <div>
             <h1 className="font-bold text-white mb-1" style={{ fontSize: 32 }}>Human Circles</h1>
-            <p style={{ fontSize: 15, color: "rgba(255,255,255,0.40)" }}>Small groups. Real accountability. No algorithms.</p>
+            <p style={{ fontSize: 15, color: "rgba(255,255,255,0.66)" }}>Small groups. Real accountability. No algorithms.</p>
           </div>
           <div className="flex gap-3">
             <button onClick={() => setShowJoin(true)} className="rounded-full font-medium transition-all hover:bg-white/5"
@@ -137,7 +137,7 @@ export default function CirclesClient({ userId, circles, memberships }: CirclesC
                 Circles are capped at 8 members. This is intentional. Accountability only works at human scale.
               </p>
             </div>
-            <button onClick={dismissBanner}><X size={16} style={{ color: "rgba(255,255,255,0.40)" }} /></button>
+            <button onClick={dismissBanner}><X size={16} style={{ color: "rgba(255,255,255,0.66)" }} /></button>
           </motion.div>
         )}
 
@@ -145,7 +145,7 @@ export default function CirclesClient({ userId, circles, memberships }: CirclesC
           <div className="flex flex-col items-center justify-center py-20 text-center" style={{ border: "1px dashed rgba(255,255,255,0.10)", borderRadius: 20 }}>
             <Users size={64} style={{ color: "rgba(255,255,255,0.08)", marginBottom: 16 }} />
             <h2 className="font-semibold text-white mb-2" style={{ fontSize: 24 }}>You&apos;re not in any circles.</h2>
-            <p className="mb-6" style={{ fontSize: 16, color: "rgba(255,255,255,0.40)", maxWidth: 400 }}>Circles are where accountability lives. Create one or join with an invite code.</p>
+            <p className="mb-6" style={{ fontSize: 16, color: "rgba(255,255,255,0.66)", maxWidth: 400 }}>Circles are where accountability lives. Create one or join with an invite code.</p>
             <div className="flex gap-3">
               <button onClick={() => setShowCreate(true)} className="rounded-full text-white font-medium px-6 py-2.5" style={{ background: "#FF5500" }}>Create a Circle</button>
               <button onClick={() => setShowJoin(true)} className="rounded-full px-6 py-2.5 transition-all hover:bg-white/5" style={{ border: "1px solid rgba(255,255,255,0.20)", color: "rgba(255,255,255,0.65)" }}>Join with Code</button>
@@ -179,7 +179,7 @@ export default function CirclesClient({ userId, circles, memberships }: CirclesC
                     </div>
                     <p className="mb-4 line-clamp-2" style={{ fontSize: 14, color: "rgba(255,255,255,0.50)", lineHeight: 1.6 }}>{c.description || "No description provided."}</p>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>Active this week</span>
+                      <span className="text-xs" style={{ color: "rgba(255,255,255,0.62)" }}>Active this week</span>
                       {isAdmin && <span className="text-xs rounded-full px-2 py-0.5" style={{ background: "rgba(255,85,0,0.10)", color: "#FF5500" }}>Admin</span>}
                     </div>
                   </motion.div>
@@ -196,7 +196,7 @@ export default function CirclesClient({ userId, circles, memberships }: CirclesC
           <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ background: "rgba(0,0,0,0.80)" }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowCreate(false)}>
             <motion.div className="w-full max-w-lg rounded-3xl" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.08)", padding: 40 }} onClick={e => e.stopPropagation()} initial={{ scale: 0.95 }} animate={{ scale: 1 }}>
               <h2 className="font-bold text-white mb-1" style={{ fontSize: 24 }}>Create a Circle</h2>
-              <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.40)" }}>Keep it small. Keep it real.</p>
+              <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.66)" }}>Keep it small. Keep it real.</p>
               
               <input value={createName} onChange={e => setCreateName(e.target.value)} placeholder="Give your circle a name" maxLength={40} className="w-full rounded-xl px-4 py-3 text-[15px] text-white outline-none mb-4" style={{ background: "#1A1A1A", border: "1px solid rgba(255,255,255,0.08)" }} />
               
@@ -226,11 +226,11 @@ export default function CirclesClient({ userId, circles, memberships }: CirclesC
           <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ background: "rgba(0,0,0,0.80)" }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <motion.div className="w-full max-w-lg rounded-3xl text-center" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.08)", padding: 40 }} initial={{ scale: 0.95 }} animate={{ scale: 1 }}>
               <h2 className="font-bold text-white mb-1" style={{ fontSize: 24 }}>Invite your people</h2>
-              <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.40)" }}>Share this code. Max 7 more members.</p>
+              <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.66)" }}>Share this code. Max 7 more members.</p>
               
               <div className="rounded-2xl py-8 mb-6" style={{ background: "#0D0D0D", border: "1px solid rgba(255,255,255,0.05)" }}>
                 <p className="font-mono font-bold mb-2" style={{ fontSize: 48, color: "#FF5500", letterSpacing: "0.15em" }}>{createdCode}</p>
-                <p className="text-xs" style={{ color: "rgba(255,255,255,0.30)" }}>Invite code</p>
+                <p className="text-xs" style={{ color: "rgba(255,255,255,0.58)" }}>Invite code</p>
               </div>
 
               <div className="flex gap-3 mb-6 justify-center">
@@ -246,7 +246,7 @@ export default function CirclesClient({ userId, circles, memberships }: CirclesC
           <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ background: "rgba(0,0,0,0.80)" }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowJoin(false)}>
             <motion.div className="w-full max-w-md rounded-3xl text-center" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.08)", padding: 40 }} onClick={e => e.stopPropagation()} initial={{ scale: 0.95 }} animate={{ scale: 1 }}>
               <h2 className="font-bold text-white mb-1" style={{ fontSize: 24 }}>Join a Circle</h2>
-              <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.40)" }}>Enter the 6-character invite code.</p>
+              <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.66)" }}>Enter the 6-character invite code.</p>
               
               <input value={joinCode} onChange={e => setJoinCode(e.target.value.toUpperCase())} maxLength={6} placeholder="XXXXXX" className="w-full text-center font-mono font-bold outline-none rounded-xl mb-4" style={{ background: "#1A1A1A", border: "2px solid rgba(255,255,255,0.10)", fontSize: 32, padding: "20px", color: "white", letterSpacing: "0.2em" }} />
               

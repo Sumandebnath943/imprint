@@ -66,7 +66,7 @@ export default function ForgeTopBar({ tool, timerDuration, elapsed, content, onE
       {/* Right: word count + end button */}
       <div className="flex items-center gap-4">
         {(tool === "free-write" || tool === "timed-write" || tool === "memory-recall" || tool === "vault-challenge") && (
-          <span className="font-mono text-sm tabular-nums" style={{ color: "rgba(255,255,255,0.35)" }}>
+          <span className="font-mono text-sm tabular-nums" style={{ color: "rgba(255,255,255,0.62)" }}>
             {wordCount} words
           </span>
         )}

@@ -181,7 +181,7 @@ export default function VaultClient({ pageData }: VaultClientProps) {
         <div className="flex items-start justify-between mb-8">
           <div>
             <h1 className="font-bold text-white mb-1" style={{ fontSize: 32 }}>Skill Vault</h1>
-            <p style={{ fontSize: 15, color: "rgba(255,255,255,0.40)" }}>Your human skills. Exercised or forgotten.</p>
+            <p style={{ fontSize: 15, color: "rgba(255,255,255,0.66)" }}>Your human skills. Exercised or forgotten.</p>
           </div>
           <button onClick={() => {
               const panelDiv = document.getElementById("add-skill-toggle");
@@ -235,7 +235,7 @@ export default function VaultClient({ pageData }: VaultClientProps) {
             className="flex flex-col items-center justify-center py-24 gap-5">
             <Shield size={64} style={{ color: "rgba(255,255,255,0.10)" }} />
             <h2 className="font-semibold text-white text-center" style={{ fontSize: 24 }}>Your Vault is empty.</h2>
-            <p className="text-base text-center max-w-sm" style={{ color: "rgba(255,255,255,0.40)", lineHeight: 1.7 }}>
+            <p className="text-base text-center max-w-sm" style={{ color: "rgba(255,255,255,0.66)", lineHeight: 1.7 }}>
               Add the skills you want to protect.<br />The ones AI is quietly replacing.
             </p>
             <button onClick={() => { setSearch(""); setFilter("All"); }}
@@ -255,7 +255,7 @@ export default function VaultClient({ pageData }: VaultClientProps) {
             </div>
           </motion.div>
         ) : (
-          <div className="py-16 text-center" style={{ color: "rgba(255,255,255,0.35)" }}>
+          <div className="py-16 text-center" style={{ color: "rgba(255,255,255,0.62)" }}>
             No skills match your current filters.
           </div>
         )}

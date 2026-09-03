@@ -84,7 +84,7 @@ export default function DriftRing({ score, size = 240, strokeWidth = 12, showCen
           </span>
           {size > 160 && (
             <>
-              <span className="mt-1" style={{ fontSize: 13, color: "rgba(255,255,255,0.40)" }}>Drift Score</span>
+              <span className="mt-1" style={{ fontSize: 13, color: "rgba(255,255,255,0.66)" }}>Drift Score</span>
               <span className="mt-0.5 font-medium" style={{ fontSize: 13, color }}>{getZoneShort(score)}</span>
             </>
           )}

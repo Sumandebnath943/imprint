@@ -42,8 +42,8 @@ export default function BottomRow({ profile, calibration, nextChallenge, streak 
         <h3 className="font-semibold text-white mb-4" style={{ fontSize: 16 }}>Coming Up</h3>
         {upcoming.length === 0 ? (
           <div className="text-center py-6">
-            <p className="text-sm mb-1" style={{ color: "rgba(255,255,255,0.40)" }}>You&apos;re clear for now.</p>
-            <p className="text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>Enjoy the stillness.</p>
+            <p className="text-sm mb-1" style={{ color: "rgba(255,255,255,0.66)" }}>You&apos;re clear for now.</p>
+            <p className="text-xs" style={{ color: "rgba(255,255,255,0.54)" }}>Enjoy the stillness.</p>
           </div>
         ) : (
           <div className="flex flex-col gap-3">
@@ -80,7 +80,7 @@ export default function BottomRow({ profile, calibration, nextChallenge, streak 
           <span className="font-bold text-white" style={{ fontSize: 52, lineHeight: 1 }}>
             {new Intl.NumberFormat().format(imprintScore)}
           </span>
-          <span style={{ fontSize: 22, color: "rgba(255,255,255,0.35)" }}>/1000</span>
+          <span style={{ fontSize: 22, color: "rgba(255,255,255,0.62)" }}>/1000</span>
         </div>
         <span className="inline-block rounded-full px-3 py-1 text-xs font-medium mb-5"
           style={{ background: `${scoreColor}1A`, border: `1px solid ${scoreColor}4D`, color: scoreColor }}>
@@ -93,7 +93,7 @@ export default function BottomRow({ profile, calibration, nextChallenge, streak 
             ["Streak", `${streak} days`],
             ["Calibrations", "0 completed"],
           ].map(([label, val]) => (
-            <div key={label} className="flex justify-between text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>
+            <div key={label} className="flex justify-between text-xs" style={{ color: "rgba(255,255,255,0.72)" }}>
               <span>{label}</span>
               <span>{val}</span>
             </div>
@@ -114,8 +114,8 @@ export default function BottomRow({ profile, calibration, nextChallenge, streak 
         <h3 className="font-semibold text-white mb-4" style={{ fontSize: 16 }}>Your Circles</h3>
         <div className="flex flex-col items-center text-center py-6 gap-3">
           <Users size={32} style={{ color: "rgba(255,255,255,0.15)" }} />
-          <p className="text-sm" style={{ color: "rgba(255,255,255,0.40)" }}>No circles yet</p>
-          <p className="text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>
+          <p className="text-sm" style={{ color: "rgba(255,255,255,0.66)" }}>No circles yet</p>
+          <p className="text-xs" style={{ color: "rgba(255,255,255,0.54)" }}>
             Accountability is part of preservation.
           </p>
           <Link href="/dashboard/circles" className="text-sm font-medium" style={{ color: "#FF5500" }}>

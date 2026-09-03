@@ -100,7 +100,7 @@ function ImageCard({ item, onOpen }: { item: GalleryItem; onOpen: (item: Gallery
       <div style={{ padding: "14px 16px" }}>
         <span className="text-xs rounded-full px-2 py-0.5 mb-2 inline-block" style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.50)" }}>{typeLabel}</span>
         {item.caption && <p className="text-sm mb-1 line-clamp-2" style={{ color: "rgba(255,255,255,0.70)", lineHeight: 1.5 }}>{item.caption}</p>}
-        <div className="flex items-center gap-2 text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
+        <div className="flex items-center gap-2 text-xs" style={{ color: "rgba(255,255,255,0.62)" }}>
           <span>{fmtRelTime(item.created_at)}</span>
           <span>·</span>
           <span className="rounded-full px-2 py-0.5" style={{ background: item.source === "forge" ? "rgba(255,85,0,0.10)" : "rgba(255,255,255,0.05)", color: item.source === "forge" ? "#FF5500" : "rgba(255,255,255,0.40)" }}>
@@ -151,7 +151,7 @@ function VoiceCard({ item, onOpen }: { item: GalleryItem; onOpen: (item: Gallery
       <Waveform />
       {item.caption && <p className="text-xs mt-3 line-clamp-2" style={{ color: "rgba(255,255,255,0.50)" }}>{item.caption}</p>}
       <div className="flex items-center justify-between mt-3">
-        <span className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>{fmtRelTime(item.created_at)}</span>
+        <span className="text-xs" style={{ color: "rgba(255,255,255,0.62)" }}>{fmtRelTime(item.created_at)}</span>
         {hovered && (
           <button onClick={togglePlay}
             className="rounded-full h-8 px-4 text-xs font-medium text-white"
@@ -181,7 +181,7 @@ function DocumentCard({ item, onOpen }: { item: GalleryItem; onOpen: (item: Gall
         <p className="text-sm italic mb-3 line-clamp-3"
           style={{ color: "rgba(255,255,255,0.60)", lineHeight: 1.6 }}>{item.caption}</p>
       )}
-      <div className="flex items-center gap-3 text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
+      <div className="flex items-center gap-3 text-xs" style={{ color: "rgba(255,255,255,0.62)" }}>
         {item.word_count && <span>{item.word_count} words</span>}
         <span>·</span><span>{fmtRelTime(item.created_at)}</span>
       </div>

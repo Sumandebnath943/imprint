@@ -21,7 +21,7 @@ export default function JournalViewer({ entry, onEdit, onDelete }: JournalViewer
   const d = entry.drift_signals;
 
   const driftStatus = (val: number, baseVal: number) => {
-    if (!baseVal) return { label: "—", color: "rgba(255,255,255,0.35)" };
+    if (!baseVal) return { label: "—", color: "rgba(255,255,255,0.62)" };
     const ratio = val / baseVal;
     if (ratio >= 0.8) return { label: "Matching", color: "#00D97E" };
     if (ratio >= 0.55) return { label: "Diverging", color: "#FFB800" };
@@ -49,7 +49,7 @@ export default function JournalViewer({ entry, onEdit, onDelete }: JournalViewer
             style={{ border: "1px solid rgba(255,255,255,0.10)" }}
             onMouseOver={(e) => (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,45,45,0.40)"}
             onMouseOut={(e) => (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.10)"}>
-            <Trash2 size={14} style={{ color: "rgba(255,255,255,0.35)" }} />
+            <Trash2 size={14} style={{ color: "rgba(255,255,255,0.62)" }} />
           </button>
         </div>
       </div>
@@ -60,7 +60,7 @@ export default function JournalViewer({ entry, onEdit, onDelete }: JournalViewer
           {entry.title ?? "Untitled Entry"}
         </h1>
         {/* Metadata row */}
-        <div className="flex items-center gap-3 mb-8 flex-wrap" style={{ fontSize: 13, color: "rgba(255,255,255,0.35)" }}>
+        <div className="flex items-center gap-3 mb-8 flex-wrap" style={{ fontSize: 13, color: "rgba(255,255,255,0.62)" }}>
           <span>{new Date(entry.created_at).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</span>
           {entry.mood && (
             <>
@@ -76,7 +76,7 @@ export default function JournalViewer({ entry, onEdit, onDelete }: JournalViewer
               <div className="flex gap-1 flex-wrap">
                 {entry.tags.map((t) => (
                   <span key={t} className="text-xs rounded-full px-2 py-0.5"
-                    style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.45)" }}>{t}</span>
+                    style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.72)" }}>{t}</span>
                 ))}
               </div>
             </>
@@ -106,7 +106,7 @@ export default function JournalViewer({ entry, onEdit, onDelete }: JournalViewer
           <div className="mt-16 border-t pt-8" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
             <button onClick={() => setShowDrift((p) => !p)}
               className="flex items-center gap-2 text-sm mb-3"
-              style={{ color: "rgba(255,255,255,0.40)" }}>
+              style={{ color: "rgba(255,255,255,0.66)" }}>
               <span>Baseline Comparison</span>
               <motion.div animate={{ rotate: showDrift ? 180 : 0 }} transition={{ duration: 0.2 }}>
                 <ChevronDown size={14} />
@@ -133,7 +133,7 @@ export default function JournalViewer({ entry, onEdit, onDelete }: JournalViewer
                         </div>
                       ))}
                     </div>
-                    <p className="text-xs italic" style={{ color: "rgba(255,255,255,0.30)", lineHeight: 1.6 }}>
+                    <p className="text-xs italic" style={{ color: "rgba(255,255,255,0.58)", lineHeight: 1.6 }}>
                       This data is only used to inform your Drift Score. It is never shared.
                     </p>
                   </div>
@@ -154,7 +154,7 @@ export default function JournalViewer({ entry, onEdit, onDelete }: JournalViewer
               onClick={(e) => e.stopPropagation()}
               initial={{ scale: 0.95 }} animate={{ scale: 1 }}>
               <p className="font-medium text-white mb-2">Delete this entry?</p>
-              <p className="text-sm mb-5" style={{ color: "rgba(255,255,255,0.40)" }}>This cannot be undone.</p>
+              <p className="text-sm mb-5" style={{ color: "rgba(255,255,255,0.66)" }}>This cannot be undone.</p>
               <div className="flex gap-3 justify-center">
                 <button onClick={() => setShowDeleteConfirm(false)}
                   className="rounded-full h-9 px-5 text-sm" style={{ border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.60)" }}>Cancel</button>

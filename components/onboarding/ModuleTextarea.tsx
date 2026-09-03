@@ -130,7 +130,7 @@ export default function ModuleTextarea({
 
       {/* Word count */}
       <div className="flex justify-end mt-2 pr-1">
-        <span className="text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>
+        <span className="text-xs" style={{ color: "rgba(255,255,255,0.54)" }}>
           {countWords(value)} words
         </span>
       </div>

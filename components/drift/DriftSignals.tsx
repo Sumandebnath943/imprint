@@ -50,7 +50,7 @@ function SignalCard({ icon, name, score, description, trend, trendPoints, miniRo
       <div className="flex flex-col gap-2 mb-4">
         {miniRows.map((row) => (
           <div key={row.label} className="flex items-center justify-between">
-            <span className="text-xs" style={{ color: "rgba(255,255,255,0.40)" }}>{row.label}</span>
+            <span className="text-xs" style={{ color: "rgba(255,255,255,0.66)" }}>{row.label}</span>
             <div className="flex items-center gap-2">
               <span className="text-xs font-medium text-white">{row.value}</span>
               {row.pct !== undefined && (
@@ -71,7 +71,7 @@ function SignalCard({ icon, name, score, description, trend, trendPoints, miniRo
             {trendPoints > 0 ? `${trendPoints} pts ` : ""}{trendLabel}
           </span>
         </div>
-        <span className="text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>vs last calibration</span>
+        <span className="text-xs" style={{ color: "rgba(255,255,255,0.54)" }}>vs last calibration</span>
       </div>
     </motion.div>
   );
@@ -153,7 +153,7 @@ export default function DriftSignalCards({ signals, trends, rawData }: DriftSign
     <div className="mb-8">
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }} className="mb-5">
         <h2 className="font-semibold text-white mb-1" style={{ fontSize: 20 }}>What&apos;s driving your score</h2>
-        <p className="text-sm" style={{ color: "rgba(255,255,255,0.40)" }}>Your drift score is calculated from 4 contributing signals.</p>
+        <p className="text-sm" style={{ color: "rgba(255,255,255,0.66)" }}>Your drift score is calculated from 4 contributing signals.</p>
       </motion.div>
       <div className="grid grid-cols-2 gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
         {cards.map((card, i) => <SignalCard key={card.name} {...card} index={i} />)}

@@ -288,7 +288,7 @@ export default function BaselinePage() {
         >
           {/* Module label */}
           <div className="mb-8">
-            <p className="uppercase tracking-widest text-xs mb-3" style={{ color: "rgba(255,255,255,0.35)" }}>
+            <p className="uppercase tracking-widest text-xs mb-3" style={{ color: "rgba(255,255,255,0.62)" }}>
               Baseline Module {moduleIndex + 1} of {modules.length}
             </p>
             <span
@@ -381,7 +381,7 @@ export default function BaselinePage() {
 
           {/* Min words hint */}
           {currentModule.minWords && inputMode === "text" && (
-            <p className="mt-3 text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>
+            <p className="mt-3 text-xs" style={{ color: "rgba(255,255,255,0.54)" }}>
               Minimum {currentModule.minWords} words · {Math.max(0, currentModule.minWords - countWords(textValue))} to go
             </p>
           )}

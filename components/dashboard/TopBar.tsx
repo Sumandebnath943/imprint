@@ -199,7 +199,7 @@ export default function TopBar({ profile, driftScore, sidebarWidth }: TopBarProp
               </div>
 
               {notifications.length === 0 ? (
-                <p className="px-4 py-6 text-[13px] text-center" style={{ color: "rgba(255,255,255,0.35)" }}>
+                <p className="px-4 py-6 text-[13px] text-center" style={{ color: "rgba(255,255,255,0.62)" }}>
                   Nothing pending. You&apos;re current.
                 </p>
               ) : (

@@ -250,16 +250,16 @@ export default function CredentialClient({ profile, driftScore, stats }: Credent
               {/* SCORES */}
               <div className="flex items-center gap-6 mb-8">
                 <div className="flex-1">
-                  <span className="block text-[10px] uppercase text-white/40 mb-1 tracking-widest">IMPRINT SCORE</span>
+                  <span className="block text-[10px] uppercase text-white/65 mb-1 tracking-widest">IMPRINT SCORE</span>
                   <div className="flex items-baseline gap-1 mb-2">
                     <span className="font-bold text-white text-[56px] leading-none">{imprintScore}</span>
-                    <span className="text-[16px] text-white/40">/1000</span>
+                    <span className="text-[16px] text-white/65">/1000</span>
                   </div>
                   <span className="px-3 py-1 rounded-full text-[12px] font-bold uppercase tracking-wider" style={{ background: `${iColor}15`, color: iColor }}>{iLabel}</span>
                 </div>
                 <div className="w-[1px] h-20 bg-white/10" />
                 <div className="flex-1">
-                  <span className="block text-[10px] uppercase text-white/40 mb-1 tracking-widest">DRIFT SCORE</span>
+                  <span className="block text-[10px] uppercase text-white/65 mb-1 tracking-widest">DRIFT SCORE</span>
                   <div className="flex items-baseline gap-1 mb-2">
                     <span className="font-bold text-[56px] leading-none" style={{ color: dColor }}>{dScore}</span>
                   </div>
@@ -271,36 +271,36 @@ export default function CredentialClient({ profile, driftScore, stats }: Credent
               <div className="flex items-center justify-between mb-8 py-4 border-t border-b border-white/10">
                 <div className="text-center">
                   <span className="block font-semibold text-white text-[16px] mb-0.5">{stats.calibrations}</span>
-                  <span className="text-[11px] text-white/40 uppercase">Calibrations</span>
+                  <span className="text-[11px] text-white/65 uppercase">Calibrations</span>
                 </div>
                 <div className="w-[1px] h-8 bg-white/10" />
                 <div className="text-center">
                   <span className="block font-semibold text-white text-[16px] mb-0.5">{stats.streak}</span>
-                  <span className="text-[11px] text-white/40 uppercase">Day Streak</span>
+                  <span className="text-[11px] text-white/65 uppercase">Day Streak</span>
                 </div>
                 <div className="w-[1px] h-8 bg-white/10" />
                 <div className="text-center">
                   <span className="block font-semibold text-white text-[16px] mb-0.5">{stats.skillsTracked}</span>
-                  <span className="text-[11px] text-white/40 uppercase">Skills Tracked</span>
+                  <span className="text-[11px] text-white/65 uppercase">Skills Tracked</span>
                 </div>
               </div>
 
               {/* FOOTER VERIFICATION */}
               <div className="text-center mb-6">
-                <span className="block text-[12px] text-white/30 mb-2">Verified {today}</span>
-                <span className="block text-[11px] text-white/20 font-mono mb-1">{verificationCode}</span>
-                <span className="block text-[10px] text-white/30">
+                <span className="block text-[12px] text-white/60 mb-2">Verified {today}</span>
+                <span className="block text-[11px] text-white/50 font-mono mb-1">{verificationCode}</span>
+                <span className="block text-[10px] text-white/60">
                   Verify at {origin.replace(/^https?:\/\//, "")}/credential/{verificationCode}
                 </span>
               </div>
 
               <div className="h-[1px] w-full bg-[#FF5500] opacity-50 mb-4" />
-              <p className="text-center text-[11px] text-white/30 italic">This credential certifies consistent identity preservation using the IMPRINT engine.</p>
+              <p className="text-center text-[11px] text-white/60 italic">This credential certifies consistent identity preservation using the IMPRINT engine.</p>
             </div>
           </div>
           
           <div className="mt-4 text-center">
-            <span className="block text-[12px] text-white/40 mb-1">Last generated: {todayShort}</span>
+            <span className="block text-[12px] text-white/65 mb-1">Last generated: {todayShort}</span>
             <button
               onClick={handleRegenerate}
               disabled={regenerating}
@@ -322,7 +322,7 @@ export default function CredentialClient({ profile, driftScore, stats }: Credent
               <Download size={16} />
               {downloading ? "Generating PNG..." : "Download as PNG"}
             </button>
-            <p className="text-[12px] text-white/40 text-center mb-2">High resolution (2x). Suitable for LinkedIn, portfolio, CV.</p>
+            <p className="text-[12px] text-white/65 text-center mb-2">High resolution (2x). Suitable for LinkedIn, portfolio, CV.</p>
             <button
               onClick={handleDownloadPdf}
               disabled={downloading}
@@ -340,7 +340,7 @@ export default function CredentialClient({ profile, driftScore, stats }: Credent
             <div className="flex items-start justify-between mb-2">
               <div>
                 <p className="text-[14px] font-medium text-white mb-1">Make publicly viewable</p>
-                <p className="text-[13px] text-white/40 leading-relaxed max-w-[240px]">Anyone with the link can view your credential. No account required.</p>
+                <p className="text-[13px] text-white/65 leading-relaxed max-w-[240px]">Anyone with the link can view your credential. No account required.</p>
               </div>
               <div onClick={togglePublic} className="w-11 h-6 rounded-full relative cursor-pointer mt-1 transition-colors" style={{ background: isPublic ? "#FF5500" : "#1A1A1A", border: isPublic ? "none" : "1px solid rgba(255,255,255,0.2)" }}>
                 <div className="absolute top-[2px] w-5 h-5 rounded-full bg-white transition-all" style={{ left: isPublic ? "22px" : "2px" }} />
@@ -373,7 +373,7 @@ export default function CredentialClient({ profile, driftScore, stats }: Credent
               </motion.div>
             ) : (
               <div className="mt-4 p-3 rounded-[10px] bg-white/5 border border-white/10 text-center">
-                <span className="text-[13px] text-white/40">Your credential is private.</span>
+                <span className="text-[13px] text-white/65">Your credential is private.</span>
               </div>
             )}
           </div>
@@ -383,7 +383,7 @@ export default function CredentialClient({ profile, driftScore, stats }: Credent
           {/* EMBED */}
           <div>
             <h3 className="text-[16px] font-semibold text-white mb-2">Embed</h3>
-            <p className="text-[14px] text-white/40 mb-4">Add to your portfolio or README</p>
+            <p className="text-[14px] text-white/65 mb-4">Add to your portfolio or README</p>
             <div className="p-4 rounded-[10px] bg-[#0D0D0D] border border-white/5 mb-3 overflow-x-auto">
               <pre className="text-[12px] text-white/50 font-mono leading-relaxed whitespace-pre-wrap break-all">
 {embedSnippet}
@@ -395,7 +395,7 @@ export default function CredentialClient({ profile, driftScore, stats }: Credent
             >
               Copy Embed Code
             </button>
-            <p className="text-[12px] text-white/30 italic">The badge image is rendered on request, so it always reflects your current scores.</p>
+            <p className="text-[12px] text-white/60 italic">The badge image is rendered on request, so it always reflects your current scores.</p>
           </div>
 
         </div>

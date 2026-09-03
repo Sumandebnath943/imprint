@@ -118,7 +118,7 @@ export default function WelcomePage() {
             style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}
           >
             <div className="mb-4">
-              <X size={22} style={{ color: "rgba(255,255,255,0.30)" }} />
+              <X size={22} style={{ color: "rgba(255,255,255,0.58)" }} />
             </div>
             <p className="font-medium text-white mb-4" style={{ fontSize: 16 }}>
               What IMPRINT never does
@@ -131,7 +131,7 @@ export default function WelcomePage() {
                 "Use AI to evaluate your responses",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-2 text-sm" style={{ color: "rgba(255,255,255,0.50)", lineHeight: 2 }}>
-                  <span style={{ color: "rgba(255,255,255,0.25)", flexShrink: 0 }}>✗</span>
+                  <span style={{ color: "rgba(255,255,255,0.54)", flexShrink: 0 }}>✗</span>
                   {item}
                 </li>
               ))}

@@ -68,7 +68,7 @@ function DriftRing({ score, color }: DriftRingProps) {
           >
             {displayScore}
           </span>
-          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.40)", fontFamily: "Space Grotesk, sans-serif" }}>
+          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.66)", fontFamily: "Space Grotesk, sans-serif" }}>
             Drift Score
           </span>
         </div>
@@ -171,12 +171,12 @@ export default function HeroRow({ driftScore, nextChallenge, calibration }: Hero
         <div className="flex items-center justify-between mb-8">
           <span
             className="text-xs uppercase tracking-widest font-medium"
-            style={{ color: "rgba(255,255,255,0.40)", fontFamily: "Space Grotesk, sans-serif" }}
+            style={{ color: "rgba(255,255,255,0.66)", fontFamily: "Space Grotesk, sans-serif" }}
           >
             Your Drift Score
           </span>
           <div className="flex items-center gap-3">
-            <span className="text-xs" style={{ color: "rgba(255,255,255,0.30)" }}>
+            <span className="text-xs" style={{ color: "rgba(255,255,255,0.58)" }}>
               {lastUpdatedDays !== null
                 ? lastUpdatedDays === 0 ? "Updated today" : `Updated ${lastUpdatedDays}d ago`
                 : "No data yet"}
@@ -194,7 +194,7 @@ export default function HeroRow({ driftScore, nextChallenge, calibration }: Hero
 
           {/* Breakdown */}
           <div className="flex-1">
-            <p className="text-sm mb-5" style={{ color: "rgba(255,255,255,0.40)", fontFamily: "Space Grotesk, sans-serif" }}>
+            <p className="text-sm mb-5" style={{ color: "rgba(255,255,255,0.66)", fontFamily: "Space Grotesk, sans-serif" }}>
               What&apos;s affecting your score
             </p>
             <div className="flex flex-col gap-5">
@@ -215,7 +215,7 @@ export default function HeroRow({ driftScore, nextChallenge, calibration }: Hero
                 // read as real measurements to anyone who had never calibrated.
                 <div
                   className="rounded-xl px-4 py-5 text-sm"
-                  style={{ background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.45)" }}
+                  style={{ background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.72)" }}
                 >
                   Complete a calibration to see what&apos;s moving your score.
                 </div>
@@ -276,7 +276,7 @@ export default function HeroRow({ driftScore, nextChallenge, calibration }: Hero
           ) : (
             <>
               <p className="font-semibold text-white" style={{ fontSize: 16 }}>Open session</p>
-              <p className="text-sm" style={{ color: "rgba(255,255,255,0.45)" }}>
+              <p className="text-sm" style={{ color: "rgba(255,255,255,0.72)" }}>
                 No active challenge. Write freely for 10 minutes.
               </p>
             </>
@@ -311,7 +311,7 @@ export default function HeroRow({ driftScore, nextChallenge, calibration }: Hero
             <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "rgba(255,120,50,0.9)" }}>The Mirror</span>
           </div>
           <p className="font-semibold text-white" style={{ fontSize: 16 }}>Reflect on something</p>
-          <p className="text-sm" style={{ color: "rgba(255,255,255,0.45)" }}>
+          <p className="text-sm" style={{ color: "rgba(255,255,255,0.72)" }}>
             Ask yourself a question. The Mirror will push you deeper.
           </p>
           <Link
@@ -341,12 +341,12 @@ export default function HeroRow({ driftScore, nextChallenge, calibration }: Hero
         >
           <div className="flex items-center gap-2">
             <Radio size={18} style={{ color: "rgba(255,255,255,0.50)" }} />
-            <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.40)" }}>Calibration</span>
+            <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.66)" }}>Calibration</span>
           </div>
           {calOverdue ? (
             <>
               <p className="font-semibold" style={{ fontSize: 16, color: "#FF5500" }}>Calibration due</p>
-              <p className="text-sm" style={{ color: "rgba(255,255,255,0.45)" }}>Your Drift Score needs updating</p>
+              <p className="text-sm" style={{ color: "rgba(255,255,255,0.72)" }}>Your Drift Score needs updating</p>
               <Link
                 href="/dashboard/calibration"
                 className="mt-auto self-start rounded-full h-9 px-5 text-sm font-medium text-white"

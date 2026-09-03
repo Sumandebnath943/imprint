@@ -127,7 +127,7 @@ export default function SkillVaultPage() {
           >
             <div className="flex items-center justify-between mb-4">
               <p className="font-medium text-white text-base">My Skills</p>
-              <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
+              <p className="text-xs" style={{ color: "rgba(255,255,255,0.62)" }}>
                 {skills.length} of {MAX_SKILLS} added
               </p>
             </div>
@@ -148,14 +148,14 @@ export default function SkillVaultPage() {
                       <button
                         onClick={() => removeSkill(skill.name)}
                         className="transition-colors hover:text-white"
-                        style={{ color: "rgba(255,255,255,0.30)" }}
+                        style={{ color: "rgba(255,255,255,0.58)" }}
                       >
                         <X size={14} />
                       </button>
                     </div>
                     {/* Strength slider */}
                     <div className="flex items-center gap-3">
-                      <p className="text-xs flex-shrink-0" style={{ color: "rgba(255,255,255,0.35)" }}>
+                      <p className="text-xs flex-shrink-0" style={{ color: "rgba(255,255,255,0.62)" }}>
                         Strength
                       </p>
                       <input
@@ -180,7 +180,7 @@ export default function SkillVaultPage() {
             </div>
 
             {skills.length < MIN_SKILLS && (
-              <p className="mt-3 text-xs" style={{ color: "rgba(255,255,255,0.30)" }}>
+              <p className="mt-3 text-xs" style={{ color: "rgba(255,255,255,0.58)" }}>
                 Add {MIN_SKILLS - skills.length} more skill{MIN_SKILLS - skills.length !== 1 ? "s" : ""} to continue
               </p>
             )}

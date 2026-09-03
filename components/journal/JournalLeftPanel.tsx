@@ -72,7 +72,7 @@ export default function JournalLeftPanel({ entries, activeId, onSelect, onNew }:
             </span>
           </div>
         ) : (
-          <p className="italic text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
+          <p className="italic text-xs" style={{ color: "rgba(255,255,255,0.62)" }}>
             Write today to start a streak
           </p>
         )}
@@ -81,7 +81,7 @@ export default function JournalLeftPanel({ entries, activeId, onSelect, onNew }:
       {/* Search */}
       <div className="shrink-0 px-4 py-3">
         <div className="relative">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "rgba(255,255,255,0.30)" }} />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "rgba(255,255,255,0.58)" }} />
           <input value={search} onChange={(e) => setSearch(e.target.value)}
             placeholder="Search entries..."
             className="w-full outline-none text-sm"
@@ -114,14 +114,14 @@ export default function JournalLeftPanel({ entries, activeId, onSelect, onNew }:
       {/* Entry list */}
       <div className="flex-1 overflow-y-auto px-2 pb-4" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(255,85,0,0.20) transparent" }}>
         {filtered.length === 0 && (
-          <p className="text-xs text-center py-8" style={{ color: "rgba(255,255,255,0.25)" }}>No entries found.</p>
+          <p className="text-xs text-center py-8" style={{ color: "rgba(255,255,255,0.54)" }}>No entries found.</p>
         )}
         {GROUP_ORDER.map((group) => {
           const items = groups[group];
           if (!items.length) return null;
           return (
             <div key={group}>
-              <p className="px-2 pt-4 pb-1 text-xs uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.25)", fontSize: 10 }}>{group}</p>
+              <p className="px-2 pt-4 pb-1 text-xs uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.54)", fontSize: 10 }}>{group}</p>
               {items.map((entry) => {
                 const isActive = activeId === entry.id;
                 const moodColor = entry.mood ? MOOD_COLORS[entry.mood as Mood] : null;
@@ -148,12 +148,12 @@ export default function JournalLeftPanel({ entries, activeId, onSelect, onNew }:
                       <span className="text-sm font-medium text-white truncate" style={{ maxWidth: 160 }}>
                         {entry.title ?? "Untitled Entry"}
                       </span>
-                      <span className="text-xs shrink-0" style={{ color: "rgba(255,255,255,0.35)" }}>
+                      <span className="text-xs shrink-0" style={{ color: "rgba(255,255,255,0.62)" }}>
                         {relativeDate(entry.created_at)}
                       </span>
                     </div>
                     {/* Row 2: preview */}
-                    <p className="text-xs mb-1.5 line-clamp-2" style={{ color: "rgba(255,255,255,0.35)", lineHeight: 1.5 }}>
+                    <p className="text-xs mb-1.5 line-clamp-2" style={{ color: "rgba(255,255,255,0.62)", lineHeight: 1.5 }}>
                       {(entry.content ?? "").slice(0, 120) || "No content."}
                     </p>
                     {/* Row 3: badges */}
@@ -168,7 +168,7 @@ export default function JournalLeftPanel({ entries, activeId, onSelect, onNew }:
                           Forge
                         </span>
                       )}
-                      <span className="text-xs ml-auto" style={{ color: "rgba(255,255,255,0.25)", fontSize: 11 }}>
+                      <span className="text-xs ml-auto" style={{ color: "rgba(255,255,255,0.54)", fontSize: 11 }}>
                         {wc} words
                       </span>
                     </div>

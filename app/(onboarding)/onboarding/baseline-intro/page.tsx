@@ -133,7 +133,7 @@ export default function BaselineIntroPage() {
             >
               <Icon size={22} style={{ color: "#FF5500", margin: "0 auto 12px" }} />
               <p className="text-sm font-medium text-white mb-1">{title}</p>
-              <p className="text-xs" style={{ color: "rgba(255,255,255,0.45)", lineHeight: 1.6 }}>{sub}</p>
+              <p className="text-xs" style={{ color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{sub}</p>
             </div>
           ))}
         </motion.div>

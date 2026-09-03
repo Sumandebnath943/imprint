@@ -24,7 +24,7 @@ export default function NotFound() {
         <h1 className="text-white font-light text-[34px] md:text-[44px] leading-tight tracking-tight mb-4">
           This page doesn&apos;t exist.
         </h1>
-        <p className="text-[15px] leading-relaxed mb-10" style={{ color: "rgba(255,255,255,0.45)" }}>
+        <p className="text-[15px] leading-relaxed mb-10" style={{ color: "rgba(255,255,255,0.72)" }}>
           The link may be broken, or the credential you&apos;re looking for was
           set back to private by its owner.
         </p>

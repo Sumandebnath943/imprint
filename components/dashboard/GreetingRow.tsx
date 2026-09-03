@@ -24,7 +24,7 @@ export default function GreetingRow({ profile, streak }: GreetingRowProps) {
     >
       {/* Left */}
       <div>
-        <p className="text-base mb-1" style={{ color: "rgba(255,255,255,0.45)", fontFamily: "Space Grotesk, sans-serif" }}>
+        <p className="text-base mb-1" style={{ color: "rgba(255,255,255,0.72)", fontFamily: "Space Grotesk, sans-serif" }}>
           {getGreeting()},
         </p>
         <h2
@@ -55,7 +55,7 @@ export default function GreetingRow({ profile, streak }: GreetingRowProps) {
 
       {/* Right */}
       <div className="text-right">
-        <p className="text-sm mb-2" style={{ color: "rgba(255,255,255,0.40)" }}>{dateStr}</p>
+        <p className="text-sm mb-2" style={{ color: "rgba(255,255,255,0.66)" }}>{dateStr}</p>
         {streak > 0 ? (
           <div className="flex items-center justify-end gap-1.5">
             <Flame size={16} style={{ color: "#FF5500" }} />
@@ -64,7 +64,7 @@ export default function GreetingRow({ profile, streak }: GreetingRowProps) {
             </span>
           </div>
         ) : (
-          <p className="text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>Start your streak today</p>
+          <p className="text-sm" style={{ color: "rgba(255,255,255,0.62)" }}>Start your streak today</p>
         )}
       </div>
     </motion.div>

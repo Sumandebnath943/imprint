@@ -31,11 +31,11 @@ export default function ActivityRow({ journalCount, activityData, streak = 0 }: 
       >
         <div className="mb-5">
           <h3 className="font-semibold text-white" style={{ fontSize: 16 }}>This Week</h3>
-          <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.40)" }}>Your IMPRINT activity</p>
+          <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.66)" }}>Your IMPRINT activity</p>
         </div>
         {data.every(d => d.value === 0) ? (
           <div className="flex items-center justify-center h-40">
-            <p className="text-sm text-center" style={{ color: "rgba(255,255,255,0.30)" }}>
+            <p className="text-sm text-center" style={{ color: "rgba(255,255,255,0.58)" }}>
               Your activity will appear here as you use IMPRINT
             </p>
           </div>
@@ -72,14 +72,14 @@ export default function ActivityRow({ journalCount, activityData, streak = 0 }: 
           <div style={{ fontSize: 36 }}>🔥</div>
           <div>
             <p className="font-bold text-white" style={{ fontSize: 28 }}>{streak} day streak</p>
-            <p className="text-xs" style={{ color: "rgba(255,255,255,0.40)" }}>
+            <p className="text-xs" style={{ color: "rgba(255,255,255,0.66)" }}>
               {streak > 0 ? "Keep it going" : "Write your first entry today"}
             </p>
           </div>
         </div>
 
         {/* Week dots */}
-        <p className="text-xs mb-2" style={{ color: "rgba(255,255,255,0.40)" }}>
+        <p className="text-xs mb-2" style={{ color: "rgba(255,255,255,0.66)" }}>
           {journalCount} {journalCount === 1 ? "entry" : "entries"} this week
         </p>
         <div className="flex gap-2 mb-5">

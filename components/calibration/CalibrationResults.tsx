@@ -152,14 +152,14 @@ export function CalibrationResults({ result, sessionNumber, previousSessionNumbe
               <p className="font-semibold mb-1" style={{ fontSize: 16, color: delta <= 0 ? "#00D97E" : "#FF2D2D" }}>
                 {delta <= 0 ? `↓ ${Math.abs(delta)} points from Session ${previousSessionNumber}` : `↑ ${delta} points from Session ${previousSessionNumber}`}
               </p>
-              <p className="text-sm" style={{ color: "rgba(255,255,255,0.45)" }}>
+              <p className="text-sm" style={{ color: "rgba(255,255,255,0.72)" }}>
                 {delta <= 0 ? "Your identity is strengthening." : "Recovery protocol has been updated."}
               </p>
             </div>
           ) : (
             <div>
               <p className="font-medium text-white mb-1" style={{ fontSize: 16 }}>Your first Drift Score.</p>
-              <p className="text-sm" style={{ color: "rgba(255,255,255,0.45)" }}>This is your starting point.</p>
+              <p className="text-sm" style={{ color: "rgba(255,255,255,0.72)" }}>This is your starting point.</p>
             </div>
           )}
         </motion.div>
@@ -189,7 +189,7 @@ export function CalibrationResults({ result, sessionNumber, previousSessionNumbe
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.80 }}
           className="w-full rounded-2xl p-6 mb-6"
           style={{ background: "rgba(255,85,0,0.05)", border: "1px solid rgba(255,85,0,0.15)" }}>
-          <p className="text-xs uppercase tracking-widest mb-2" style={{ color: "rgba(255,255,255,0.35)" }}>What moved most this session:</p>
+          <p className="text-xs uppercase tracking-widest mb-2" style={{ color: "rgba(255,255,255,0.62)" }}>What moved most this session:</p>
           <p className="font-semibold text-white mb-1" style={{ fontSize: 16 }}>{signalLabels[weakestSignalKey]}</p>
           <p className="text-sm" style={{ color: "rgba(255,255,255,0.55)", lineHeight: 1.6 }}>{signalDescriptions[weakestSignalKey]}</p>
         </motion.div>
@@ -197,7 +197,7 @@ export function CalibrationResults({ result, sessionNumber, previousSessionNumbe
         {/* Next steps */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 }}
           className="w-full mb-8">
-          <p className="text-sm mb-3" style={{ color: "rgba(255,255,255,0.40)" }}>Next session due: {nextDate}</p>
+          <p className="text-sm mb-3" style={{ color: "rgba(255,255,255,0.66)" }}>Next session due: {nextDate}</p>
           {score > 40 && (
             <div className="flex flex-col gap-2">
               {[

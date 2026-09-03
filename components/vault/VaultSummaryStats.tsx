@@ -82,7 +82,7 @@ export function VaultSummaryStats({ skills, decayedStrengths }: SummaryStatsProp
                 transition={{ duration: 1, ease: "easeOut", delay: 0.3 }} />
             </div>
           )}
-          <p className="text-xs" style={{ color: "rgba(255,255,255,0.40)" }}>{c.label}</p>
+          <p className="text-xs" style={{ color: "rgba(255,255,255,0.66)" }}>{c.label}</p>
           {c.sub && <p className="text-xs mt-1" style={{ color: c.subColor }}>{c.sub}</p>}
         </motion.div>
       ))}

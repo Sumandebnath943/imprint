@@ -169,7 +169,7 @@ export default function ForEveryHumanSection() {
         viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.3 }}
         className="mt-10 text-center px-6"
       >
-        <p className="text-sm mb-2" style={{ color: "rgba(255,255,255,0.40)" }}>33 professions. 6 clusters. One engine built for all of them.</p>
+        <p className="text-sm mb-2" style={{ color: "rgba(255,255,255,0.66)" }}>33 professions. 6 clusters. One engine built for all of them.</p>
         <Link href="/signup" className="text-sm font-medium" style={{ color: "#FF5500" }}>+ See all professions</Link>
       </motion.div>
     </section>

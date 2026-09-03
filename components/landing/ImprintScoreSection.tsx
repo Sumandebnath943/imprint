@@ -132,7 +132,7 @@ export default function ImprintScoreSection() {
                   <div className="relative z-10 text-[48px] md:text-[64px] font-bold text-[#FF5500] font-[Space_Grotesk,sans-serif] leading-none mb-3 md:mb-4 tracking-tighter">
                     91
                   </div>
-                  <div className="relative z-10 text-xs md:text-sm text-white/40 leading-snug max-w-[200px]">
+                  <div className="relative z-10 text-xs md:text-sm text-white/65 leading-snug max-w-[200px]">
                     <span className="block text-white/90 font-medium mb-1 md:mb-1.5 text-sm md:text-base">Baseline Consistency</span>
                     Adherence to your unique voice.
                   </div>
@@ -148,7 +148,7 @@ export default function ImprintScoreSection() {
                   <div className="relative z-10 text-[48px] md:text-[64px] font-bold text-[#FF5500] font-[Space_Grotesk,sans-serif] leading-none mb-3 md:mb-4 tracking-tighter">
                     65
                   </div>
-                  <div className="relative z-10 text-xs md:text-sm text-white/40 leading-snug max-w-[200px]">
+                  <div className="relative z-10 text-xs md:text-sm text-white/65 leading-snug max-w-[200px]">
                     <span className="block text-white/90 font-medium mb-1 md:mb-1.5 text-sm md:text-base">Weekly Activity</span>
                     Recent interactions mapped.
                   </div>

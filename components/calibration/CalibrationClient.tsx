@@ -101,7 +101,7 @@ export default function CalibrationClient({ pageData }: CalibrationClientProps) 
           style={{ background: "rgba(255,85,0,0.08)", border: "1px solid rgba(255,85,0,0.25)", boxShadow: "0 0 40px rgba(255,85,0,0.08)" }}>
           <div>
             <p className="text-sm font-medium text-white">You have a session in progress.</p>
-            <p className="text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>
+            <p className="text-xs" style={{ color: "rgba(255,255,255,0.72)" }}>
               {pageData.activeSession.responses.length} of {pageData.activeSession.prompts.length} prompts completed.
             </p>
           </div>

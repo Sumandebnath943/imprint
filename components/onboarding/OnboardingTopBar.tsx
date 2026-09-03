@@ -36,7 +36,7 @@ export default function OnboardingTopBar({ onSaveExit }: OnboardingTopBarProps) 
         <button
           onClick={onSaveExit}
           className="text-xs transition-colors duration-200 hover:text-white"
-          style={{ color: "rgba(255,255,255,0.40)", fontFamily: "Space Grotesk, sans-serif" }}
+          style={{ color: "rgba(255,255,255,0.66)", fontFamily: "Space Grotesk, sans-serif" }}
         >
           Save &amp; Exit
         </button>

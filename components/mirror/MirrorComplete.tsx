@@ -22,7 +22,7 @@ function StatCard({ value, label, color }: { value: string; label: string; color
     <div className="flex flex-col items-center gap-1 px-6 py-4 rounded-2xl"
       style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)", minWidth: 120 }}>
       <span className="font-bold" style={{ fontSize: 32, color, fontFamily: "monospace" }}>{value}</span>
-      <span className="text-xs uppercase tracking-widest text-center" style={{ color: "rgba(255,255,255,0.35)" }}>{label}</span>
+      <span className="text-xs uppercase tracking-widest text-center" style={{ color: "rgba(255,255,255,0.62)" }}>{label}</span>
     </div>
   );
 }
@@ -83,7 +83,7 @@ export default function MirrorComplete({
       {/* Summary */}
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
         className="w-full rounded-2xl p-6" style={{ maxWidth: 480, background: "#141420", border: "1px solid rgba(255,255,255,0.06)" }}>
-        <p className="text-sm font-semibold mb-4" style={{ color: "rgba(255,255,255,0.45)" }}>What The Mirror noticed</p>
+        <p className="text-sm font-semibold mb-4" style={{ color: "rgba(255,255,255,0.72)" }}>What The Mirror noticed</p>
         {isLoadingSummary ? (
           <div className="flex gap-1.5 items-center py-2">
             {[0, 1, 2].map((i) => (

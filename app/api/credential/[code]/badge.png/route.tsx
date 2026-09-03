@@ -79,7 +79,7 @@ export async function GET(
         </div>
 
         <div style={{ display: "flex", flexDirection: "column" }}>
-          <span style={{ color: "rgba(255,255,255,0.45)", fontSize: 15, letterSpacing: 2 }}>
+          <span style={{ color: "rgba(255,255,255,0.72)", fontSize: 15, letterSpacing: 2 }}>
             ISSUED TO
           </span>
           <span style={{ color: "#fff", fontSize: 42, fontWeight: 700, marginTop: 4 }}>
@@ -92,14 +92,14 @@ export async function GET(
 
         <div style={{ display: "flex", alignItems: "flex-end", gap: 44 }}>
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ color: "rgba(255,255,255,0.40)", fontSize: 14, letterSpacing: 2 }}>
+            <span style={{ color: "rgba(255,255,255,0.66)", fontSize: 14, letterSpacing: 2 }}>
               IMPRINT SCORE
             </span>
             <div style={{ display: "flex", alignItems: "flex-end", gap: 6 }}>
               <span style={{ color: "#fff", fontSize: 60, fontWeight: 700, lineHeight: 1 }}>
                 {imprint}
               </span>
-              <span style={{ color: "rgba(255,255,255,0.35)", fontSize: 20 }}>/1000</span>
+              <span style={{ color: "rgba(255,255,255,0.62)", fontSize: 20 }}>/1000</span>
             </div>
             <span style={{ color: ORANGE, fontSize: 16, fontWeight: 700, marginTop: 4 }}>
               {scoreLabel(imprint)}
@@ -109,7 +109,7 @@ export async function GET(
           <div style={{ width: 1, height: 74, background: "rgba(255,255,255,0.12)" }} />
 
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ color: "rgba(255,255,255,0.40)", fontSize: 14, letterSpacing: 2 }}>
+            <span style={{ color: "rgba(255,255,255,0.66)", fontSize: 14, letterSpacing: 2 }}>
               DRIFT
             </span>
             <span

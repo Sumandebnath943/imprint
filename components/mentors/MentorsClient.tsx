@@ -118,7 +118,7 @@ export default function MentorsClient({ userId, myMentorship, myMentees, eligibl
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="flex items-start justify-between mb-8">
           <div>
             <h1 className="font-bold text-white mb-1" style={{ fontSize: 32 }}>Mentor Network</h1>
-            <p style={{ fontSize: 15, color: "rgba(255,255,255,0.40)" }}>Guided by humans. Measured by IMPRINT.</p>
+            <p style={{ fontSize: 15, color: "rgba(255,255,255,0.66)" }}>Guided by humans. Measured by IMPRINT.</p>
           </div>
           <div className="flex gap-3">
             <button onClick={() => setShowApply(true)} className="rounded-full font-medium transition-all hover:bg-white/5"
@@ -153,7 +153,7 @@ export default function MentorsClient({ userId, myMentorship, myMentees, eligibl
                 </div>
               </div>
               <div className="text-center">
-                <p className="text-sm mb-1" style={{ color: "rgba(255,255,255,0.40)" }}>Mentoring you for {Math.floor((Date.now() - new Date(myMentorship.started_at).getTime()) / 86400000)} days</p>
+                <p className="text-sm mb-1" style={{ color: "rgba(255,255,255,0.66)" }}>Mentoring you for {Math.floor((Date.now() - new Date(myMentorship.started_at).getTime()) / 86400000)} days</p>
                 <div className="flex items-center justify-center gap-1.5 text-sm font-medium" style={{ color: "#FF5500" }}>
                   <span>🔥</span> {myMentorship.check_in_streak} consecutive
                 </div>
@@ -226,7 +226,7 @@ export default function MentorsClient({ userId, myMentorship, myMentees, eligibl
             // otherwise empty row, unlike every other empty state in the app.
             <div className="col-span-full rounded-[16px] p-10 text-center" style={{ background: "#111111", border: "1px dashed rgba(255,255,255,0.10)" }}>
               <p className="text-[15px] text-white mb-2">No mentors are open right now.</p>
-              <p className="text-sm mb-5" style={{ color: "rgba(255,255,255,0.40)" }}>
+              <p className="text-sm mb-5" style={{ color: "rgba(255,255,255,0.66)" }}>
                 Mentors appear here once they open their doors. If your IMPRINT
                 score is above 500, that could be you.
               </p>
@@ -255,7 +255,7 @@ export default function MentorsClient({ userId, myMentorship, myMentees, eligibl
                     <span className="text-xs rounded-full px-2 py-0.5 mt-1 inline-block" style={{ background: "rgba(255,85,0,0.10)", color: "#FF5500" }}>IMPRINT Score: {showProfile.imprint_score}</span>
                   </div>
                 </div>
-                <button onClick={() => setShowProfile(null)}><X size={20} style={{ color: "rgba(255,255,255,0.40)" }} /></button>
+                <button onClick={() => setShowProfile(null)}><X size={20} style={{ color: "rgba(255,255,255,0.66)" }} /></button>
               </div>
 
               <div className="mb-6">
@@ -288,7 +288,7 @@ export default function MentorsClient({ userId, myMentorship, myMentees, eligibl
            <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ background: "rgba(0,0,0,0.80)" }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowApply(false)}>
             <motion.div className="w-full max-w-lg rounded-3xl" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.08)", padding: 40 }} onClick={e => e.stopPropagation()} initial={{ scale: 0.95 }} animate={{ scale: 1 }}>
               <h2 className="font-bold text-white mb-1" style={{ fontSize: 24 }}>Become a Mentor</h2>
-              <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.40)" }}>Help others preserve their identity.</p>
+              <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.66)" }}>Help others preserve their identity.</p>
 
               <p className="text-sm mb-2" style={{ color: "rgba(255,255,255,0.60)" }}>Bio (Why do you mentor?)</p>
               <textarea value={bio} onChange={e => setBio(e.target.value)} className="w-full rounded-xl px-4 py-3 text-[14px] outline-none resize-none mb-4" style={{ background: "#1A1A1A", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.70)", minHeight: 80 }} />

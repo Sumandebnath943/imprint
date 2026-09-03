@@ -148,7 +148,7 @@ export default function ForgeVoice({ onSave }: ForgeVoiceProps) {
               }
             </motion.button>
 
-            <p className="text-sm" style={{ color: "rgba(255,255,255,0.45)" }}>
+            <p className="text-sm" style={{ color: "rgba(255,255,255,0.72)" }}>
               {state === "idle" ? "Tap to begin recording" : "Recording — tap to stop"}
             </p>
 
@@ -180,7 +180,7 @@ export default function ForgeVoice({ onSave }: ForgeVoiceProps) {
                   <div className="h-full rounded-full" style={{ background: "#FF5500", width: "60%" }} />
                 </div>
               </div>
-              <span className="font-mono text-sm" style={{ color: "rgba(255,255,255,0.45)" }}>{formatTime(audioDuration)}</span>
+              <span className="font-mono text-sm" style={{ color: "rgba(255,255,255,0.72)" }}>{formatTime(audioDuration)}</span>
             </div>
 
             {/* Actions */}

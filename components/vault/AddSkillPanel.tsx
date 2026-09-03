@@ -39,7 +39,7 @@ export function AddSkillPanel({ userCluster, existingSkills, onAdd }: AddSkillPa
       {/* Toggle */}
       <button onClick={() => setOpen((p) => !p)}
         className="flex items-center gap-2 transition-colors duration-150 group"
-        style={{ color: "rgba(255,255,255,0.40)" }}
+        style={{ color: "rgba(255,255,255,0.66)" }}
         onMouseOver={(e) => (e.currentTarget as HTMLElement).style.color = "white"}
         onMouseOut={(e) => (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.40)"}>
         <PlusCircle size={16} />
@@ -72,7 +72,7 @@ export function AddSkillPanel({ userCluster, existingSkills, onAdd }: AddSkillPa
                       </button>
                     ))}
                   </div>
-                  <p className="text-xs italic mt-3" style={{ color: "rgba(255,255,255,0.30)" }}>
+                  <p className="text-xs italic mt-3" style={{ color: "rgba(255,255,255,0.58)" }}>
                     These are human skills AI is actively replacing in your field.
                   </p>
                 </div>
@@ -81,7 +81,7 @@ export function AddSkillPanel({ userCluster, existingSkills, onAdd }: AddSkillPa
               {/* Custom skill */}
               <div className="flex items-end gap-4 flex-wrap">
                 <div className="flex-1" style={{ minWidth: 200 }}>
-                  <label className="text-xs mb-2 block" style={{ color: "rgba(255,255,255,0.40)" }}>Skill name</label>
+                  <label className="text-xs mb-2 block" style={{ color: "rgba(255,255,255,0.66)" }}>Skill name</label>
                   <input value={customName} onChange={(e) => setCustomName(e.target.value)}
                     placeholder="e.g. Public speaking"
                     className="w-full outline-none text-sm"
@@ -90,7 +90,7 @@ export function AddSkillPanel({ userCluster, existingSkills, onAdd }: AddSkillPa
                   />
                 </div>
                 <div style={{ minWidth: 160 }}>
-                  <label className="text-xs mb-2 block" style={{ color: "rgba(255,255,255,0.40)" }}>
+                  <label className="text-xs mb-2 block" style={{ color: "rgba(255,255,255,0.66)" }}>
                     Current strength: <span style={{ color: "#FF5500" }}>{strength}%</span>
                   </label>
                   <input type="range" min={0} max={100} value={strength} onChange={(e) => setStrength(parseInt(e.target.value))}
@@ -136,9 +136,9 @@ export function VaultHistory({ history }: VaultHistoryProps) {
       <button onClick={() => setOpen((p) => !p)}
         className="flex items-center gap-3 w-full text-left mb-4">
         <span className="font-semibold text-white" style={{ fontSize: 16 }}>Vault History</span>
-        <span className="text-sm" style={{ color: "rgba(255,255,255,0.40)" }}>{history.length} sessions total</span>
+        <span className="text-sm" style={{ color: "rgba(255,255,255,0.66)" }}>{history.length} sessions total</span>
         <motion.div className="ml-auto" animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }}>
-          <ChevronDown size={16} style={{ color: "rgba(255,255,255,0.40)" }} />
+          <ChevronDown size={16} style={{ color: "rgba(255,255,255,0.66)" }} />
         </motion.div>
       </button>
 
@@ -152,7 +152,7 @@ export function VaultHistory({ history }: VaultHistoryProps) {
                   <tr style={{ background: "rgba(255,255,255,0.03)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
                     {["Date", "Skill", "Type", "Result", "Strength Δ"].map((h) => (
                       <th key={h} className="text-left text-xs font-semibold uppercase tracking-wide px-4 py-3"
-                        style={{ color: "rgba(255,255,255,0.35)" }}>{h}</th>
+                        style={{ color: "rgba(255,255,255,0.62)" }}>{h}</th>
                     ))}
                   </tr>
                 </thead>

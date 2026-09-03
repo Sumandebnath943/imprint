@@ -129,7 +129,7 @@ export default function CapsuleCompose({ userId, userName, currentDriftScore, on
           <span className="text-xs" style={{ color: saveState === "saved" ? "#00D97E" : "rgba(255,255,255,0.30)" }}>
             {saveState === "saving" ? "Saving…" : saveState === "saved" ? "Saved ✓" : ""}
           </span>
-          <button onClick={onCancel} className="text-sm" style={{ color: "rgba(255,255,255,0.40)" }}>Cancel</button>
+          <button onClick={onCancel} className="text-sm" style={{ color: "rgba(255,255,255,0.66)" }}>Cancel</button>
           <button onClick={() => setShowSealModal(true)}
             className="rounded-full h-8 px-4 text-xs font-medium text-white"
             style={{ background: "#FF5500" }}>
@@ -158,7 +158,7 @@ export default function CapsuleCompose({ userId, userName, currentDriftScore, on
             className="rounded-xl px-4 py-2 text-sm outline-none mb-3"
             style={{ background: "#1A1A1A", border: "1px solid rgba(255,255,255,0.10)", color: "white" }} />
         )}
-        <p className="text-sm italic" style={{ color: "rgba(255,255,255,0.40)" }}>
+        <p className="text-sm italic" style={{ color: "rgba(255,255,255,0.66)" }}>
           This capsule will unlock on {fmtDate(unlockDate.toISOString())} — {daysFromNow} days from today.
         </p>
       </div>
@@ -175,7 +175,7 @@ export default function CapsuleCompose({ userId, userName, currentDriftScore, on
           <div>
             <p className="text-sm" style={{ color: "rgba(255,255,255,0.60)" }}>Attach my current Drift Score to this capsule</p>
             {attachDrift && (
-              <p className="text-xs italic mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>
+              <p className="text-xs italic mt-0.5" style={{ color: "rgba(255,255,255,0.62)" }}>
                 Your Drift Score of {currentDriftScore} will be sealed into this capsule. When it unlocks, you&apos;ll see who you were.
               </p>
             )}
@@ -185,7 +185,7 @@ export default function CapsuleCompose({ userId, userName, currentDriftScore, on
 
       {/* Compose area */}
       <div className="flex-1 overflow-y-auto px-10 pb-32">
-        <p className="text-xs mb-5" style={{ color: "rgba(255,255,255,0.25)" }}>Written {today}</p>
+        <p className="text-xs mb-5" style={{ color: "rgba(255,255,255,0.54)" }}>Written {today}</p>
         <textarea value={content} onChange={(e) => setContent(e.target.value)}
           placeholder={`Dear ${userName} of ${unlockYear},\n\nWrite whatever you need to say to yourself.\nWho you are right now. What you're working on.\nWhat you're afraid of. What you hope for.\n\nThis letter will be sealed until ${fmtDate(unlockDate.toISOString())}.\nWrite honestly. No one will read this before then.`}
           spellCheck className="w-full bg-transparent border-none outline-none resize-none"
@@ -194,7 +194,7 @@ export default function CapsuleCompose({ userId, userName, currentDriftScore, on
 
       {/* Bottom toolbar */}
       <div className="flex items-center justify-between px-10 py-3" style={{ flexShrink: 0, background: "rgba(10,10,10,0.95)", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-        <span className="text-xs font-mono" style={{ color: "rgba(255,255,255,0.30)" }}>
+        <span className="text-xs font-mono" style={{ color: "rgba(255,255,255,0.58)" }}>
           {wc} words · {readMins(wc)} min read
         </span>
         <button onClick={() => setShowSealModal(true)}

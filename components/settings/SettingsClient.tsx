@@ -278,7 +278,7 @@ export default function SettingsClient({ profile }: SettingsClientProps) {
           <div className="p-4 flex flex-col gap-6">
             {sections.map(sec => (
               <div key={sec}>
-                <span className="text-[11px] font-bold text-white/40 uppercase tracking-widest pl-3 mb-2 block">{sec}</span>
+                <span className="text-[11px] font-bold text-white/65 uppercase tracking-widest pl-3 mb-2 block">{sec}</span>
                 <ul className="flex flex-col gap-1">
                   {navItems.filter(i => i.section === sec).map(item => (
                     <li key={item.id}>
@@ -306,7 +306,7 @@ export default function SettingsClient({ profile }: SettingsClientProps) {
           {activeSection === "profile" && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-[16px] p-8" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
               <h2 className="text-[18px] font-semibold text-white mb-1">Profile Overview</h2>
-              <p className="text-[13px] text-white/40 mb-6">Your public identity on IMPRINT.</p>
+              <p className="text-[13px] text-white/65 mb-6">Your public identity on IMPRINT.</p>
               <div className="h-[1px] w-full bg-white/5 mb-6" />
               
               <div className="flex items-center justify-between">
@@ -330,20 +330,20 @@ export default function SettingsClient({ profile }: SettingsClientProps) {
           {activeSection === "security" && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-[16px] p-8" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
               <h2 className="text-[18px] font-semibold text-white mb-1">Password & Security</h2>
-              <p className="text-[13px] text-white/40 mb-6">Manage your password.</p>
+              <p className="text-[13px] text-white/65 mb-6">Manage your password.</p>
               <div className="h-[1px] w-full bg-white/5 mb-6" />
 
               <div className="flex flex-col gap-4 max-w-sm">
                 <div className="relative">
                   <input type={showCurrent ? "text" : "password"} placeholder="Current Password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} className="w-full px-4 py-3 rounded-full text-[14px] text-white outline-none" style={{ background: "#1A1A1A" }} />
-                  <button onClick={() => setShowCurrent(!showCurrent)} className="absolute right-4 top-3 text-white/40 hover:text-white/80">
+                  <button onClick={() => setShowCurrent(!showCurrent)} className="absolute right-4 top-3 text-white/65 hover:text-white/80">
                     {showCurrent ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
 
                 <div className="relative">
                   <input type={showNew ? "text" : "password"} placeholder="New Password" value={newPassword} onChange={e => setNewPassword(e.target.value)} className="w-full px-4 py-3 rounded-full text-[14px] text-white outline-none" style={{ background: "#1A1A1A" }} />
-                  <button onClick={() => setShowNew(!showNew)} className="absolute right-4 top-3 text-white/40 hover:text-white/80">
+                  <button onClick={() => setShowNew(!showNew)} className="absolute right-4 top-3 text-white/65 hover:text-white/80">
                     {showNew ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
@@ -359,7 +359,7 @@ export default function SettingsClient({ profile }: SettingsClientProps) {
 
                 <div className="relative mb-4">
                   <input type={showConfirm ? "text" : "password"} placeholder="Confirm New Password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="w-full px-4 py-3 rounded-full text-[14px] text-white outline-none" style={{ background: "#1A1A1A" }} />
-                  <button onClick={() => setShowConfirm(!showConfirm)} className="absolute right-4 top-3 text-white/40 hover:text-white/80">
+                  <button onClick={() => setShowConfirm(!showConfirm)} className="absolute right-4 top-3 text-white/65 hover:text-white/80">
                     {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
@@ -377,7 +377,7 @@ export default function SettingsClient({ profile }: SettingsClientProps) {
           {activeSection === "connections" && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-[16px] p-8" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
               <h2 className="text-[18px] font-semibold text-white mb-1">Connected Accounts</h2>
-              <p className="text-[13px] text-white/40 mb-6">Connect social accounts for quick login.</p>
+              <p className="text-[13px] text-white/65 mb-6">Connect social accounts for quick login.</p>
               <div className="h-[1px] w-full bg-white/5 mb-6" />
 
               {!checkingProviders && (
@@ -394,7 +394,7 @@ export default function SettingsClient({ profile }: SettingsClientProps) {
                   
                   {connectedProviders.includes('google') ? (
                     <div className="flex items-center gap-4">
-                      <span className="text-[13px] text-white/40">{profile?.email}</span>
+                      <span className="text-[13px] text-white/65">{profile?.email}</span>
                       <span className="px-3 py-1 rounded-full text-[11px] font-medium text-[#00D97E]" style={{ background: "rgba(0,217,126,0.15)" }}>Connected</span>
                       <button onClick={handleDisconnectGoogle} className="px-4 py-1.5 rounded-full text-[13px] text-white/70 bg-white/5 hover:bg-white/10 transition-colors">
                         Disconnect
@@ -402,7 +402,7 @@ export default function SettingsClient({ profile }: SettingsClientProps) {
                     </div>
                   ) : (
                     <div className="flex items-center gap-4">
-                      <span className="text-[13px] text-white/40">Not connected</span>
+                      <span className="text-[13px] text-white/65">Not connected</span>
                       <button onClick={handleConnectGoogle} className="px-4 py-1.5 rounded-full text-[13px] text-white bg-white/5 hover:bg-white/10 transition-colors">
                         Connect Google
                       </button>
@@ -419,7 +419,7 @@ export default function SettingsClient({ profile }: SettingsClientProps) {
               <div className="flex items-center justify-between mb-1">
                 <h2 className="text-[18px] font-semibold text-white">Notifications</h2>
               </div>
-              <p className="text-[13px] text-white/40 mb-6">Choose what IMPRINT alerts you about.</p>
+              <p className="text-[13px] text-white/65 mb-6">Choose what IMPRINT alerts you about.</p>
               <div className="h-[1px] w-full bg-white/5 mb-6" />
 
               <div className="flex flex-col gap-6">
@@ -436,7 +436,7 @@ export default function SettingsClient({ profile }: SettingsClientProps) {
                   <div key={item.key} className="flex items-start justify-between">
                     <div>
                       <p className="text-[15px] font-medium text-white mb-0.5">{item.label}</p>
-                      <p className="text-[13px] text-white/40 max-w-[300px]" style={{ lineHeight: 1.5 }}>{item.desc}</p>
+                      <p className="text-[13px] text-white/65 max-w-[300px]" style={{ lineHeight: 1.5 }}>{item.desc}</p>
                     </div>
                     <button 
                       onClick={() => handleToggleNotification(item.key, !notificationPrefs[item.key])}
@@ -459,7 +459,7 @@ export default function SettingsClient({ profile }: SettingsClientProps) {
           {activeSection === "calibration" && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-[16px] p-8" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
               <h2 className="text-[18px] font-semibold text-white mb-1">Calibration Schedule</h2>
-              <p className="text-[13px] text-white/40 mb-6">How often IMPRINT checks your drift.</p>
+              <p className="text-[13px] text-white/65 mb-6">How often IMPRINT checks your drift.</p>
               <div className="h-[1px] w-full bg-white/5 mb-6" />
 
               <div className="mb-8 p-3 rounded-[10px]" style={{ background: "rgba(255,184,0,0.06)", border: "1px solid rgba(255,184,0,0.15)" }}>
@@ -469,7 +469,7 @@ export default function SettingsClient({ profile }: SettingsClientProps) {
               </div>
 
               <div className="mb-8">
-                <label className="text-[13px] font-medium text-white/40 uppercase mb-3 block">Session frequency</label>
+                <label className="text-[13px] font-medium text-white/65 uppercase mb-3 block">Session frequency</label>
                 <div className="flex flex-wrap gap-2">
                   {["Weekly", "Bi-weekly", "Monthly"].map(freq => (
                     <button key={freq} onClick={() => handleCalibrationChange(freq)} className="px-4 py-2 rounded-full text-[13px] transition-all" style={calibrationFrequency === freq ? { background: "#FF5500", color: "white" } : { background: "#1A1A1A", color: "white/70" }}>
@@ -480,7 +480,7 @@ export default function SettingsClient({ profile }: SettingsClientProps) {
               </div>
 
               <div className="mb-8">
-                <label className="text-[13px] font-medium text-white/40 uppercase mb-3 block">Remind me before session is due</label>
+                <label className="text-[13px] font-medium text-white/65 uppercase mb-3 block">Remind me before session is due</label>
                 <div className="flex flex-wrap gap-2">
                   {[
                     { label: "1 day", val: 1 }, 
@@ -496,7 +496,7 @@ export default function SettingsClient({ profile }: SettingsClientProps) {
               </div>
 
               <div className="pt-6 border-t border-white/5">
-                <span className="text-[13px] text-white/40 mr-2">Next calibration:</span>
+                <span className="text-[13px] text-white/65 mr-2">Next calibration:</span>
                 <span className="text-[14px] font-medium" style={{ color: nextCalibration === "Available now" ? "#FF5500" : "white" }}>
                   {nextCalibration || "Loading..."}
                 </span>
@@ -508,14 +508,14 @@ export default function SettingsClient({ profile }: SettingsClientProps) {
           {activeSection === "protocol" && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-[16px] p-8" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
               <h2 className="text-[18px] font-semibold text-white mb-1">AI Reduction Protocol</h2>
-              <p className="text-[13px] text-white/40 mb-6">A voluntary commitment to use AI less.</p>
+              <p className="text-[13px] text-white/65 mb-6">A voluntary commitment to use AI less.</p>
               <div className="h-[1px] w-full bg-white/5 mb-6" />
 
               {!protocolActive ? (
                 <div className="text-center py-6">
                   <Brain size={32} className="mx-auto mb-4 text-white/15" />
                   <p className="text-[16px] font-medium text-white mb-1">No reduction protocol active.</p>
-                  <p className="text-[14px] text-white/40 mb-8">Start one when your Drift Score signals it&apos;s needed.</p>
+                  <p className="text-[14px] text-white/65 mb-8">Start one when your Drift Score signals it&apos;s needed.</p>
                   
                   <div className="text-left mb-6">
                     <label className="text-[13px] font-medium text-white/60 mb-2 block">Duration</label>
@@ -570,7 +570,7 @@ export default function SettingsClient({ profile }: SettingsClientProps) {
           {activeSection === "privacy" && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-[16px] p-8" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
               <h2 className="text-[18px] font-semibold text-white mb-1">Data & Privacy</h2>
-              <p className="text-[13px] text-white/40 mb-6">You own your data. Always.</p>
+              <p className="text-[13px] text-white/65 mb-6">You own your data. Always.</p>
               <div className="h-[1px] w-full bg-white/5 mb-6" />
 
               <div className="flex items-start gap-3 p-4 rounded-[12px] mb-8" style={{ background: "rgba(0,217,126,0.04)", border: "1px solid rgba(0,217,126,0.15)" }}>

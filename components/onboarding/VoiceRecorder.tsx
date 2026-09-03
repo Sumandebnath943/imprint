@@ -132,7 +132,7 @@ export default function VoiceRecorder({ onRecordingComplete }: VoiceRecorderProp
       </AnimatePresence>
 
       {/* Status label */}
-      <p className="text-sm" style={{ color: "rgba(255,255,255,0.45)" }}>
+      <p className="text-sm" style={{ color: "rgba(255,255,255,0.72)" }}>
         {state === "idle" && "Tap to start recording"}
         {state === "recording" && "Recording… tap to stop"}
         {state === "done" && "Recording complete"}
@@ -155,7 +155,7 @@ export default function VoiceRecorder({ onRecordingComplete }: VoiceRecorderProp
           <button
             onClick={reset}
             className="flex items-center gap-2 text-sm transition-colors hover:text-white"
-            style={{ color: "rgba(255,255,255,0.45)" }}
+            style={{ color: "rgba(255,255,255,0.72)" }}
           >
             <RotateCcw size={14} />
             Re-record

@@ -40,7 +40,7 @@ export default function GlobalError({
           <h1 style={{ fontSize: 32, fontWeight: 300, lineHeight: 1.2, marginBottom: 16 }}>
             IMPRINT failed to load.
           </h1>
-          <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 15, lineHeight: 1.6, marginBottom: 32 }}>
+          <p style={{ color: "rgba(255,255,255,0.72)", fontSize: 15, lineHeight: 1.6, marginBottom: 32 }}>
             Refresh the page to try again.
           </p>
           <button

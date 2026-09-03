@@ -156,7 +156,7 @@ export default function BeliefsClient({ beliefs: initial, userId }: BeliefsClien
           className="flex items-start justify-between mb-6">
           <div>
             <h1 className="font-bold text-white mb-1" style={{ fontSize: 32 }}>Beliefs</h1>
-            <p style={{ fontSize: 15, color: "rgba(255,255,255,0.40)" }}>What you actually think. Recorded. Watched. Owned.</p>
+            <p style={{ fontSize: 15, color: "rgba(255,255,255,0.66)" }}>What you actually think. Recorded. Watched. Owned.</p>
           </div>
           <button onClick={() => setShowForm(true)}
             className="flex items-center gap-1.5 rounded-full font-medium text-white"
@@ -175,7 +175,7 @@ export default function BeliefsClient({ beliefs: initial, userId }: BeliefsClien
           ].map(({ value, label, sub, subColor, valueColor, bar }) => (
             <div key={label} className="rounded-2xl p-5" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
               <p className="font-bold mb-0.5" style={{ fontSize: 36, color: valueColor ?? "white", lineHeight: 1 }}>{value}</p>
-              <p className="text-xs mb-1" style={{ color: "rgba(255,255,255,0.40)" }}>{label}</p>
+              <p className="text-xs mb-1" style={{ color: "rgba(255,255,255,0.66)" }}>{label}</p>
               {sub && <p className="text-xs" style={{ color: subColor ?? "rgba(255,255,255,0.35)" }}>{sub}</p>}
               {bar !== undefined && (
                 <div className="h-1 rounded-full mt-2" style={{ background: "rgba(255,255,255,0.08)" }}>
@@ -193,14 +193,14 @@ export default function BeliefsClient({ beliefs: initial, userId }: BeliefsClien
               className="overflow-hidden mb-6">
               <div className="rounded-2xl p-8" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
                 <h2 className="font-semibold text-white mb-1" style={{ fontSize: 18 }}>Record a belief</h2>
-                <p className="text-sm italic mb-5" style={{ color: "rgba(255,255,255,0.40)" }}>Be precise. Vague beliefs are useless.</p>
+                <p className="text-sm italic mb-5" style={{ color: "rgba(255,255,255,0.66)" }}>Be precise. Vague beliefs are useless.</p>
 
                 <textarea value={statement} onChange={(e) => setStatement(e.target.value)}
                   placeholder="I believe that…" spellCheck
                   className="w-full rounded-xl outline-none resize-none mb-4"
                   style={{ background: "#0D0D0D", border: "1px solid rgba(255,255,255,0.08)", padding: "20px 24px", minHeight: 100, fontSize: 16, color: "rgba(255,255,255,0.85)", lineHeight: 1.7 }} />
 
-                <p className="text-xs uppercase tracking-widest mb-2" style={{ color: "rgba(255,255,255,0.40)" }}>Category</p>
+                <p className="text-xs uppercase tracking-widest mb-2" style={{ color: "rgba(255,255,255,0.66)" }}>Category</p>
                 <div className="flex flex-wrap gap-2 mb-5">
                   {CATEGORIES.map((c) => (
                     <button key={c} onClick={() => setCategory(c)}
@@ -214,10 +214,10 @@ export default function BeliefsClient({ beliefs: initial, userId }: BeliefsClien
                 <p className="text-sm mb-2" style={{ color: "rgba(255,255,255,0.50)" }}>How confident are you in this belief?</p>
                 <div className="text-center mb-1">
                   <span className="font-bold" style={{ fontSize: 32, color: "#FF5500" }}>{confidence}</span>
-                  <span className="text-sm" style={{ color: "rgba(255,255,255,0.40)" }}>/10</span>
+                  <span className="text-sm" style={{ color: "rgba(255,255,255,0.66)" }}>/10</span>
                   <span className="ml-3 text-sm" style={{ color: CONFIDENCE_COLOR(confidence) }}>{CONFIDENCE_LABEL(confidence)}</span>
                 </div>
-                <div className="flex justify-between text-xs mb-1" style={{ color: "rgba(255,255,255,0.30)" }}>
+                <div className="flex justify-between text-xs mb-1" style={{ color: "rgba(255,255,255,0.58)" }}>
                   <span>Not sure at all</span><span>Completely certain</span>
                 </div>
                 <input type="range" min={1} max={10} value={confidence} onChange={(e) => setConfidence(Number(e.target.value))}
@@ -258,7 +258,7 @@ export default function BeliefsClient({ beliefs: initial, userId }: BeliefsClien
         {filteredBeliefs.length === 0 ? (
           <div className="rounded-2xl py-16 text-center" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
             <p className="font-medium text-white mb-2" style={{ fontSize: 18 }}>No beliefs recorded yet.</p>
-            <p className="text-sm" style={{ color: "rgba(255,255,255,0.40)" }}>Record what you actually think. Precisely.</p>
+            <p className="text-sm" style={{ color: "rgba(255,255,255,0.66)" }}>Record what you actually think. Precisely.</p>
           </div>
         ) : (
           <div className="grid gap-4 mb-12" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
@@ -274,9 +274,9 @@ export default function BeliefsClient({ beliefs: initial, userId }: BeliefsClien
             <button onClick={() => setShowHistory((p) => !p)}
               className="flex items-center gap-2 mb-4">
               <h2 className="font-semibold text-white" style={{ fontSize: 20 }}>How your beliefs have changed</h2>
-              <span className="text-sm" style={{ color: "rgba(255,255,255,0.40)" }}>{allChanges.length} changes</span>
+              <span className="text-sm" style={{ color: "rgba(255,255,255,0.66)" }}>{allChanges.length} changes</span>
               <motion.div animate={{ rotate: showHistory ? 180 : 0 }}>
-                <ChevronDown size={16} style={{ color: "rgba(255,255,255,0.40)" }} />
+                <ChevronDown size={16} style={{ color: "rgba(255,255,255,0.66)" }} />
               </motion.div>
             </button>
             <AnimatePresence>
@@ -293,12 +293,12 @@ export default function BeliefsClient({ beliefs: initial, userId }: BeliefsClien
                             {i < allChanges.length - 1 && <div className="flex-1 w-px mt-1" style={{ background: "rgba(255,255,255,0.08)", minHeight: 24 }} />}
                           </div>
                           <div className="flex-1 pb-4" style={{ borderBottom: i < allChanges.length - 1 ? "none" : undefined }}>
-                            <p className="text-xs mb-1" style={{ color: "rgba(255,255,255,0.35)" }}>{relTime(c.date)}</p>
+                            <p className="text-xs mb-1" style={{ color: "rgba(255,255,255,0.62)" }}>{relTime(c.date)}</p>
                             <p className="text-sm text-white mb-1">{c.belief}…</p>
                             <span className="text-xs" style={{ color: diff > 0 ? "#00D97E" : "#FF2D2D" }}>
                               {diff > 0 ? `↑ +${diff}` : `↓ ${diff}`} confidence ({c.previous_confidence}/10 → {c.new_confidence}/10)
                             </span>
-                            {c.note && <p className="text-xs italic mt-1" style={{ color: "rgba(255,255,255,0.45)" }}>{c.note}</p>}
+                            {c.note && <p className="text-xs italic mt-1" style={{ color: "rgba(255,255,255,0.72)" }}>{c.note}</p>}
                           </div>
                         </div>
                       );

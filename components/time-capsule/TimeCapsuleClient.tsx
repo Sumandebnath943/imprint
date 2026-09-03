@@ -62,10 +62,10 @@ export default function TimeCapsuleClient({ capsules: initial, userId, userName,
               style={{ background: "#0A0A0A" }}
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <BookOpen size={48} style={{ color: "rgba(255,255,255,0.08)", marginBottom: 16 }} />
-              <h2 className="font-medium mb-2" style={{ fontSize: 20, color: "rgba(255,255,255,0.40)" }}>
+              <h2 className="font-medium mb-2" style={{ fontSize: 20, color: "rgba(255,255,255,0.66)" }}>
                 {capsules.length === 0 ? "Write your first time capsule." : "Select a capsule or write a new one."}
               </h2>
-              <p className="text-sm text-center max-w-xs" style={{ color: "rgba(255,255,255,0.25)", lineHeight: 1.7 }}>
+              <p className="text-sm text-center max-w-xs" style={{ color: "rgba(255,255,255,0.54)", lineHeight: 1.7 }}>
                 Seal a letter to your future self.<br />It stays locked until the date you choose.
               </p>
             </motion.div>

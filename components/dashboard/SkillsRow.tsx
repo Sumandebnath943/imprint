@@ -16,7 +16,7 @@ export default function SkillsRow({ skills }: SkillsRowProps) {
       </div>
       {skills.length === 0 ? (
         <div className="rounded-2xl p-8 text-center" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
-          <p className="text-sm mb-2" style={{ color: "rgba(255,255,255,0.40)" }}>No skills tracked yet.</p>
+          <p className="text-sm mb-2" style={{ color: "rgba(255,255,255,0.66)" }}>No skills tracked yet.</p>
           <Link href="/dashboard/vault" className="text-sm" style={{ color: "#FF5500" }}>Add your first skill →</Link>
         </div>
       ) : (
@@ -49,7 +49,7 @@ export default function SkillsRow({ skills }: SkillsRowProps) {
                     transition={{ duration: 1.0, delay: 0.3 + i * 0.08 }} />
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-xs" style={{ color: "rgba(255,255,255,0.30)" }}>
+                  <p className="text-xs" style={{ color: "rgba(255,255,255,0.58)" }}>
                     {lastDays < 999 ? `${lastDays}d ago` : "Never practiced"}
                   </p>
                   {isOld && (

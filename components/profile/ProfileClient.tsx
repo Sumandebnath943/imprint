@@ -216,7 +216,7 @@ export default function ProfileClient({
                   <span className="px-3 py-1 rounded-full text-[13px] font-medium" style={{ background: "rgba(255,85,0,0.10)", border: "1px solid rgba(255,85,0,0.25)", color: "#FF5500" }}>{profile?.profession || "Undefined"}</span>
                   <span className="px-3 py-1 rounded-full text-[13px]" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.60)" }}>{profile?.profession_cluster ? (CLUSTER_LABELS[profile.profession_cluster] ?? profile.profession_cluster) : "No Cluster"}</span>
                 </div>
-                <div className="flex items-center gap-2 text-[13px]" style={{ color: "rgba(255,255,255,0.35)" }}>
+                <div className="flex items-center gap-2 text-[13px]" style={{ color: "rgba(255,255,255,0.62)" }}>
                   <span>IMPRINT member since {memberSinceDate}</span>
                   <span>·</span>
                   {/* daysActive counts distinct days with activity, not elapsed
@@ -237,7 +237,7 @@ export default function ProfileClient({
                 </svg>
                 <div className="text-center">
                   <span className="block font-bold text-white" style={{ fontSize: 40, lineHeight: 1 }}>{driftScore}</span>
-                  <span className="block text-[11px] font-medium uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.40)", marginTop: 4 }}>Drift Score</span>
+                  <span className="block text-[11px] font-medium uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.66)", marginTop: 4 }}>Drift Score</span>
                 </div>
               </div>
               <span className="mt-4 px-4 py-1.5 rounded-full text-[12px] font-bold uppercase tracking-wider" style={{ background: `${driftColor}15`, color: driftColor }}>
@@ -251,7 +251,7 @@ export default function ProfileClient({
                 <span className="block text-[11px] font-bold uppercase tracking-widest mb-2" style={{ color: "#FF5500" }}>IMPRINT SCORE</span>
                 <div className="flex items-baseline gap-1 mb-2">
                   <span className="font-bold text-white" style={{ fontSize: 48, lineHeight: 1 }}>{profile?.imprint_score || 0}</span>
-                  <span className="text-[18px]" style={{ color: "rgba(255,255,255,0.40)" }}>/1000</span>
+                  <span className="text-[18px]" style={{ color: "rgba(255,255,255,0.66)" }}>/1000</span>
                 </div>
                 <div className="flex items-center gap-2 mb-4">
                   <span className="w-2 h-2 rounded-full" style={{ background: imprintStatus.color }} />
@@ -277,7 +277,7 @@ export default function ProfileClient({
             ].map((s, i) => (
               <div key={i} className="text-center min-w-[100px]">
                 <p className="font-bold text-white mb-1" style={{ fontSize: 20 }}>{s.val}</p>
-                <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.40)" }}>{s.label}</p>
+                <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.66)" }}>{s.label}</p>
               </div>
             ))}
           </div>
@@ -288,7 +288,7 @@ export default function ProfileClient({
           <div className="flex justify-between items-center mb-8">
             <div>
               <h2 className="font-semibold text-white mb-1" style={{ fontSize: 20 }}>Your IMPRINT Score</h2>
-              <p className="text-[13px]" style={{ color: "rgba(255,255,255,0.40)" }}>A composite measure of identity preservation.</p>
+              <p className="text-[13px]" style={{ color: "rgba(255,255,255,0.66)" }}>A composite measure of identity preservation.</p>
             </div>
             <Link href="/dashboard/profile/credential" className="px-4 py-2 rounded-full text-[13px] font-medium text-white transition-all hover:bg-white/10" style={{ background: "rgba(255,85,0,0.15)", color: "#FF5500" }}>
               View Full Credential →
@@ -306,14 +306,14 @@ export default function ProfileClient({
                 <div key={c.name} className="flex flex-col gap-2">
                   <div className="flex items-center gap-2">
                     {c.icon}
-                    <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.40)" }}>{c.name}</span>
+                    <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.66)" }}>{c.name}</span>
                   </div>
                   <div className="h-2 w-full rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
                     <motion.div initial={{ width: 0 }} animate={{ width: `${(c.val / c.max) * 100}%` }} transition={{ duration: 1, delay: 0.2 }} className="h-full" style={{ background: c.color }} />
                   </div>
                   <div className="flex items-baseline gap-1 mt-1">
                     <span className="font-bold text-white text-[20px]">{c.val}</span>
-                    <span className="text-[12px]" style={{ color: "rgba(255,255,255,0.30)" }}>/{c.max} max</span>
+                    <span className="text-[12px]" style={{ color: "rgba(255,255,255,0.58)" }}>/{c.max} max</span>
                   </div>
                 </div>
               ))}
@@ -336,20 +336,20 @@ export default function ProfileClient({
         <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           <div className="rounded-[16px] p-6" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
             <span className="block font-bold text-white mb-1" style={{ fontSize: 32, lineHeight: 1 }}>{stats.daysActive}</span>
-            <span className="text-[13px]" style={{ color: "rgba(255,255,255,0.40)" }}>Days active on IMPRINT</span>
+            <span className="text-[13px]" style={{ color: "rgba(255,255,255,0.66)" }}>Days active on IMPRINT</span>
           </div>
           <div className="rounded-[16px] p-6" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
             <span className="block font-bold mb-1" style={{ fontSize: 32, lineHeight: 1, color: "#00D97E" }}>{stats.bestDriftScore || "--"}</span>
-            <span className="text-[13px]" style={{ color: "rgba(255,255,255,0.40)" }}>Best Drift Score (lowest)</span>
-            <p className="text-[12px] mt-2" style={{ color: "rgba(255,255,255,0.30)" }}>{stats.bestDriftDate || "N/A"}</p>
+            <span className="text-[13px]" style={{ color: "rgba(255,255,255,0.66)" }}>Best Drift Score (lowest)</span>
+            <p className="text-[12px] mt-2" style={{ color: "rgba(255,255,255,0.58)" }}>{stats.bestDriftDate || "N/A"}</p>
           </div>
           <div className="rounded-[16px] p-6" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
             <span className="block font-bold text-white mb-1" style={{ fontSize: 32, lineHeight: 1 }}>{formatNumber(stats.wordsWritten)}</span>
-            <span className="text-[13px]" style={{ color: "rgba(255,255,255,0.40)" }}>Words written in IMPRINT</span>
+            <span className="text-[13px]" style={{ color: "rgba(255,255,255,0.66)" }}>Words written in IMPRINT</span>
           </div>
           <div className="rounded-[16px] p-6" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
             <span className="block font-bold mb-1" style={{ fontSize: 32, lineHeight: 1, color: "#FF5500" }}>{stats.consistencyRate}%</span>
-            <span className="text-[13px]" style={{ color: "rgba(255,255,255,0.40)" }}>Challenge completion rate</span>
+            <span className="text-[13px]" style={{ color: "rgba(255,255,255,0.66)" }}>Challenge completion rate</span>
           </div>
         </motion.div>
 
@@ -372,7 +372,7 @@ export default function ProfileClient({
                     <div>
                       <label className="block text-[13px] font-medium text-white/60 mb-2">Username</label>
                       <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 font-mono">@</span>
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60 font-mono">@</span>
                         <input type="text" value={formData.username} onChange={e => setFormData({ ...formData, username: e.target.value })} className="w-full text-[15px] outline-none text-white rounded-[10px] pl-8 font-mono" style={{ background: "#1A1A1A", padding: "12px 16px", border: "1px solid transparent" }} />
                       </div>
                     </div>
@@ -411,7 +411,7 @@ export default function ProfileClient({
                         ))}
                       </select>
                       {formData.profession_cluster && (
-                        <p className="text-[12px] mt-2" style={{ color: "rgba(255,255,255,0.35)" }}>
+                        <p className="text-[12px] mt-2" style={{ color: "rgba(255,255,255,0.62)" }}>
                           Cluster: <span style={{ color: "#FF5500" }}>{CLUSTER_LABELS[formData.profession_cluster] ?? formData.profession_cluster}</span>
                         </p>
                       )}

@@ -120,7 +120,7 @@ export default function SkillDrawer({ skill, decayedStrength, onClose, onGenerat
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <h2 className="font-bold text-white mb-1" style={{ fontSize: 22 }}>{skill.skill_name}</h2>
-                  <span className="text-xs rounded-full" style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.40)", padding: "3px 10px" }}>
+                  <span className="text-xs rounded-full" style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.66)", padding: "3px 10px" }}>
                     {skill.cluster.replace(/_/g, " ")}
                   </span>
                 </div>
@@ -139,7 +139,7 @@ export default function SkillDrawer({ skill, decayedStrength, onClose, onGenerat
             <div className="flex-1 p-6 flex flex-col gap-6">
               {/* Strength history chart */}
               <div>
-                <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.30)" }}>Strength over time (30 days)</p>
+                <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.58)" }}>Strength over time (30 days)</p>
                 <ResponsiveContainer width="100%" height={100}>
                   <LineChart data={historyData}>
                     <Line type="monotone" dataKey="strength" stroke={color} strokeWidth={2} dot={false} />
@@ -154,11 +154,11 @@ export default function SkillDrawer({ skill, decayedStrength, onClose, onGenerat
 
               {/* Decay projection */}
               <div className="rounded-xl p-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.30)" }}>If you don&apos;t practice this week</p>
+                <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.58)" }}>If you don&apos;t practice this week</p>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
                     <p className="font-bold text-white" style={{ fontSize: 24 }}>{decayedStrength}%</p>
-                    <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>Current</p>
+                    <p className="text-xs" style={{ color: "rgba(255,255,255,0.62)" }}>Current</p>
                   </div>
                   <div className="flex-1 flex items-center">
                     <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.10)" }} />
@@ -170,17 +170,17 @@ export default function SkillDrawer({ skill, decayedStrength, onClose, onGenerat
                   </div>
                   <div className="text-center">
                     <p className="font-bold" style={{ fontSize: 24, color: projDropsBelowHealthy ? "#FF2D2D" : "#FFB800" }}>{projectedIn7}%</p>
-                    <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>In 7 days</p>
+                    <p className="text-xs" style={{ color: "rgba(255,255,255,0.62)" }}>In 7 days</p>
                   </div>
                 </div>
               </div>
 
               {/* Challenge history */}
               <div>
-                <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.30)" }}>Practice & Challenge History</p>
+                <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.58)" }}>Practice & Challenge History</p>
                 <div className="flex flex-col gap-2">
                   {loadingHistory ? (
-                    <p className="text-xs" style={{ color: "rgba(255,255,255,0.30)" }}>Loading...</p>
+                    <p className="text-xs" style={{ color: "rgba(255,255,255,0.58)" }}>Loading...</p>
                   ) : realHistory.length > 0 ? (
                     realHistory.map((item, i) => {
                       const d = new Date(item.date);
@@ -189,7 +189,7 @@ export default function SkillDrawer({ skill, decayedStrength, onClose, onGenerat
                           style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
                           <div>
                             <p className="text-xs text-white">{d.toLocaleDateString("en-US", { month: "short", day: "numeric" })}</p>
-                            <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>{item.type}</p>
+                            <p className="text-xs" style={{ color: "rgba(255,255,255,0.62)" }}>{item.type}</p>
                           </div>
                           <div className="flex items-center gap-2">
                             {item.completed
@@ -211,7 +211,7 @@ export default function SkillDrawer({ skill, decayedStrength, onClose, onGenerat
                       );
                     })
                   ) : (
-                    <p className="text-xs" style={{ color: "rgba(255,255,255,0.30)" }}>No challenges or practices completed yet.</p>
+                    <p className="text-xs" style={{ color: "rgba(255,255,255,0.58)" }}>No challenges or practices completed yet.</p>
                   )}
                 </div>
                 {skill.times_practiced > 0 && (

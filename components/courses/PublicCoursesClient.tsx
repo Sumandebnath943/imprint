@@ -111,7 +111,7 @@ export default function PublicCoursesClient() {
             ].map(s => (
               <div key={s.label} className="text-center">
                 <p className="font-bold text-[24px] mb-1" style={{ color: s.color }}>{s.val}</p>
-                <p className="text-[13px]" style={{ color: "rgba(255,255,255,0.40)" }}>{s.label}</p>
+                <p className="text-[13px]" style={{ color: "rgba(255,255,255,0.66)" }}>{s.label}</p>
               </div>
             ))}
           </motion.div>
@@ -131,7 +131,7 @@ export default function PublicCoursesClient() {
             ) : (
               <>
                 <h3 className="font-semibold text-white mb-2" style={{ fontSize: 18 }}>Be first when courses go live.</h3>
-                <p className="text-[14px] mb-6" style={{ color: "rgba(255,255,255,0.40)" }}>We&apos;ll notify you the moment your first course is ready. No spam. Ever.</p>
+                <p className="text-[14px] mb-6" style={{ color: "rgba(255,255,255,0.66)" }}>We&apos;ll notify you the moment your first course is ready. No spam. Ever.</p>
                 <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Your email address" className="w-full text-[15px] outline-none text-white mb-3" style={{ background: "#1A1A1A", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 100, height: 52, padding: "0 20px" }} />
                 <button onClick={() => handleJoin("top")} disabled={joining || !email} className="w-full rounded-full font-medium text-white mb-4 disabled:opacity-50 transition-all hover:opacity-90" style={{ background: "#FF5500", height: 52 }}>
                   {joining ? "Joining..." : "Join Waitlist"}
@@ -145,7 +145,7 @@ export default function PublicCoursesClient() {
         <div className="mb-32">
           <div className="text-center mb-12">
             <h2 className="font-semibold text-white mb-2" style={{ fontSize: 28 }}>Not another online course.</h2>
-            <p className="text-[15px]" style={{ color: "rgba(255,255,255,0.40)" }}>Every course on IMPRINT follows 3 rules that no other platform follows.</p>
+            <p className="text-[15px]" style={{ color: "rgba(255,255,255,0.66)" }}>Every course on IMPRINT follows 3 rules that no other platform follows.</p>
           </div>
           <motion.div initial="hidden" whileInView="show" viewport={{ once: true, margin: "-100px" }} variants={{ show: { transition: { staggerChildren: 0.1 } } }} className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
@@ -166,7 +166,7 @@ export default function PublicCoursesClient() {
         <div className="mb-32">
           <div className="text-center mb-12">
             <h2 className="font-semibold text-white mb-2" style={{ fontSize: 24 }}>A glimpse of what&apos;s coming.</h2>
-            <p className="text-[15px]" style={{ color: "rgba(255,255,255,0.40)" }}>These aren&apos;t finalized. They&apos;re a signal of what IMPRINT is building.</p>
+            <p className="text-[15px]" style={{ color: "rgba(255,255,255,0.66)" }}>These aren&apos;t finalized. They&apos;re a signal of what IMPRINT is building.</p>
           </div>
           
           <motion.div initial="hidden" whileInView="show" viewport={{ once: true, margin: "-100px" }} variants={{ show: { transition: { staggerChildren: 0.15 } } }} className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -174,8 +174,8 @@ export default function PublicCoursesClient() {
               <motion.div key={c.title} variants={cardVariants} className="relative rounded-[20px] p-7 overflow-hidden group" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
                 {/* Blur Overlay & Hover Action */}
                 <div className="absolute inset-0 z-10 flex flex-col items-center justify-center transition-all duration-300 bg-black/60 backdrop-blur-[3px] group-hover:bg-black/40">
-                  <Lock size={20} className="mb-2 transition-transform group-hover:-translate-y-4" style={{ color: "rgba(255,255,255,0.40)" }} />
-                  <span className="text-[13px] font-medium tracking-wide uppercase transition-transform group-hover:-translate-y-4" style={{ color: "rgba(255,255,255,0.40)" }}>Coming Soon</span>
+                  <Lock size={20} className="mb-2 transition-transform group-hover:-translate-y-4" style={{ color: "rgba(255,255,255,0.66)" }} />
+                  <span className="text-[13px] font-medium tracking-wide uppercase transition-transform group-hover:-translate-y-4" style={{ color: "rgba(255,255,255,0.66)" }}>Coming Soon</span>
                   
                   {/* Slide up button on hover */}
                   <div className="absolute bottom-8 left-0 right-0 flex justify-center translate-y-[200%] opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 px-6">
@@ -190,17 +190,17 @@ export default function PublicCoursesClient() {
                   <h3 className="font-bold text-white mb-4" style={{ fontSize: 22, lineHeight: 1.2 }}>{c.title}</h3>
                   <div className="flex items-center gap-3 mb-5">
                     <div className="w-8 h-8 rounded-full" style={{ background: "rgba(255,255,255,0.10)" }} />
-                    <span className="text-[13px]" style={{ color: "rgba(255,255,255,0.40)" }}>Taught by a human expert</span>
+                    <span className="text-[13px]" style={{ color: "rgba(255,255,255,0.66)" }}>Taught by a human expert</span>
                   </div>
-                  <p className="text-[14px] mb-5 line-clamp-3" style={{ color: "rgba(255,255,255,0.40)", lineHeight: 1.6 }}>{c.desc}</p>
+                  <p className="text-[14px] mb-5 line-clamp-3" style={{ color: "rgba(255,255,255,0.66)", lineHeight: 1.6 }}>{c.desc}</p>
                   <ul className="mb-6 flex flex-col gap-2">
                     {c.practices.map(p => (
-                      <li key={p} className="flex items-start gap-2 text-[13px]" style={{ color: "rgba(255,255,255,0.40)" }}>
+                      <li key={p} className="flex items-start gap-2 text-[13px]" style={{ color: "rgba(255,255,255,0.66)" }}>
                         <span style={{ color: "#FF5500", marginTop: 2 }}>•</span> {p}
                       </li>
                     ))}
                   </ul>
-                  <div className="flex items-center gap-2 text-[13px]" style={{ color: "rgba(255,255,255,0.40)" }}>
+                  <div className="flex items-center gap-2 text-[13px]" style={{ color: "rgba(255,255,255,0.66)" }}>
                     <span>{c.duration}</span><span>·</span><span>{c.level}</span>
                   </div>
                 </div>

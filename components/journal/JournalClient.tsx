@@ -180,10 +180,10 @@ export default function JournalClient({ pageData }: JournalClientProps) {
 
               <div className="relative z-10 text-center flex flex-col items-center gap-4">
                 <BookOpen size={48} style={{ color: "rgba(255,255,255,0.08)" }} />
-                <h2 className="font-medium" style={{ fontSize: 20, color: "rgba(255,255,255,0.45)" }}>
+                <h2 className="font-medium" style={{ fontSize: 20, color: "rgba(255,255,255,0.72)" }}>
                   {entries.length === 0 ? "Your journal is empty." : "Select an entry or start a new one."}
                 </h2>
-                <p className="text-sm max-w-xs text-center leading-relaxed" style={{ color: "rgba(255,255,255,0.30)", lineHeight: 1.7 }}>
+                <p className="text-sm max-w-xs text-center leading-relaxed" style={{ color: "rgba(255,255,255,0.58)", lineHeight: 1.7 }}>
                   No AI reads this. No AI helps write this.<br />Just you and your thoughts.
                 </p>
                 {entries.length === 0 && (

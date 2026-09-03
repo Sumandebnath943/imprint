@@ -100,7 +100,7 @@ export default function GalleryClient({ items: initial, userId }: GalleryClientP
           className="flex items-start justify-between mb-4">
           <div>
             <h1 className="font-bold text-white mb-1" style={{ fontSize: 32 }}>Creative Gallery</h1>
-            <p style={{ fontSize: 15, color: "rgba(255,255,255,0.40)" }}>Your creative fingerprint, preserved.</p>
+            <p style={{ fontSize: 15, color: "rgba(255,255,255,0.66)" }}>Your creative fingerprint, preserved.</p>
           </div>
           <button onClick={() => setShowUpload(true)}
             className="flex items-center gap-1.5 rounded-full font-medium text-white"
@@ -111,7 +111,7 @@ export default function GalleryClient({ items: initial, userId }: GalleryClientP
 
         {/* Stats row */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.06 }}
-          className="flex items-center gap-2 mb-8 text-sm" style={{ color: "rgba(255,255,255,0.40)" }}>
+          className="flex items-center gap-2 mb-8 text-sm" style={{ color: "rgba(255,255,255,0.66)" }}>
           {[
             // One entry per filter tab. "sketches" previously folded in
             // handwriting, so the header claimed a count the Sketches filter
@@ -167,7 +167,7 @@ export default function GalleryClient({ items: initial, userId }: GalleryClientP
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-24">
             <Palette size={64} style={{ color: "rgba(255,255,255,0.08)", marginBottom: 20 }} />
             <h2 className="font-semibold text-white mb-2 text-center" style={{ fontSize: 24 }}>Your gallery is empty.</h2>
-            <p className="text-base text-center mb-8" style={{ color: "rgba(255,255,255,0.40)", maxWidth: 400, lineHeight: 1.7 }}>
+            <p className="text-base text-center mb-8" style={{ color: "rgba(255,255,255,0.66)", maxWidth: 400, lineHeight: 1.7 }}>
               Sketches, handwriting, voice notes, and uploads from The Forge appear here.
             </p>
             <div className="flex gap-3">
@@ -219,7 +219,7 @@ export default function GalleryClient({ items: initial, userId }: GalleryClientP
                 <span className="text-xs capitalize rounded-full px-2 py-0.5 shrink-0"
                   style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.50)" }}>{item.item_type}</span>
                 <p className="flex-1 text-sm truncate" style={{ color: "rgba(255,255,255,0.70)" }}>{item.caption ?? "Untitled"}</p>
-                <span className="text-xs shrink-0" style={{ color: "rgba(255,255,255,0.35)" }}>{fmtRelTime(item.created_at)}</span>
+                <span className="text-xs shrink-0" style={{ color: "rgba(255,255,255,0.62)" }}>{fmtRelTime(item.created_at)}</span>
                 <span className="text-xs shrink-0 rounded-full px-2 py-0.5"
                   style={{ background: item.source === "forge" ? "rgba(255,85,0,0.10)" : "rgba(255,255,255,0.05)", color: item.source === "forge" ? "#FF5500" : "rgba(255,255,255,0.40)" }}>
                   {item.source === "forge" ? "Forge" : "Upload"}

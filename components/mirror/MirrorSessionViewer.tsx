@@ -61,14 +61,14 @@ export default function MirrorSessionViewer({ sessionId, onClose }: MirrorSessio
           <div>
             <p className="font-semibold text-white">Past Reflection</p>
             {sessionData && (
-              <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
+              <p className="text-xs" style={{ color: "rgba(255,255,255,0.66)" }}>
                 {formatDate(sessionData.created_at)} · {(sessionData.topics || []).join(", ")}
               </p>
             )}
           </div>
         </div>
         {sessionData && (
-          <div className="flex gap-4 text-xs font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>
+          <div className="flex gap-4 text-xs font-medium" style={{ color: "rgba(255,255,255,0.66)" }}>
             <span>{formatTime(sessionData.session_duration_seconds)}</span>
             <span>{sessionData.ai_question_count} Questions</span>
           </div>
@@ -93,7 +93,7 @@ export default function MirrorSessionViewer({ sessionId, onClose }: MirrorSessio
         )}
 
         {!loading && !error && messages.length === 0 && (
-          <div className="flex-1 flex items-center justify-center text-sm text-white/40">
+          <div className="flex-1 flex items-center justify-center text-sm text-white/65">
             This session has no recorded messages.
           </div>
         )}

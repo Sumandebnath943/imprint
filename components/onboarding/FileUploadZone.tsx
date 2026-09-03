@@ -43,9 +43,9 @@ export default function FileUploadZone({ onFileSelected }: FileUploadZoneProps) 
         )}
         <div className="flex-1 min-w-0">
           <p className="text-sm text-white truncate">{preview.name}</p>
-          <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.35)" }}>Uploaded</p>
+          <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.62)" }}>Uploaded</p>
         </div>
-        <button onClick={clear} style={{ color: "rgba(255,255,255,0.40)" }} className="hover:text-white transition-colors">
+        <button onClick={clear} style={{ color: "rgba(255,255,255,0.66)" }} className="hover:text-white transition-colors">
           <X size={16} />
         </button>
       </div>
@@ -65,11 +65,11 @@ export default function FileUploadZone({ onFileSelected }: FileUploadZoneProps) 
         background: dragging ? "rgba(255,85,0,0.04)" : "transparent",
       }}
     >
-      <Upload size={32} style={{ color: "rgba(255,255,255,0.30)", marginBottom: 12 }} />
+      <Upload size={32} style={{ color: "rgba(255,255,255,0.58)", marginBottom: 12 }} />
       <p className="text-sm text-center" style={{ color: "rgba(255,255,255,0.60)" }}>
         Upload your sketch, drawing, or image
       </p>
-      <p className="text-xs mt-2" style={{ color: "rgba(255,255,255,0.30)" }}>
+      <p className="text-xs mt-2" style={{ color: "rgba(255,255,255,0.58)" }}>
         JPG, PNG, or PDF · Max 10MB
       </p>
       <input

@@ -62,7 +62,7 @@ export default function FinalCTASection() {
           initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}
           viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.5 }}
           className="text-xs"
-          style={{ color: "rgba(255,255,255,0.25)" }}
+          style={{ color: "rgba(255,255,255,0.54)" }}
         >
           Used by 2,400+ humans across 47 professions
         </motion.p>

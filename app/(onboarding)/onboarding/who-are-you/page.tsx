@@ -118,7 +118,7 @@ export default function WhoAreYouPage() {
 
           {/* Search */}
           <div className="relative mb-5">
-            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "rgba(255,255,255,0.30)" }} />
+            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "rgba(255,255,255,0.58)" }} />
             <input
               type="text"
               value={search}
@@ -154,7 +154,7 @@ export default function WhoAreYouPage() {
                 >
                   <div className="flex items-center gap-1.5 mb-2">
                     <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: clusterColor }} />
-                    <span className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
+                    <span className="text-xs" style={{ color: "rgba(255,255,255,0.62)" }}>
                       {CLUSTER_LABELS[p.cluster]}
                     </span>
                   </div>
@@ -172,7 +172,7 @@ export default function WhoAreYouPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
                 className="text-sm italic"
-                style={{ color: "rgba(255,255,255,0.40)" }}
+                style={{ color: "rgba(255,255,255,0.66)" }}
               >
                 You&apos;re in the{" "}
                 <span className="font-medium" style={{ color: CLUSTER_COLORS[answers.professionCluster] }}>

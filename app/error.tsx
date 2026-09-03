@@ -27,7 +27,7 @@ export default function Error({
         <h1 className="text-white font-light text-[32px] md:text-[40px] leading-tight tracking-tight mb-4">
           We hit an unexpected error.
         </h1>
-        <p className="text-[15px] leading-relaxed mb-10" style={{ color: "rgba(255,255,255,0.45)" }}>
+        <p className="text-[15px] leading-relaxed mb-10" style={{ color: "rgba(255,255,255,0.72)" }}>
           Your work is saved. Try again, and if it keeps happening, head back to
           the dashboard.
         </p>
@@ -49,7 +49,7 @@ export default function Error({
         </div>
 
         {error.digest ? (
-          <p className="mt-8 text-[11px] font-mono" style={{ color: "rgba(255,255,255,0.20)" }}>
+          <p className="mt-8 text-[11px] font-mono" style={{ color: "rgba(255,255,255,0.50)" }}>
             Reference: {error.digest}
           </p>
         ) : null}

@@ -67,10 +67,10 @@ export default function LeaderboardClient({ userId, isOptedIn, rankings, userRan
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="flex items-start justify-between mb-8">
           <div>
             <h1 className="font-bold text-white mb-1" style={{ fontSize: 32 }}>Leaderboard</h1>
-            <p style={{ fontSize: 15, color: "rgba(255,255,255,0.40)" }}>Ranked by who&apos;s doing the work. Opt-in only.</p>
+            <p style={{ fontSize: 15, color: "rgba(255,255,255,0.66)" }}>Ranked by who&apos;s doing the work. Opt-in only.</p>
           </div>
           {isOptedIn && (
-            <button onClick={handleOptOut} className="text-[13px] transition-all hover:text-white" style={{ color: "rgba(255,255,255,0.40)" }}>Opt out</button>
+            <button onClick={handleOptOut} className="text-[13px] transition-all hover:text-white" style={{ color: "rgba(255,255,255,0.66)" }}>Opt out</button>
           )}
         </motion.div>
 
@@ -83,7 +83,7 @@ export default function LeaderboardClient({ userId, isOptedIn, rankings, userRan
             </div>
             <div className="text-right">
               <button onClick={handleOptIn} disabled={optingIn} className="rounded-full font-medium text-white px-5 py-2.5 text-sm transition-all mb-2 disabled:opacity-50" style={{ background: "#FF5500" }}>{optingIn ? "Joining…" : "Join Leaderboard"}</button>
-              <p className="text-[12px] italic" style={{ color: "rgba(255,255,255,0.40)" }}>Only username & IMPRINT Score visible.</p>
+              <p className="text-[12px] italic" style={{ color: "rgba(255,255,255,0.66)" }}>Only username & IMPRINT Score visible.</p>
             </div>
           </motion.div>
         )}
@@ -105,7 +105,7 @@ export default function LeaderboardClient({ userId, isOptedIn, rankings, userRan
               </button>
             ))}
           </div>
-          <p className="text-[13px] shrink-0 ml-4" style={{ color: "rgba(255,255,255,0.40)" }}>Showing {visible.length} humans</p>
+          <p className="text-[13px] shrink-0 ml-4" style={{ color: "rgba(255,255,255,0.66)" }}>Showing {visible.length} humans</p>
         </div>
 
         {/* Podium */}
@@ -152,7 +152,7 @@ export default function LeaderboardClient({ userId, isOptedIn, rankings, userRan
         )}
         
         {visible.length > 0 && <div className="h-px w-full mb-4" style={{ background: "rgba(255,255,255,0.06)" }} />}
-        <p className="text-center text-[13px] mb-10" style={{ color: "rgba(255,255,255,0.30)" }}>
+        <p className="text-center text-[13px] mb-10" style={{ color: "rgba(255,255,255,0.58)" }}>
           {visible.length === 0
             ? "No one here yet — be the first to join this board."
             : `${visible.length} ${visible.length === 1 ? "human" : "humans"} preserving their identity`}
@@ -161,10 +161,10 @@ export default function LeaderboardClient({ userId, isOptedIn, rankings, userRan
         {/* Table */}
         <div className="rounded-2xl overflow-hidden mb-12" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
           <div className="grid grid-cols-6 p-4" style={{ background: "#0D0D0D", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-            <div className="text-[11px] uppercase tracking-wide col-span-1" style={{ color: "rgba(255,255,255,0.40)" }}>Rank</div>
-            <div className="text-[11px] uppercase tracking-wide col-span-2" style={{ color: "rgba(255,255,255,0.40)" }}>User</div>
-            <div className="text-[11px] uppercase tracking-wide col-span-2 text-right" style={{ color: "rgba(255,255,255,0.40)" }}>IMPRINT Score</div>
-            <div className="text-[11px] uppercase tracking-wide col-span-1 text-right" style={{ color: "rgba(255,255,255,0.40)" }}>Drift</div>
+            <div className="text-[11px] uppercase tracking-wide col-span-1" style={{ color: "rgba(255,255,255,0.66)" }}>Rank</div>
+            <div className="text-[11px] uppercase tracking-wide col-span-2" style={{ color: "rgba(255,255,255,0.66)" }}>User</div>
+            <div className="text-[11px] uppercase tracking-wide col-span-2 text-right" style={{ color: "rgba(255,255,255,0.66)" }}>IMPRINT Score</div>
+            <div className="text-[11px] uppercase tracking-wide col-span-1 text-right" style={{ color: "rgba(255,255,255,0.66)" }}>Drift</div>
           </div>
           {rest.map((r, i) => {
             const rank = i + 4;
@@ -204,11 +204,11 @@ export default function LeaderboardClient({ userId, isOptedIn, rankings, userRan
           <div className="max-w-6xl mx-auto w-full flex items-center justify-between">
             <div>
               <p className="text-[16px] font-bold text-white mb-0.5">Your rank: #{userRank}</p>
-              <p className="text-[13px]" style={{ color: "rgba(255,255,255,0.40)" }}>of {rankings.length} humans</p>
+              <p className="text-[13px]" style={{ color: "rgba(255,255,255,0.66)" }}>of {rankings.length} humans</p>
             </div>
             <div className="text-center">
               <p className="text-[20px] font-bold" style={{ color: "#FF5500" }}>{rankings.find(r => r.id === userId)?.imprint_score || 0}</p>
-              <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.40)" }}>IMPRINT Score</p>
+              <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.66)" }}>IMPRINT Score</p>
             </div>
             <div className="flex items-center gap-4 text-right">
               <button

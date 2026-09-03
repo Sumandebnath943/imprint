@@ -27,7 +27,7 @@ function Stat({ label, value, color = "white" }: { label: string; value: string;
     <div className="flex flex-col items-center gap-1 px-6 py-4 rounded-2xl"
       style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", minWidth: 120 }}>
       <span className="font-bold" style={{ fontSize: 32, color, fontFamily: "'Courier New', monospace" }}>{value}</span>
-      <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.40)" }}>{label}</span>
+      <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.66)" }}>{label}</span>
     </div>
   );
 }
@@ -116,13 +116,13 @@ export default function ForgeComplete({
       {isTextTool(tool) && words > 30 && (
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}
           className="w-full rounded-2xl p-6" style={{ maxWidth: 420, background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
-          <p className="text-sm font-semibold mb-4" style={{ color: "rgba(255,255,255,0.40)" }}>Compared to your Baseline</p>
+          <p className="text-sm font-semibold mb-4" style={{ color: "rgba(255,255,255,0.66)" }}>Compared to your Baseline</p>
           <div className="flex flex-col gap-4">
             <Bar label="Vocabulary match" value={vocabMatch} color={vocabMatch > 0.7 ? "#00D97E" : "#FFB800"} />
             <Bar label="Writing pace" value={Math.min(1, wpm / 50)} color="#FF5500" />
             <Bar label="Output depth" value={Math.min(1, words / 400)} color="#FF7A30" />
           </div>
-          <p className="text-sm mt-5 leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
+          <p className="text-sm mt-5 leading-relaxed" style={{ color: "rgba(255,255,255,0.72)" }}>
             This session has been saved to your Forge history and will inform your next Drift Score calculation.
           </p>
         </motion.div>

@@ -75,7 +75,7 @@ export function GalleryItemViewer({ item, items, userId, onClose, onDelete, onCa
         {/* Top bar */}
         <div className="flex items-center justify-between px-8 py-4 shrink-0"
           style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-          <div className="flex items-center gap-3 text-sm" style={{ color: "rgba(255,255,255,0.40)" }}>
+          <div className="flex items-center gap-3 text-sm" style={{ color: "rgba(255,255,255,0.66)" }}>
             <button onClick={onClose} className="flex items-center gap-1 transition-all hover:text-white" style={{ color: "rgba(255,255,255,0.80)" }}>
               <ChevronLeft size={16} /> <span className="font-medium">Back to Gallery</span>
             </button>
@@ -92,7 +92,7 @@ export function GalleryItemViewer({ item, items, userId, onClose, onDelete, onCa
             <button onClick={() => setShowDelete(true)}
               className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:bg-red-500/10"
               style={{ border: "1px solid rgba(255,255,255,0.10)" }}>
-              <Trash2 size={13} style={{ color: "rgba(255,255,255,0.40)" }} />
+              <Trash2 size={13} style={{ color: "rgba(255,255,255,0.66)" }} />
             </button>
             <button onClick={onClose}
               className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:bg-white/10"
@@ -158,7 +158,7 @@ export function GalleryItemViewer({ item, items, userId, onClose, onDelete, onCa
             style={{ width: 280, borderLeft: "1px solid rgba(255,255,255,0.06)" }}>
             {/* Caption */}
             <div className="mb-5">
-              <p className="text-xs uppercase tracking-widest mb-2" style={{ color: "rgba(255,255,255,0.35)" }}>Caption</p>
+              <p className="text-xs uppercase tracking-widest mb-2" style={{ color: "rgba(255,255,255,0.62)" }}>Caption</p>
               {editingCaption ? (
                 <div>
                   <textarea value={caption} onChange={(e) => setCaption(e.target.value)}
@@ -166,7 +166,7 @@ export function GalleryItemViewer({ item, items, userId, onClose, onDelete, onCa
                     style={{ background: "#1A1A1A", border: "1px solid rgba(255,85,0,0.30)", padding: "10px 12px", color: "rgba(255,255,255,0.80)", minHeight: 80 }} />
                   <div className="flex gap-2 mt-2">
                     <button onClick={handleSaveCaption} className="text-xs rounded-full px-3 py-1 text-white" style={{ background: "#FF5500" }}>Save</button>
-                    <button onClick={() => setEditingCaption(false)} className="text-xs" style={{ color: "rgba(255,255,255,0.40)" }}>Cancel</button>
+                    <button onClick={() => setEditingCaption(false)} className="text-xs" style={{ color: "rgba(255,255,255,0.66)" }}>Cancel</button>
                   </div>
                 </div>
               ) : (
@@ -178,7 +178,7 @@ export function GalleryItemViewer({ item, items, userId, onClose, onDelete, onCa
             </div>
 
             {/* Details */}
-            <div className="flex flex-col gap-3 text-xs" style={{ color: "rgba(255,255,255,0.40)" }}>
+            <div className="flex flex-col gap-3 text-xs" style={{ color: "rgba(255,255,255,0.66)" }}>
               {[
                 { label: "Type", value: item.item_type },
                 { label: "Source", value: item.source === "forge" ? "The Forge" : "Direct Upload" },
@@ -187,7 +187,7 @@ export function GalleryItemViewer({ item, items, userId, onClose, onDelete, onCa
                 item.word_count ? { label: "Words", value: String(item.word_count) } : null,
               ].filter(Boolean).map((d) => d && (
                 <div key={d.label} className="flex justify-between">
-                  <span style={{ color: "rgba(255,255,255,0.30)" }}>{d.label}</span>
+                  <span style={{ color: "rgba(255,255,255,0.58)" }}>{d.label}</span>
                   <span className="capitalize" style={{ color: "rgba(255,255,255,0.60)" }}>{d.value}</span>
                 </div>
               ))}
@@ -206,7 +206,7 @@ export function GalleryItemViewer({ item, items, userId, onClose, onDelete, onCa
             <motion.div className="rounded-2xl p-7 text-center" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.08)", width: 300 }}
               onClick={(e) => e.stopPropagation()} initial={{ scale: 0.94 }} animate={{ scale: 1 }}>
               <p className="font-medium text-white mb-2" style={{ fontSize: 18 }}>Delete this item?</p>
-              <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.40)" }}>This is gone forever.</p>
+              <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.66)" }}>This is gone forever.</p>
               <button onClick={() => { onDelete(item.id); setShowDelete(false); onClose(); }}
                 className="w-full rounded-full h-10 text-white mb-2" style={{ background: "#FF2D2D" }}>Delete</button>
               <button onClick={() => setShowDelete(false)}
@@ -324,7 +324,7 @@ export function GalleryUploadModal({ userId, onUploaded, onClose }: UploadModalP
         onClick={(e) => e.stopPropagation()} initial={{ scale: 0.93, y: 16 }} animate={{ scale: 1, y: 0 }}>
         <div className="flex items-center justify-between mb-5">
           <h3 className="font-semibold text-white" style={{ fontSize: 20 }}>Add to Gallery</h3>
-          <button onClick={onClose}><X size={18} style={{ color: "rgba(255,255,255,0.40)" }} /></button>
+          <button onClick={onClose}><X size={18} style={{ color: "rgba(255,255,255,0.66)" }} /></button>
         </div>
 
         {/* Drop zone */}
@@ -336,13 +336,13 @@ export function GalleryUploadModal({ userId, onUploaded, onClose }: UploadModalP
               {file.type.startsWith("image/") ? <ImageIcon size={28} style={{ color: "#FF5500" }} /> : file.type.startsWith("audio/") ? <Mic size={28} style={{ color: "#FF5500" }} /> : <FileText size={28} style={{ color: "#FF5500" }} />}
               <div>
                 <p className="text-sm font-medium text-white">{file.name}</p>
-                <p className="text-xs" style={{ color: "rgba(255,255,255,0.40)" }}>{(file.size / 1024 / 1024).toFixed(1)} MB</p>
+                <p className="text-xs" style={{ color: "rgba(255,255,255,0.66)" }}>{(file.size / 1024 / 1024).toFixed(1)} MB</p>
               </div>
             </div>
           ) : (
             <>
-              <Upload size={28} style={{ color: "rgba(255,255,255,0.25)", marginBottom: 8 }} />
-              <p className="text-sm text-center" style={{ color: "rgba(255,255,255,0.45)" }}>
+              <Upload size={28} style={{ color: "rgba(255,255,255,0.54)", marginBottom: 8 }} />
+              <p className="text-sm text-center" style={{ color: "rgba(255,255,255,0.72)" }}>
                 Click to upload · Images, audio, PDFs, text<br />Max 25MB
               </p>
             </>

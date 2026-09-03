@@ -127,16 +127,16 @@ export default async function PublicCredentialPage({ params }: { params: { code:
           {/* SCORES */}
           <div className="flex items-center gap-6 mb-8">
             <div className="flex-1">
-              <span className="block text-[10px] uppercase text-white/40 mb-1 tracking-widest">IMPRINT SCORE</span>
+              <span className="block text-[10px] uppercase text-white/65 mb-1 tracking-widest">IMPRINT SCORE</span>
               <div className="flex items-baseline gap-1 mb-2">
                 <span className="font-bold text-white text-[56px] leading-none">{imprintScore}</span>
-                <span className="text-[16px] text-white/40">/1000</span>
+                <span className="text-[16px] text-white/65">/1000</span>
               </div>
               <span className="px-3 py-1 rounded-full text-[12px] font-bold uppercase tracking-wider" style={{ background: `${iColor}15`, color: iColor }}>{iLabel}</span>
             </div>
             <div className="w-[1px] h-20 bg-white/10" />
             <div className="flex-1">
-              <span className="block text-[10px] uppercase text-white/40 mb-1 tracking-widest">DRIFT SCORE</span>
+              <span className="block text-[10px] uppercase text-white/65 mb-1 tracking-widest">DRIFT SCORE</span>
               <div className="flex items-baseline gap-1 mb-2">
                 <span className="font-bold text-[56px] leading-none" style={{ color: dColor }}>{dScore}</span>
               </div>
@@ -148,28 +148,28 @@ export default async function PublicCredentialPage({ params }: { params: { code:
           <div className="flex items-center justify-between mb-8 py-4 border-t border-b border-white/10">
             <div className="text-center">
               <span className="block font-semibold text-white text-[16px] mb-0.5">{stats.calibrations}</span>
-              <span className="text-[11px] text-white/40 uppercase">Calibrations</span>
+              <span className="text-[11px] text-white/65 uppercase">Calibrations</span>
             </div>
             <div className="w-[1px] h-8 bg-white/10" />
             <div className="text-center">
               <span className="block font-semibold text-white text-[16px] mb-0.5">{stats.streak}</span>
-              <span className="text-[11px] text-white/40 uppercase">Day Streak</span>
+              <span className="text-[11px] text-white/65 uppercase">Day Streak</span>
             </div>
             <div className="w-[1px] h-8 bg-white/10" />
             <div className="text-center">
               <span className="block font-semibold text-white text-[16px] mb-0.5">{stats.skillsTracked}</span>
-              <span className="text-[11px] text-white/40 uppercase">Skills Tracked</span>
+              <span className="text-[11px] text-white/65 uppercase">Skills Tracked</span>
             </div>
           </div>
 
           {/* FOOTER VERIFICATION */}
           <div className="text-center mb-6">
-            <span className="block text-[12px] text-white/30 mb-2">Verified {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
-            <span className="block text-[11px] text-white/20 font-mono mb-1">{params.code}</span>
+            <span className="block text-[12px] text-white/60 mb-2">Verified {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
+            <span className="block text-[11px] text-white/50 font-mono mb-1">{params.code}</span>
           </div>
 
           <div className="h-[1px] w-full bg-[#FF5500] opacity-50 mb-4" />
-          <p className="text-center text-[11px] text-white/30 italic">This credential certifies consistent identity preservation using the IMPRINT engine.</p>
+          <p className="text-center text-[11px] text-white/60 italic">This credential certifies consistent identity preservation using the IMPRINT engine.</p>
         </div>
       </div>
 

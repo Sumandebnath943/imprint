@@ -270,7 +270,7 @@ export default function Sidebar({ profile }: SidebarProps) {
               <Link
                 href="/dashboard/profile"
                 className="text-xs transition-colors hover:text-white"
-                style={{ color: "rgba(255,255,255,0.40)" }}
+                style={{ color: "rgba(255,255,255,0.66)" }}
               >
                 View Profile
               </Link>
@@ -287,7 +287,7 @@ export default function Sidebar({ profile }: SidebarProps) {
               height: 36,
               padding: collapsed ? "0" : "0 12px",
               justifyContent: collapsed ? "center" : "flex-start",
-              color: "rgba(255,255,255,0.35)",
+              color: "rgba(255,255,255,0.62)",
             }}
             title="Sign out"
             onMouseOver={(e) => { (e.currentTarget as HTMLElement).style.color = "#FF5500"; (e.currentTarget as HTMLElement).style.background = "rgba(255,85,0,0.06)"; }}
@@ -311,8 +311,8 @@ export default function Sidebar({ profile }: SidebarProps) {
             onMouseOut={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)"; }}
           >
             {collapsed
-              ? <ChevronRight size={14} style={{ color: "rgba(255,255,255,0.40)" }} />
-              : <ChevronLeft size={14} style={{ color: "rgba(255,255,255,0.40)" }} />
+              ? <ChevronRight size={14} style={{ color: "rgba(255,255,255,0.66)" }} />
+              : <ChevronLeft size={14} style={{ color: "rgba(255,255,255,0.66)" }} />
             }
           </button>
         </div>

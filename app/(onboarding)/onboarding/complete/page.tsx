@@ -167,7 +167,7 @@ export default function CompletePage() {
               style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)", padding: "20px 28px", minWidth: 140 }}
             >
               <p className="font-bold mb-1" style={{ fontSize: 36, color, lineHeight: 1 }}>{value}</p>
-              <p className="text-xs" style={{ color: "rgba(255,255,255,0.40)", lineHeight: 1.5 }}>{label}</p>
+              <p className="text-xs" style={{ color: "rgba(255,255,255,0.66)", lineHeight: 1.5 }}>{label}</p>
             </div>
           ))}
         </motion.div>
@@ -195,7 +195,7 @@ export default function CompletePage() {
             />
             <text x={60} y={60} textAnchor="middle" dy="0.3em" fill="white" fontSize={28} fontWeight={700} fontFamily="Space Grotesk, sans-serif">0</text>
           </svg>
-          <p className="text-sm mt-3" style={{ color: "rgba(255,255,255,0.45)" }}>Your starting Drift Score</p>
+          <p className="text-sm mt-3" style={{ color: "rgba(255,255,255,0.72)" }}>Your starting Drift Score</p>
           <p className="text-sm font-medium mt-1" style={{ color: "#00D97E" }}>Anchored. Completely you.</p>
         </motion.div>
 
@@ -214,7 +214,7 @@ export default function CompletePage() {
           Enter IMPRINT →
         </motion.button>
 
-        <p className="text-sm" style={{ color: "rgba(255,255,255,0.30)" }}>
+        <p className="text-sm" style={{ color: "rgba(255,255,255,0.58)" }}>
           Your first Vault Challenge drops in 24 hours.
         </p>
       </motion.div>

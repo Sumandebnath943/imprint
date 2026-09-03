@@ -41,7 +41,7 @@ function EmptyState() {
           style={{ background: "#FF5500", boxShadow: "0 0 40px rgba(255,85,0,0.25)" }}>
           Begin First Calibration →
         </button>
-        <p className="text-sm" style={{ color: "rgba(255,255,255,0.30)" }}>Takes 15–20 minutes. Bi-weekly after that.</p>
+        <p className="text-sm" style={{ color: "rgba(255,255,255,0.58)" }}>Takes 15–20 minutes. Bi-weekly after that.</p>
       </motion.div>
     </div>
   );

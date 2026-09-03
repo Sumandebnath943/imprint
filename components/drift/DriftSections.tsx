@@ -21,13 +21,13 @@ export function DriftWeeklyTable({ rows }: WeeklyTableProps) {
       className="rounded-2xl overflow-hidden mb-8" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
       <div className="px-6 py-5" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <h2 className="font-semibold text-white mb-1" style={{ fontSize: 20 }}>Week by Week</h2>
-        <p className="text-sm" style={{ color: "rgba(255,255,255,0.40)" }}>Your full calibration history.</p>
+        <p className="text-sm" style={{ color: "rgba(255,255,255,0.66)" }}>Your full calibration history.</p>
       </div>
 
       {rows.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 gap-4">
           <p className="font-medium text-white" style={{ fontSize: 18 }}>No calibration data yet.</p>
-          <p className="text-sm text-center max-w-sm" style={{ color: "rgba(255,255,255,0.40)", lineHeight: 1.6 }}>
+          <p className="text-sm text-center max-w-sm" style={{ color: "rgba(255,255,255,0.66)", lineHeight: 1.6 }}>
             Complete your first calibration to see your score history.
           </p>
           <a href="/dashboard/calibration"
@@ -44,7 +44,7 @@ export function DriftWeeklyTable({ rows }: WeeklyTableProps) {
                 <tr style={{ background: "#0D0D0D", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
                   {COLS.map((c) => (
                     <th key={c} className="text-left px-5 py-3 text-xs uppercase tracking-widest"
-                      style={{ color: "rgba(255,255,255,0.35)", fontWeight: 600 }}>{c}</th>
+                      style={{ color: "rgba(255,255,255,0.62)", fontWeight: 600 }}>{c}</th>
                   ))}
                 </tr>
               </thead>
@@ -70,7 +70,7 @@ export function DriftWeeklyTable({ rows }: WeeklyTableProps) {
                       <td className="px-5 py-3.5 text-sm" style={{ color: "rgba(255,255,255,0.60)" }}>{row.ai}%</td>
                       <td className="px-5 py-3.5 text-sm" style={{ color: "rgba(255,255,255,0.60)" }}>{row.journal}%</td>
                       <td className="px-5 py-3.5 text-sm">
-                        {row.delta === null ? <span style={{ color: "rgba(255,255,255,0.25)" }}>—</span>
+                        {row.delta === null ? <span style={{ color: "rgba(255,255,255,0.54)" }}>—</span>
                           : row.delta <= 0
                           ? <span style={{ color: "#00D97E" }}>↓ {Math.abs(row.delta)}</span>
                           : <span style={{ color: "#FF2D2D" }}>↑ {row.delta}</span>}
@@ -176,7 +176,7 @@ export function DriftCalibration({ calibrations }: CalibrationProps) {
         className="rounded-2xl mb-8" style={{ background: "rgba(255,85,0,0.04)", border: "1px solid rgba(255,85,0,0.15)", padding: "40px" }}>
         <div className="text-center">
           <p className="font-medium text-white mb-2" style={{ fontSize: 18 }}>No calibrations yet.</p>
-          <p className="text-sm mb-6 mx-auto max-w-sm" style={{ color: "rgba(255,255,255,0.45)", lineHeight: 1.7 }}>
+          <p className="text-sm mb-6 mx-auto max-w-sm" style={{ color: "rgba(255,255,255,0.72)", lineHeight: 1.7 }}>
             Your Drift Score is based on your initial baseline. Complete your first calibration to get your real score.
           </p>
           <a href="/dashboard/calibration" className="inline-block rounded-full h-11 px-8 text-sm font-medium text-white"
@@ -215,7 +215,7 @@ export function DriftCalibration({ calibrations }: CalibrationProps) {
                   cal.findings?.vault_note ?? "Vault activity reviewed",
                   cal.findings?.mirror_note ?? "Mirror session patterns analyzed",
                 ].map((f, j) => (
-                  <div key={j} className="flex items-start gap-2 text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>
+                  <div key={j} className="flex items-start gap-2 text-xs" style={{ color: "rgba(255,255,255,0.72)" }}>
                     <span className="w-1 h-1 rounded-full mt-1.5 shrink-0" style={{ background: "rgba(255,255,255,0.30)" }} />{f}
                   </div>
                 ))}
@@ -263,7 +263,7 @@ Verified by IMPRINT Identity Engine`;
       style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)", padding: "20px 28px" }}>
       <div>
         <p className="font-semibold text-white mb-1" style={{ fontSize: 16 }}>Your IMPRINT Score Report</p>
-        <p className="text-sm" style={{ color: "rgba(255,255,255,0.40)" }}>Export your full drift history and score breakdown.</p>
+        <p className="text-sm" style={{ color: "rgba(255,255,255,0.66)" }}>Export your full drift history and score breakdown.</p>
       </div>
       <div className="flex gap-3 flex-wrap">
         <button onClick={handlePrint}

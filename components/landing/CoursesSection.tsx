@@ -67,7 +67,7 @@ export default function CoursesSection() {
                 Coming Soon
               </span>
             </div>
-            <p className="text-white/40 text-[12px] uppercase tracking-widest text-left lg:text-right mt-3 leading-relaxed">
+            <p className="text-white/65 text-[12px] uppercase tracking-widest text-left lg:text-right mt-3 leading-relaxed">
               Curriculum Development
               <br/>In Progress
             </p>
@@ -118,7 +118,7 @@ export default function CoursesSection() {
                   </button>
                 </div>
               )}
-              <p className="text-[12px] text-white/30 text-center sm:text-right mt-2 mr-4 uppercase tracking-widest font-semibold">Early Access Pass</p>
+              <p className="text-[12px] text-white/60 text-center sm:text-right mt-2 mr-4 uppercase tracking-widest font-semibold">Early Access Pass</p>
             </form>
           </motion.div>
         </div>

@@ -70,10 +70,10 @@ export default function CapsuleList({ capsules, selectedId, onSelect, onNew }: C
             {currentTab === "locked"
               ? <Lock size={28} style={{ color: "rgba(255,255,255,0.15)" }} />
               : <Unlock size={28} style={{ color: "rgba(255,255,255,0.15)" }} />}
-            <p className="text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>
+            <p className="text-sm" style={{ color: "rgba(255,255,255,0.62)" }}>
               {currentTab === "locked" ? "No locked capsules." : "No capsules unlocked yet."}
             </p>
-            <p className="text-xs text-center" style={{ color: "rgba(255,255,255,0.20)" }}>
+            <p className="text-xs text-center" style={{ color: "rgba(255,255,255,0.50)" }}>
               {currentTab === "locked" ? "Write one for your future self." : "Your first one will appear here when its time comes."}
             </p>
           </div>
@@ -96,7 +96,7 @@ export default function CapsuleList({ capsules, selectedId, onSelect, onNew }: C
                   <div className="flex items-center gap-1.5 min-w-0">
                     {capsuleIsUnlocked(c)
                       ? <Unlock size={11} style={{ color: "#00D97E", flexShrink: 0 }} />
-                      : <Lock size={11} style={{ color: "rgba(255,255,255,0.30)", flexShrink: 0 }} />}
+                      : <Lock size={11} style={{ color: "rgba(255,255,255,0.58)", flexShrink: 0 }} />}
                     <span className="text-sm font-medium text-white truncate">{c.title || "Untitled Capsule"}</span>
                   </div>
                   {capsuleIsUnlocked(c) ? (
@@ -110,7 +110,7 @@ export default function CapsuleList({ capsules, selectedId, onSelect, onNew }: C
                   )}
                 </div>
                 {/* Row 2 */}
-                <p className="text-xs mb-2" style={{ color: "rgba(255,255,255,0.35)" }}>
+                <p className="text-xs mb-2" style={{ color: "rgba(255,255,255,0.62)" }}>
                   {capsuleIsUnlocked(c) ? `Unlocked ${fmtDate(c.unlock_date)}` : `Opens ${fmtDate(c.unlock_date)}`}
                 </p>
                 {/* Row 3 — progress bar (locked only) */}

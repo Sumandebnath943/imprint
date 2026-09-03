@@ -46,7 +46,7 @@ export default function VaultFilterBar({ filter, sort, search, onFilter, onSort,
 
       {/* Search */}
       <div className="flex-1 relative" style={{ minWidth: 180, maxWidth: 280 }}>
-        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "rgba(255,255,255,0.30)" }} />
+        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "rgba(255,255,255,0.58)" }} />
         <input
           value={search} onChange={(e) => onSearch(e.target.value)}
           placeholder="Search skills..."
@@ -62,7 +62,7 @@ export default function VaultFilterBar({ filter, sort, search, onFilter, onSort,
       {/* Sort */}
       <div className="relative flex items-center gap-2 rounded-lg px-3 h-9"
         style={{ background: "#1A1A1A", border: "1px solid rgba(255,255,255,0.08)", minWidth: 180 }}>
-        <ArrowUpDown size={14} style={{ color: "rgba(255,255,255,0.40)", flexShrink: 0 }} />
+        <ArrowUpDown size={14} style={{ color: "rgba(255,255,255,0.66)", flexShrink: 0 }} />
         <select value={sort} onChange={(e) => onSort(e.target.value as SortType)}
           className="flex-1 outline-none text-sm bg-transparent appearance-none cursor-pointer"
           style={{ color: "rgba(255,255,255,0.70)" }}>

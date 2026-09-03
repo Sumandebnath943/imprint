@@ -161,11 +161,11 @@ export default function JournalEditor({
         style={{ height: 56, background: "rgba(10,10,10,0.95)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
         {/* Word count + save status (moved to start) */}
         <div className="flex items-center gap-3 flex-1 justify-start">
-          <span className="font-mono text-sm" style={{ color: "rgba(255,255,255,0.30)" }}>{wordCount} words</span>
+          <span className="font-mono text-sm" style={{ color: "rgba(255,255,255,0.58)" }}>{wordCount} words</span>
           <AnimatePresence>
             {saveStatus !== "idle" && (
               <motion.span key={saveStatus} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
+                className="text-xs" style={{ color: "rgba(255,255,255,0.62)" }}>
                 {saveStatus === "saving" ? "Saving..." : "Saved ✓"}
               </motion.span>
             )}
@@ -201,7 +201,7 @@ export default function JournalEditor({
                   {mood && (
                     <button onClick={() => { setMood(null); setShowMoodMenu(false); }}
                       className="col-span-2 text-xs py-2 text-center rounded-lg hover:bg-white/5"
-                      style={{ color: "rgba(255,255,255,0.35)" }}>Clear mood</button>
+                      style={{ color: "rgba(255,255,255,0.62)" }}>Clear mood</button>
                   )}
                 </motion.div>
               )}
@@ -258,7 +258,7 @@ export default function JournalEditor({
           <button onClick={onToggleFocusMode}
             className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:bg-white/5"
             style={{ border: "1px solid rgba(255,255,255,0.10)" }}>
-            <Maximize2 size={14} style={{ color: "rgba(255,255,255,0.40)" }} />
+            <Maximize2 size={14} style={{ color: "rgba(255,255,255,0.66)" }} />
           </button>
 
           {/* More */}
@@ -266,7 +266,7 @@ export default function JournalEditor({
             <button onClick={() => { setShowMoreMenu((p) => !p); setShowMoodMenu(false); setShowTagMenu(false); }}
               className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:bg-white/5"
               style={{ border: "1px solid rgba(255,255,255,0.10)" }}>
-              <MoreHorizontal size={14} style={{ color: "rgba(255,255,255,0.40)" }} />
+              <MoreHorizontal size={14} style={{ color: "rgba(255,255,255,0.66)" }} />
             </button>
             <AnimatePresence>
               {showMoreMenu && (
@@ -297,7 +297,7 @@ export default function JournalEditor({
           className="w-full outline-none bg-transparent font-bold mb-3"
           style={{ fontSize: 32, color: "white" }}
         />
-        <p style={{ fontSize: 14, color: "rgba(255,255,255,0.25)", marginBottom: 32 }}>{today}</p>
+        <p style={{ fontSize: 14, color: "rgba(255,255,255,0.54)", marginBottom: 32 }}>{today}</p>
         <textarea
           ref={textareaRef}
           value={content}
@@ -333,12 +333,12 @@ export default function JournalEditor({
             </button>
           ))}
           <div className="w-px h-5 mx-1" style={{ background: "rgba(255,255,255,0.08)" }} />
-          <span className="text-sm" style={{ color: "rgba(255,255,255,0.30)" }}>
+          <span className="text-sm" style={{ color: "rgba(255,255,255,0.58)" }}>
             {wordCount} words · {readingMinutes(wordCount)} min read
           </span>
         </div>
         <div className="flex items-center gap-3 ml-auto">
-          <span className="text-xs" style={{ color: "rgba(255,255,255,0.20)" }}>⌘S to save</span>
+          <span className="text-xs" style={{ color: "rgba(255,255,255,0.50)" }}>⌘S to save</span>
           <button onClick={handleManualSave}
             className="rounded-full h-9 px-5 text-sm font-medium text-white"
             style={{ background: "#FF5500" }}>
@@ -370,7 +370,7 @@ export default function JournalEditor({
                   </button>
                 ))}
               </div>
-              <p className="text-xs italic" style={{ color: "rgba(255,255,255,0.35)", lineHeight: 1.6 }}>
+              <p className="text-xs italic" style={{ color: "rgba(255,255,255,0.62)", lineHeight: 1.6 }}>
                 Your journal entries are yours. Export anytime.
               </p>
             </motion.div>
@@ -386,7 +386,7 @@ export default function JournalEditor({
               onClick={(e) => e.stopPropagation()}
               initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}>
               <p className="font-medium text-white mb-2">Delete this entry?</p>
-              <p className="text-sm mb-5" style={{ color: "rgba(255,255,255,0.40)" }}>This cannot be undone.</p>
+              <p className="text-sm mb-5" style={{ color: "rgba(255,255,255,0.66)" }}>This cannot be undone.</p>
               <div className="flex gap-3 justify-center">
                 <button onClick={() => setShowDeleteConfirm(false)}
                   className="rounded-full h-9 px-5 text-sm" style={{ border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.60)" }}>

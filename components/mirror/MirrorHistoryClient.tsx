@@ -19,13 +19,13 @@ export default function MirrorHistoryClient({ initialSessions }: { initialSessio
               <ArrowLeft size={14} /> Back to Mirror
             </a>
             <h1 className="text-3xl font-bold text-white">Mirror History</h1>
-            <p className="text-sm mt-2" style={{ color: "rgba(255,255,255,0.4)" }}>Your past reflection sessions.</p>
+            <p className="text-sm mt-2" style={{ color: "rgba(255,255,255,0.66)" }}>Your past reflection sessions.</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {initialSessions.length === 0 && (
-            <p className="text-sm" style={{ color: "rgba(255,255,255,0.3)" }}>You haven&apos;t completed any mirror sessions yet.</p>
+            <p className="text-sm" style={{ color: "rgba(255,255,255,0.58)" }}>You haven&apos;t completed any mirror sessions yet.</p>
           )}
           {initialSessions.map((s) => (
             <div key={s.id} onClick={() => setViewingSessionId(s.id)}
@@ -39,7 +39,7 @@ export default function MirrorHistoryClient({ initialSessions }: { initialSessio
                 (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.05)";
                 (e.currentTarget as HTMLElement).style.boxShadow = "none";
               }}>
-              <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.3)" }}>
+              <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.58)" }}>
                 {new Date(s.created_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
               </p>
               <h3 className="text-lg font-bold text-white mb-2 line-clamp-2">

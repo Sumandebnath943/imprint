@@ -91,7 +91,7 @@ export default function AIExposurePage() {
                   <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: level.color, boxShadow: selected ? `0 0 8px ${level.color}` : "none" }} />
                   <div className="flex-1">
                     <p className="font-medium text-white text-base">{level.label}</p>
-                    <p className="text-sm mt-0.5" style={{ color: "rgba(255,255,255,0.45)" }}>{level.description}</p>
+                    <p className="text-sm mt-0.5" style={{ color: "rgba(255,255,255,0.72)" }}>{level.description}</p>
                   </div>
                   {selected && <CheckCircle2 size={18} style={{ color: "#FF5500", flexShrink: 0 }} />}
                 </button>
@@ -110,7 +110,7 @@ export default function AIExposurePage() {
           <p className="uppercase tracking-widest text-xs font-medium mb-1" style={{ color: "rgba(255,255,255,0.50)" }}>
             What do you use AI for?
           </p>
-          <p className="text-xs mb-5" style={{ color: "rgba(255,255,255,0.30)" }}>Select all that apply</p>
+          <p className="text-xs mb-5" style={{ color: "rgba(255,255,255,0.58)" }}>Select all that apply</p>
           <div className="flex flex-wrap gap-2.5">
             {AI_USE_CONTEXTS.map((item) => {
               const selected = answers.aiUseContext.includes(item);
@@ -141,7 +141,7 @@ export default function AIExposurePage() {
           <p className="text-sm font-medium text-white mb-2">
             Optional: Anything else about your AI use you want to record for yourself?
           </p>
-          <p className="text-xs mb-3" style={{ color: "rgba(255,255,255,0.35)" }}>
+          <p className="text-xs mb-3" style={{ color: "rgba(255,255,255,0.62)" }}>
             This is for you, not us. We&apos;ll reflect it back in 90 days.
           </p>
           <textarea

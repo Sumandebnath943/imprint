@@ -51,14 +51,14 @@ function ReviewModal({ belief, onUpdate, onClose }: ReviewModalProps) {
         style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.08)", padding: "36px" }}
         onClick={(e) => e.stopPropagation()} initial={{ scale: 0.93, y: 16 }} animate={{ scale: 1, y: 0 }}>
         <h3 className="font-semibold text-white mb-1" style={{ fontSize: 20 }}>Revisiting a belief</h3>
-        <p className="text-sm mb-5" style={{ color: "rgba(255,255,255,0.40)" }}>{daysSince} days since you recorded this</p>
+        <p className="text-sm mb-5" style={{ color: "rgba(255,255,255,0.66)" }}>{daysSince} days since you recorded this</p>
 
         <div className="rounded-xl p-4 mb-5" style={{ background: "#0D0D0D" }}>
           <p className="text-sm" style={{ color: "rgba(255,255,255,0.80)", lineHeight: 1.7 }}>{belief.belief_statement}</p>
         </div>
 
         <div className="flex items-center gap-1 mb-5">
-          <span className="text-sm" style={{ color: "rgba(255,255,255,0.45)" }}>Your original confidence:</span>
+          <span className="text-sm" style={{ color: "rgba(255,255,255,0.72)" }}>Your original confidence:</span>
           <span className="ml-2 text-sm font-semibold" style={{ color: CONFIDENCE_COLOR(belief.confidence_level) }}>
             {belief.confidence_level}/10
           </span>
@@ -69,11 +69,11 @@ function ReviewModal({ belief, onUpdate, onClose }: ReviewModalProps) {
         {/* Slider */}
         <div className="mb-1 text-center">
           <span className="font-bold" style={{ fontSize: 32, color: "#FF5500" }}>{conf}</span>
-          <span className="text-sm" style={{ color: "rgba(255,255,255,0.40)" }}>/10</span>
+          <span className="text-sm" style={{ color: "rgba(255,255,255,0.66)" }}>/10</span>
         </div>
         <input type="range" min={1} max={10} value={conf} onChange={(e) => setConf(Number(e.target.value))}
           className="w-full mb-1" style={{ accentColor: "#FF5500" }} />
-        <div className="flex justify-between text-xs mb-5" style={{ color: "rgba(255,255,255,0.30)" }}>
+        <div className="flex justify-between text-xs mb-5" style={{ color: "rgba(255,255,255,0.58)" }}>
           <span>Not sure at all</span><span>{CONFIDENCE_LABEL(conf)}</span><span>Completely certain</span>
         </div>
 
@@ -169,7 +169,7 @@ export default function BeliefCard({ belief, index, onReview, onDelete }: Belief
         <p className="text-xs mb-3" style={{ color }}>{CONFIDENCE_LABEL(conf)}</p>
 
         {/* Dates */}
-        <div className="flex gap-3 text-xs mb-2" style={{ color: "rgba(255,255,255,0.35)" }}>
+        <div className="flex gap-3 text-xs mb-2" style={{ color: "rgba(255,255,255,0.62)" }}>
           <span>Recorded {relTime(belief.first_recorded)}</span>
           <span>·</span>
           <span>Reviewed {relTime(belief.last_reviewed)}</span>
@@ -177,7 +177,7 @@ export default function BeliefCard({ belief, index, onReview, onDelete }: Belief
 
         {/* Change indicator */}
         {belief.change_log.length > 0 && (
-          <p className="text-xs italic" style={{ color: "rgba(255,255,255,0.35)" }}>
+          <p className="text-xs italic" style={{ color: "rgba(255,255,255,0.62)" }}>
             Changed {belief.change_log.length}×
             {lastChange && ` — was ${lastChange.previous_confidence}/10 → ${lastChange.new_confidence}/10`}
           </p>
@@ -193,7 +193,7 @@ export default function BeliefCard({ belief, index, onReview, onDelete }: Belief
                 style={{ border: "1px solid rgba(255,85,0,0.35)", color: "#FF5500" }}>Review</button>
               <button onClick={() => onDelete(belief.id)}
                 className="rounded-full h-8 px-4 text-xs transition-all hover:bg-red-500/10"
-                style={{ border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.40)" }}>Delete</button>
+                style={{ border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.66)" }}>Delete</button>
             </motion.div>
           )}
         </AnimatePresence>

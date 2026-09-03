@@ -42,14 +42,14 @@ export function DriftHero({ current, previous, nextCalibrationAvailable, nextCal
       {/* LEFT */}
       <div className="flex-1" style={{ minWidth: 280 }}>
         <h1 className="font-bold text-white mb-1" style={{ fontSize: 32 }}>Drift Score</h1>
-        <p className="mb-8" style={{ fontSize: 15, color: "rgba(255,255,255,0.40)" }}>Your identity preservation index.</p>
+        <p className="mb-8" style={{ fontSize: 15, color: "rgba(255,255,255,0.66)" }}>Your identity preservation index.</p>
 
         {/* Big score */}
         <div className="flex items-end gap-3 mb-4">
           <span className="font-bold" style={{ fontSize: 96, lineHeight: 1, color }}>
             <CountUp to={score} color={color} />
           </span>
-          <span className="mb-3" style={{ fontSize: 32, color: "rgba(255,255,255,0.20)" }}>/ 100</span>
+          <span className="mb-3" style={{ fontSize: 32, color: "rgba(255,255,255,0.50)" }}>/ 100</span>
         </div>
 
         {/* Status badge */}
@@ -65,9 +65,9 @@ export function DriftHero({ current, previous, nextCalibrationAvailable, nextCal
               {delta <= 0 ? `↓ ${Math.abs(delta)}` : `↑ ${delta}`} points since last calibration
             </span>
           ) : (
-            <span style={{ fontSize: 15, color: "rgba(255,255,255,0.35)" }}>No change since last calibration</span>
+            <span style={{ fontSize: 15, color: "rgba(255,255,255,0.62)" }}>No change since last calibration</span>
           )}
-          <span style={{ fontSize: 13, color: "rgba(255,255,255,0.30)" }}>
+          <span style={{ fontSize: 13, color: "rgba(255,255,255,0.58)" }}>
             Last calibration: {formatScoreDate(current.created_at)}
           </span>
         </div>
@@ -77,7 +77,7 @@ export function DriftHero({ current, previous, nextCalibrationAvailable, nextCal
       <div className="flex flex-col items-center gap-4">
         <DriftRing score={score} size={240} strokeWidth={12} showCenter signals={orbitalSignals} />
         <div className="text-center">
-          <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>Next calibration:</p>
+          <p className="text-xs" style={{ color: "rgba(255,255,255,0.62)" }}>Next calibration:</p>
           <p className="text-sm font-medium" style={{ color: nextCalibrationAvailable ? "#FF5500" : "white" }}>
             {nextCalibrationAvailable ? "Available now" : (nextCalibrationDate ?? "In 2 weeks")}
           </p>
@@ -121,7 +121,7 @@ export function DriftZoneBar({ score }: { score: number }) {
             ))}
           </div>
         </div>
-        <p className="text-sm italic shrink-0" style={{ color: "rgba(255,255,255,0.30)" }}>Lower is better.</p>
+        <p className="text-sm italic shrink-0" style={{ color: "rgba(255,255,255,0.58)" }}>Lower is better.</p>
       </div>
     </motion.div>
   );

@@ -256,7 +256,7 @@ export default function ProblemSection() {
           <p className="text-[#FF6B00] font-medium text-base md:text-lg mb-3 relative z-10 drop-shadow-[0_0_10px_rgba(255,85,0,0.3)]">
             IMPRINT is the only engine built to stop it.
           </p>
-          <p className="text-white/40 text-sm md:text-[15px] max-w-xl mb-8 relative z-10 leading-relaxed font-light">
+          <p className="text-white/65 text-sm md:text-[15px] max-w-xl mb-8 relative z-10 leading-relaxed font-light">
             Secure your creative instinct. Build your cognitive vault today, and prevent the machine from quietly replacing you.
           </p>
 

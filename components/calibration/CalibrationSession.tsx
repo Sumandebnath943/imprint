@@ -144,11 +144,11 @@ export default function CalibrationSessionView({ session, sessionNumber, onCompl
         <span className="font-semibold uppercase tracking-widest" style={{ fontSize: 12, color: "#FF5500" }}>
           CALIBRATION SESSION {sessionNumber}
         </span>
-        <span style={{ fontSize: 14, color: "rgba(255,255,255,0.40)" }}>
+        <span style={{ fontSize: 14, color: "rgba(255,255,255,0.66)" }}>
           Prompt {currentIdx + 1} of {total}
         </span>
         <div className="flex items-center gap-4">
-          <span className="font-mono" style={{ fontSize: 14, color: "rgba(255,255,255,0.35)" }}>
+          <span className="font-mono" style={{ fontSize: 14, color: "rgba(255,255,255,0.62)" }}>
             {formatTime(elapsed)}
           </span>
           <button onClick={handlePause}
@@ -171,7 +171,7 @@ export default function CalibrationSessionView({ session, sessionNumber, onCompl
           <div className="relative z-10">
             {/* Label + badge */}
             <div className="flex items-center gap-3 mb-6">
-              <span className="text-xs uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.30)" }}>
+              <span className="text-xs uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.58)" }}>
                 Prompt {currentIdx + 1} of {total}
               </span>
               <span className="text-xs rounded-full px-3 py-1"
@@ -190,7 +190,7 @@ export default function CalibrationSessionView({ session, sessionNumber, onCompl
 
             {/* Authenticity note */}
             <div className="mb-6 rounded-xl px-4 py-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
-              <p className="text-sm italic" style={{ color: "rgba(255,255,255,0.40)" }}>
+              <p className="text-sm italic" style={{ color: "rgba(255,255,255,0.66)" }}>
                 ⚡ You answered a similar prompt during your Baseline Imprint. Answer naturally — do not try to match your previous response. The engine measures authenticity, not consistency.
               </p>
             </div>
@@ -238,7 +238,7 @@ export default function CalibrationSessionView({ session, sessionNumber, onCompl
             style={{ border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.60)" }}>
             ← Back
           </button>
-          <span className="text-xs italic" style={{ color: "rgba(255,255,255,0.20)" }}>
+          <span className="text-xs italic" style={{ color: "rgba(255,255,255,0.50)" }}>
             Don&apos;t overthink. Write what comes to you first.
           </span>
         </div>
