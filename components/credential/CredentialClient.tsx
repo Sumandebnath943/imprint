@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Download, Copy, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import html2canvas from "html2canvas";
+import { CLUSTER_LABELS } from "@/lib/onboarding/modules";
 
 export interface CredentialProfile {
   id: string;
@@ -242,7 +243,7 @@ export default function CredentialClient({ profile, driftScore, stats }: Credent
                 <span className="block text-[28px] font-bold text-white mb-2 leading-none">{profile.full_name || "Anonymous User"}</span>
                 <div className="flex items-center gap-2">
                   <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium" style={{ background: "rgba(255,85,0,0.10)", border: "1px solid rgba(255,85,0,0.25)", color: "#FF5500" }}>{profile.profession || "Undefined"}</span>
-                  <span className="px-2.5 py-0.5 rounded-full text-[11px]" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.60)" }}>{profile.profession_cluster || "No Cluster"}</span>
+                  <span className="px-2.5 py-0.5 rounded-full text-[11px]" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.60)" }}>{profile.profession_cluster ? (CLUSTER_LABELS[profile.profession_cluster] ?? profile.profession_cluster) : "No Cluster"}</span>
                 </div>
               </div>
 

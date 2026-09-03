@@ -214,7 +214,7 @@ export default function ProfileClient({
                 <h1 className="font-bold text-white mb-3" style={{ fontSize: 32, lineHeight: 1 }}>{profile?.full_name || "Anonymous User"}</h1>
                 <div className="flex items-center gap-2 mb-3">
                   <span className="px-3 py-1 rounded-full text-[13px] font-medium" style={{ background: "rgba(255,85,0,0.10)", border: "1px solid rgba(255,85,0,0.25)", color: "#FF5500" }}>{profile?.profession || "Undefined"}</span>
-                  <span className="px-3 py-1 rounded-full text-[13px]" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.60)" }}>{profile?.profession_cluster || "No Cluster"}</span>
+                  <span className="px-3 py-1 rounded-full text-[13px]" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.60)" }}>{profile?.profession_cluster ? (CLUSTER_LABELS[profile.profession_cluster] ?? profile.profession_cluster) : "No Cluster"}</span>
                 </div>
                 <div className="flex items-center gap-2 text-[13px]" style={{ color: "rgba(255,255,255,0.35)" }}>
                   <span>IMPRINT member since {memberSinceDate}</span>

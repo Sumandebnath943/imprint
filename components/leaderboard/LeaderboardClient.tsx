@@ -116,10 +116,10 @@ export default function LeaderboardClient({ userId, isOptedIn, rankings, userRan
               <motion.div initial={{ y: 200, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2, type: "spring", stiffness: 150, damping: 20 }}
                 className="flex flex-col items-center w-36 relative z-10">
                 <div className="w-[52px] h-[52px] rounded-full flex items-center justify-center text-lg font-bold mb-3 z-20" style={{ background: "#C0C0C0", color: "black", border: "3px solid #080808" }}>{top3[1].full_name.charAt(0)}</div>
-                <div className="w-full flex flex-col items-center pt-8 pb-4 rounded-t-xl" style={{ background: "rgba(255,255,255,0.06)", borderTop: "1px solid rgba(255,255,255,0.12)", borderLeft: "1px solid rgba(255,255,255,0.06)", borderRight: "1px solid rgba(255,255,255,0.06)", height: 160, marginTop: -26 }}>
+                <div className="relative w-full flex flex-col items-center pt-8 pb-4 rounded-t-xl" style={{ background: "rgba(255,255,255,0.06)", borderTop: "1px solid rgba(255,255,255,0.12)", borderLeft: "1px solid rgba(255,255,255,0.06)", borderRight: "1px solid rgba(255,255,255,0.06)", height: 160, marginTop: -26 }}>
                   <p className="font-semibold text-white text-[14px] mb-1">{top3[1].full_name}</p>
                   <p className="font-bold text-white text-[22px]">{top3[1].imprint_score}</p>
-                  <div className="absolute top-1/2 rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold" style={{ background: "#C0C0C0", color: "black", marginTop: -16 }}>2</div>
+                  <div className="absolute left-1/2 -translate-x-1/2 bottom-4 rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold" style={{ background: "#C0C0C0", color: "black" }}>2</div>
                 </div>
               </motion.div>
             )}
@@ -129,10 +129,10 @@ export default function LeaderboardClient({ userId, isOptedIn, rankings, userRan
               className="flex flex-col items-center w-40 relative z-20">
               <div className="text-[#FFD700] mb-1">👑</div>
               <div className="w-[64px] h-[64px] rounded-full flex items-center justify-center text-xl font-bold mb-3 z-20" style={{ background: "#FFD700", color: "black", border: "4px solid #080808" }}>{top3[0].full_name.charAt(0)}</div>
-              <div className="w-full flex flex-col items-center pt-10 pb-4 rounded-t-xl" style={{ background: "rgba(255,85,0,0.15)", borderTop: "1px solid rgba(255,85,0,0.30)", borderLeft: "1px solid rgba(255,85,0,0.15)", borderRight: "1px solid rgba(255,85,0,0.15)", height: 200, marginTop: -32 }}>
+              <div className="relative w-full flex flex-col items-center pt-10 pb-4 rounded-t-xl" style={{ background: "rgba(255,85,0,0.15)", borderTop: "1px solid rgba(255,85,0,0.30)", borderLeft: "1px solid rgba(255,85,0,0.15)", borderRight: "1px solid rgba(255,85,0,0.15)", height: 200, marginTop: -32 }}>
                 <p className="font-bold text-white text-[16px] mb-1">{top3[0].full_name}</p>
                 <p className="font-bold text-[#FF5500] text-[28px]">{top3[0].imprint_score}</p>
-                <div className="absolute top-1/2 rounded-full w-10 h-10 flex items-center justify-center text-sm font-bold" style={{ background: "#FFD700", color: "black", marginTop: -20 }}>1</div>
+                <div className="absolute left-1/2 -translate-x-1/2 bottom-4 rounded-full w-10 h-10 flex items-center justify-center text-sm font-bold" style={{ background: "#FFD700", color: "black" }}>1</div>
               </div>
             </motion.div>
 
@@ -141,10 +141,10 @@ export default function LeaderboardClient({ userId, isOptedIn, rankings, userRan
               <motion.div initial={{ y: 200, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1, type: "spring", stiffness: 150, damping: 20 }}
                 className="flex flex-col items-center w-36 relative z-10">
                 <div className="w-[48px] h-[48px] rounded-full flex items-center justify-center text-base font-bold mb-3 z-20" style={{ background: "#CD7F32", color: "white", border: "3px solid #080808" }}>{top3[2].full_name.charAt(0)}</div>
-                <div className="w-full flex flex-col items-center pt-6 pb-4 rounded-t-xl" style={{ background: "rgba(255,184,0,0.08)", borderTop: "1px solid rgba(255,184,0,0.20)", borderLeft: "1px solid rgba(255,184,0,0.08)", borderRight: "1px solid rgba(255,184,0,0.08)", height: 130, marginTop: -24 }}>
+                <div className="relative w-full flex flex-col items-center pt-6 pb-4 rounded-t-xl" style={{ background: "rgba(255,184,0,0.08)", borderTop: "1px solid rgba(255,184,0,0.20)", borderLeft: "1px solid rgba(255,184,0,0.08)", borderRight: "1px solid rgba(255,184,0,0.08)", height: 130, marginTop: -24 }}>
                   <p className="font-semibold text-white text-[14px] mb-1">{top3[2].full_name}</p>
                   <p className="font-bold text-white text-[20px]">{top3[2].imprint_score}</p>
-                  <div className="absolute top-1/2 rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold" style={{ background: "#CD7F32", color: "white", marginTop: -16 }}>3</div>
+                  <div className="absolute left-1/2 -translate-x-1/2 bottom-4 rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold" style={{ background: "#CD7F32", color: "white" }}>3</div>
                 </div>
               </motion.div>
             )}

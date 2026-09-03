@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, PlusCircle } from "lucide-react";
 import type { VaultSkill } from "@/lib/vault/types";
 import { SUGGESTED_SKILLS } from "@/lib/vault/types";
+import { CLUSTER_LABELS } from "@/lib/onboarding/modules";
 
 interface AddSkillPanelProps {
   userCluster: string;
@@ -22,7 +23,7 @@ export function AddSkillPanel({ userCluster, existingSkills, onAdd }: AddSkillPa
   const suggested = (SUGGESTED_SKILLS[userCluster] ?? SUGGESTED_SKILLS.life_personal)
     .filter((s) => !existingNames.has(s.toLowerCase()));
 
-  const clusterLabel = userCluster.replace(/_/g, " ");
+  const clusterLabel = CLUSTER_LABELS[userCluster] ?? userCluster.replace(/_/g, " ");
 
   const handleAdd = async (name: string, str: number) => {
     if (!name.trim() || adding) return;

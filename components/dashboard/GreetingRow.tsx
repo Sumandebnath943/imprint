@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import type { DashboardProfile } from "@/lib/dashboard/types";
 import { getGreeting, getFirstName } from "@/lib/dashboard/types";
 import { Flame } from "lucide-react";
+import { CLUSTER_LABELS } from "@/lib/onboarding/modules";
 
 interface GreetingRowProps {
   profile: DashboardProfile | null;
@@ -44,7 +45,10 @@ export default function GreetingRow({ profile, streak }: GreetingRowProps) {
               fontFamily: "Space Grotesk, sans-serif",
             }}
           >
-            {profile.profession}{profile.profession_cluster ? ` · ${profile.profession_cluster}` : ""}
+            {profile.profession}
+            {profile.profession_cluster
+              ? ` · ${CLUSTER_LABELS[profile.profession_cluster] ?? profile.profession_cluster}`
+              : ""}
           </span>
         )}
       </div>

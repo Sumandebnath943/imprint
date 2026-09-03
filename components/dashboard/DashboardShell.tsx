@@ -38,8 +38,13 @@ export default function DashboardShell({ children, profile, driftScore }: Dashbo
   const sidebarWidth = collapsed ? COLLAPSED_W : EXPANDED_W;
 
   return (
+    // overflow-x-hidden: several pages place a decorative ghost-word watermark
+    // at right-[-10%]. Each carries overflow-hidden, but that clips its own
+    // children, not the element itself, so the word extended past the viewport
+    // and gave Settings and the Credential page a real horizontal scrollbar.
+    // Clipping at the shell fixes every page and stops the next one recurring.
     <div
-      className="min-h-screen"
+      className="min-h-screen overflow-x-hidden"
       style={{ background: "#080808", fontFamily: "Space Grotesk, sans-serif" }}
     >
       {/* Ambient glow — top-right, fixed */}

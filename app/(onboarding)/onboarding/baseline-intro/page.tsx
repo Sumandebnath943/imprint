@@ -138,19 +138,9 @@ export default function BaselineIntroPage() {
           ))}
         </motion.div>
 
-        {/* CTA */}
-        <motion.button
-          onClick={handleBegin}
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.32 }}
-          whileHover={{ scale: 1.02, boxShadow: "0 0 40px rgba(255,85,0,0.40)" }}
-          whileTap={{ scale: 0.97 }}
-          className="h-14 px-10 rounded-pill text-white font-medium text-base"
-          style={{ background: "#FF5500", boxShadow: "0 0 24px rgba(255,85,0,0.25)" }}
-        >
-          Begin My Baseline →
-        </motion.button>
+        {/* The CTA lives in BottomNav, as it does on every other step that has
+            one. A second copy used to sit here and was overlapped by that
+            fixed bar — its lower third rendered behind the nav. */}
       </div>
 
       <div className="h-28" />
