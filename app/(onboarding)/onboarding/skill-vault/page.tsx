@@ -50,7 +50,7 @@ export default function SkillVaultPage() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden px-6 py-32">
+    <div className="relative min-h-screen flex flex-col overflow-hidden px-6 pt-28 pb-28 md:pt-[72px] md:pb-[84px] md:h-full">
       {/* Ghost word */}
       <div
         className="fixed select-none pointer-events-none"
@@ -222,7 +222,7 @@ export default function SkillVaultPage() {
         </motion.div>
       </div>
 
-      <div className="h-28" />
+      <div className="h-28 md:hidden" />
 
       <BottomNav
         step={STEP}

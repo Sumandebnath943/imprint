@@ -54,7 +54,7 @@ export default function BaselineIntroPage() {
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden px-6 py-32">
+    <div className="relative min-h-screen flex flex-col items-center justify-center md:justify-start overflow-hidden px-6 pt-28 pb-28 md:pt-[72px] md:pb-[84px] md:h-full">
       {/* Ghost word */}
       <div
         className="fixed select-none pointer-events-none"
@@ -82,7 +82,7 @@ export default function BaselineIntroPage() {
         )}
       </AnimatePresence>
 
-      <div className="relative z-10 max-w-[680px] w-full mx-auto text-center">
+      <div className="relative z-10 max-w-[680px] w-full mx-auto text-center md:flex-1 md:min-h-0 md:overflow-y-auto md:pr-2">
         {/* Headline */}
         <motion.h1
           initial={{ opacity: 0, y: 24 }}
@@ -143,7 +143,7 @@ export default function BaselineIntroPage() {
             fixed bar — its lower third rendered behind the nav. */}
       </div>
 
-      <div className="h-28" />
+      <div className="h-28 md:hidden" />
 
       <BottomNav
         step={STEP}

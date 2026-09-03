@@ -31,13 +31,19 @@ export default function OnboardingShell({ children }: { children: ReactNode }) {
   }, [profile, currentStep, router]);
 
   return (
+    // The onboarding flow is a guided sequence, so each step should fit the
+    // screen rather than hiding its input below the fold. Above md the shell
+    // is exactly one viewport tall and never scrolls; each step fills it and
+    // gives its own long region (a profession grid, a prompt) internal scroll.
+    // Below md it falls back to normal page scrolling, which is expected on a
+    // phone and the only way this much content stays usable there.
     <div
-      className="relative min-h-screen overflow-x-hidden"
+      className="relative overflow-x-hidden md:h-[100dvh] md:overflow-hidden"
       style={{ background: "#080808", fontFamily: "Space Grotesk, sans-serif" }}
     >
       <ProgressBar step={currentStep} total={TOTAL_STEPS} />
       <OnboardingTopBar onSaveExit={handleSaveExit} />
-      <main className="min-h-screen">{children}</main>
+      <main className="min-h-screen md:h-full md:min-h-0">{children}</main>
     </div>
   );
 }

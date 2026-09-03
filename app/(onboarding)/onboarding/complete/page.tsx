@@ -74,7 +74,7 @@ export default function CompletePage() {
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden px-6 py-20">
+    <div className="relative min-h-screen flex flex-col items-center justify-center md:justify-start overflow-hidden px-6 pt-28 pb-28 md:pt-[72px] md:pb-[84px] md:h-full">
       {/* Ghost word */}
       <div
         className="fixed select-none pointer-events-none"
@@ -108,7 +108,7 @@ export default function CompletePage() {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 flex flex-col items-center text-center max-w-[600px] w-full"
+        className="relative z-10 flex flex-col items-center text-center max-w-[600px] w-full md:flex-1 md:min-h-0 md:overflow-y-auto md:pr-2"
       >
         {/* Sonar pulse icon */}
         <div className="relative w-20 h-20 flex items-center justify-center mb-10">

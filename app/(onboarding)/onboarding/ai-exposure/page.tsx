@@ -32,7 +32,7 @@ export default function AIExposurePage() {
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col overflow-hidden px-6 py-32">
+    <div className="relative min-h-screen flex flex-col overflow-hidden px-6 pt-28 pb-28 md:pt-[72px] md:pb-[84px] md:h-full">
       {/* Ghost word */}
       <div
         className="fixed select-none pointer-events-none"
@@ -41,7 +41,7 @@ export default function AIExposurePage() {
         HONEST
       </div>
 
-      <div className="relative z-10 max-w-[720px] w-full mx-auto">
+      <div className="relative z-10 max-w-[720px] w-full mx-auto md:flex-1 md:min-h-0 md:overflow-y-auto md:pr-2">
         {/* Headline */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -59,7 +59,7 @@ export default function AIExposurePage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.1 }}
-          className="mb-12"
+          className="mb-12 md:mb-6"
           style={{ fontSize: 17, color: "rgba(255,255,255,0.50)", lineHeight: 1.7 }}
         >
           No judgment. We need to know your starting point to measure your drift accurately.
@@ -70,7 +70,7 @@ export default function AIExposurePage() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="mb-12"
+          className="mb-12 md:mb-6"
         >
           <p className="uppercase tracking-widest text-xs font-medium mb-5" style={{ color: "rgba(255,255,255,0.50)" }}>
             How heavily do you currently use AI tools?
@@ -105,7 +105,7 @@ export default function AIExposurePage() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 }}
-          className="mb-10"
+          className="mb-10 md:mb-5"
         >
           <p className="uppercase tracking-widest text-xs font-medium mb-1" style={{ color: "rgba(255,255,255,0.50)" }}>
             What do you use AI for?
@@ -165,7 +165,7 @@ export default function AIExposurePage() {
         </motion.div>
       </div>
 
-      <div className="h-28" />
+      <div className="h-28 md:hidden" />
 
       <BottomNav
         step={STEP}

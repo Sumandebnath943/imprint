@@ -15,7 +15,7 @@ export default function WelcomePage() {
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden px-6 py-32">
+    <div className="relative min-h-screen flex flex-col items-center justify-center md:justify-start overflow-hidden px-6 pt-28 pb-28 md:pt-[72px] md:pb-[84px] md:h-full">
       {/* Ghost word */}
       <div
         className="absolute select-none pointer-events-none"
@@ -35,13 +35,13 @@ export default function WelcomePage() {
         IDENTITY
       </div>
 
-      <div className="relative z-10 max-w-[720px] w-full mx-auto">
+      <div className="relative z-10 max-w-[720px] w-full mx-auto md:flex-1 md:min-h-0 md:overflow-y-auto md:pr-2">
         {/* Badge */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-8"
+          className="mb-8 md:mb-4"
         >
           <span
             className="inline-flex items-center px-4 py-2 rounded-pill text-xs font-medium uppercase tracking-widest"
@@ -56,7 +56,7 @@ export default function WelcomePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-8"
+          className="mb-8 md:mb-4"
         >
           <h1 className="font-bold leading-[0.95]" style={{ fontSize: "clamp(40px,6vw,64px)" }}>
             <span className="text-white block">Before we begin,</span>
@@ -69,7 +69,7 @@ export default function WelcomePage() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
-          className="leading-[1.8] mb-12"
+          className="leading-[1.8] mb-12 md:mb-6"
           style={{ fontSize: 18, color: "rgba(255,255,255,0.60)", maxWidth: 560 }}
         >
           IMPRINT will never write for you. Never think for you. Never replace you. Everything you do here is raw, unassisted, and entirely yours.
@@ -84,7 +84,7 @@ export default function WelcomePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.28, ease: [0.16, 1, 0.3, 1] }}
-          className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-12"
+          className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-12 md:gap-4 md:mb-6"
         >
           {/* What IMPRINT does */}
           <div

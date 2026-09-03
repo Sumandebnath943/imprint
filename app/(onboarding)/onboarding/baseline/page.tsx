@@ -255,7 +255,7 @@ export default function BaselinePage() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative min-h-screen overflow-hidden md:h-full md:min-h-0 md:flex md:flex-col md:pb-[84px]">
       {/* Ghost word */}
       <div
         className="fixed select-none pointer-events-none"
@@ -284,10 +284,10 @@ export default function BaselinePage() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="relative z-10 max-w-[720px] mx-auto px-6 pt-24 pb-36"
+          className="relative z-10 max-w-[720px] mx-auto px-6 pt-24 pb-36 md:w-full md:flex-1 md:min-h-0 md:overflow-y-auto md:pt-16 md:pb-6"
         >
           {/* Module label */}
-          <div className="mb-8">
+          <div className="mb-8 md:mb-4">
             <p className="uppercase tracking-widest text-xs mb-3" style={{ color: "rgba(255,255,255,0.62)" }}>
               Baseline Module {moduleIndex + 1} of {modules.length}
             </p>
@@ -301,13 +301,13 @@ export default function BaselinePage() {
           </div>
 
           {/* Headline */}
-          <h2 className="font-bold text-white mb-6" style={{ fontSize: "clamp(28px,4vw,40px)", lineHeight: 1.2 }}>
+          <h2 className="font-bold text-white mb-6 md:mb-3" style={{ fontSize: "clamp(24px,3vw,40px)", lineHeight: 1.2 }}>
             {currentModule.headline}
           </h2>
 
           {/* Prompt */}
           <div
-            className="rounded-2xl p-6 mb-8"
+            className="rounded-2xl p-6 mb-8 md:p-4 md:mb-4"
             style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}
           >
             <p className="whitespace-pre-line leading-relaxed" style={{ fontSize: 16, color: "rgba(255,255,255,0.65)", lineHeight: 1.8 }}>
@@ -332,7 +332,7 @@ export default function BaselinePage() {
           ) : currentModule.allowVoiceAlternative ? (
             <div>
               {/* Mode toggle */}
-              <div className="flex gap-3 mb-5">
+              <div className="flex gap-3 mb-5 md:mb-3">
                 {(["text", "audio"] as InputMode[]).map((m) => {
                   const labels = { text: "Write", audio: "Voice" };
                   const icons = { text: FileText, audio: Mic };
@@ -362,7 +362,7 @@ export default function BaselinePage() {
                   timerSeconds={currentModule.timed ? currentModule.timed * 60 : 0}
                   onTimerEnd={handleContinue}
                   disableBackspace={currentModule.disableBackspace}
-                  minHeight={200}
+                  minHeight={150}
                 />
               ) : (
                 <VoiceRecorder onRecordingComplete={(blob, _secs) => { setAudioBlob(blob); }} />
@@ -375,7 +375,7 @@ export default function BaselinePage() {
               timerSeconds={currentModule.timed ? currentModule.timed * 60 : 0}
               onTimerEnd={handleContinue}
               disableBackspace={currentModule.disableBackspace}
-              minHeight={200}
+              minHeight={150}
             />
           )}
 

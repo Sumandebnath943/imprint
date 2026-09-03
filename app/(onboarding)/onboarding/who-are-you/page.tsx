@@ -42,7 +42,7 @@ export default function WhoAreYouPage() {
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col overflow-hidden px-6 py-32">
+    <div className="relative min-h-screen flex flex-col overflow-hidden px-6 pt-28 pb-28 md:pt-[72px] md:pb-[100px] md:h-full">
       {/* Ghost word */}
       <div
         className="fixed select-none pointer-events-none"
@@ -51,13 +51,13 @@ export default function WhoAreYouPage() {
         HUMAN
       </div>
 
-      <div className="relative z-10 max-w-[720px] w-full mx-auto">
+      <div className="relative z-10 max-w-[720px] w-full mx-auto flex flex-col md:flex-1 md:min-h-0">
         {/* Headline */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-4"
+          className="mb-4 md:mb-3"
         >
           <h1 className="font-bold leading-tight" style={{ fontSize: "clamp(36px,5vw,48px)" }}>
             <span className="text-white">Tell us who </span>
@@ -69,7 +69,7 @@ export default function WhoAreYouPage() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.08 }}
-          className="mb-12"
+          className="mb-12 md:mb-6"
           style={{ fontSize: 17, color: "rgba(255,255,255,0.50)", maxWidth: 500, lineHeight: 1.7 }}
         >
           Not your job title. Not your LinkedIn bio.<br />Who you actually are, right now.
@@ -80,7 +80,7 @@ export default function WhoAreYouPage() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.14 }}
-          className="mb-10"
+          className="mb-10 md:mb-6"
         >
           <p className="uppercase tracking-widest text-xs font-medium mb-4" style={{ color: "rgba(255,255,255,0.50)" }}>
             How old are you?
@@ -111,6 +111,7 @@ export default function WhoAreYouPage() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.20 }}
+          className="flex flex-col md:flex-1 md:min-h-0"
         >
           <p className="uppercase tracking-widest text-xs font-medium mb-4" style={{ color: "rgba(255,255,255,0.50)" }}>
             What do you do?
@@ -137,7 +138,7 @@ export default function WhoAreYouPage() {
           </div>
 
           {/* Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6 md:flex-1 md:min-h-0 md:overflow-y-auto md:content-start md:pr-1">
             {filteredProfessions.map((p) => {
               const selected = answers.profession === p.name;
               const clusterColor = CLUSTER_COLORS[p.cluster] ?? "#FF5500";
@@ -186,7 +187,7 @@ export default function WhoAreYouPage() {
       </div>
 
       {/* Bottom spacer */}
-      <div className="h-28" />
+      <div className="h-28 md:hidden" />
 
       <BottomNav
         step={STEP}
