@@ -3,10 +3,49 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: "IMPRINT Identity Credential",
-  description: "A verified record of identity preservation.",
-};
+// Dynamic share card: a credential link posted to LinkedIn or X should show
+// the holder's name and score, not a generic site title.
+export async function generateMetadata(
+  { params }: { params: { code: string } }
+): Promise<Metadata> {
+  const supabase = createClient();
+  const { data: profile } = await supabase
+    .from("public_profiles")
+    .select("full_name, profession, imprint_score")
+    .eq("credential_code", params.code)
+    .eq("credential_public", true)
+    .maybeSingle();
+
+  if (!profile) {
+    return {
+      title: "Credential not found",
+      robots: { index: false, follow: false },
+    };
+  }
+
+  const name = profile.full_name || "An IMPRINT member";
+  const title = `${name} — IMPRINT Identity Credential`;
+  const description = `${name}${
+    profile.profession ? `, ${profile.profession},` : ""
+  } scores ${profile.imprint_score ?? 0}/1000 on IMPRINT — a verified record of identity preservation in the age of AI.`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "profile",
+      images: [`/api/credential/${params.code}/badge.png`],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [`/api/credential/${params.code}/badge.png`],
+    },
+  };
+}
 
 export default async function PublicCredentialPage({ params }: { params: { code: string } }) {
   const supabase = createClient();

@@ -1,11 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, Search } from "lucide-react";
+import { Bell } from "lucide-react";
 import type { DashboardProfile, DashboardDriftScore } from "@/lib/dashboard/types";
 import { getDriftColor } from "@/lib/dashboard/types";
+import { createClient } from "@/lib/supabase/client";
+
+interface Notification {
+  id: string;
+  label: string;
+  detail: string;
+  href: string;
+}
 
 const PAGE_TITLES: Record<string, string> = {
   "/dashboard": "Dashboard",
@@ -33,7 +41,84 @@ interface TopBarProps {
 export default function TopBar({ profile, driftScore, sidebarWidth }: TopBarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const [hasNotif] = useState(false);
+
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const notifRef = useRef<HTMLDivElement>(null);
+  const hasNotif = notifications.length > 0;
+
+  // Derived from data the user already has, rather than a notifications table:
+  // challenges coming due, time capsules that have unlocked, and incoming
+  // mentorship requests. Previously the bell was hardcoded to never light up.
+  const loadNotifications = useCallback(async () => {
+    if (!profile?.id) return;
+    try {
+      const supabase = createClient();
+      const today = new Date().toISOString().split("T")[0];
+
+      const [challenges, capsules, requests] = await Promise.all([
+        supabase
+          .from("vault_challenges")
+          .select("id, challenge_title, due_date")
+          .eq("user_id", profile.id)
+          .eq("status", "pending")
+          .lte("due_date", today)
+          .limit(5),
+        supabase
+          .from("time_capsules")
+          .select("id, title, unlock_date")
+          .eq("user_id", profile.id)
+          .eq("is_unlocked", false)
+          .lte("unlock_date", today)
+          .limit(5),
+        supabase
+          .from("mentorship_requests")
+          .select("id, status")
+          .eq("mentor_id", profile.id)
+          .eq("status", "pending")
+          .limit(5),
+      ]);
+
+      const next: Notification[] = [
+        ...(challenges.data ?? []).map((c) => ({
+          id: `challenge-${c.id}`,
+          label: "Challenge due",
+          detail: c.challenge_title,
+          href: "/dashboard/vault",
+        })),
+        ...(capsules.data ?? []).map((c) => ({
+          id: `capsule-${c.id}`,
+          label: "Time capsule unlocked",
+          detail: c.title,
+          href: "/dashboard/time-capsule",
+        })),
+        ...(requests.data ?? []).map((r) => ({
+          id: `request-${r.id}`,
+          label: "Mentorship request",
+          detail: "Someone asked you to mentor them",
+          href: "/dashboard/mentors",
+        })),
+      ];
+
+      setNotifications(next);
+    } catch (err) {
+      console.error("[TopBar] notifications failed", err);
+    }
+  }, [profile?.id]);
+
+  useEffect(() => { loadNotifications(); }, [loadNotifications]);
+
+  // Close the panel on outside click.
+  useEffect(() => {
+    if (!notifOpen) return;
+    const onDown = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setNotifOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [notifOpen]);
 
   const title = PAGE_TITLES[pathname] ?? "Dashboard";
   const score = driftScore?.score ?? 0;
@@ -69,15 +154,56 @@ export default function TopBar({ profile, driftScore, sidebarWidth }: TopBarProp
       {/* Right cluster */}
       <div className="flex items-center gap-3">
         {/* Bell */}
-        <button className="relative p-1.5 rounded-lg transition-colors hover:bg-white/5">
-          <Bell size={20} style={{ color: "rgba(255,255,255,0.50)" }} />
-          {hasNotif && (
-            <span
-              className="absolute top-1 right-1 w-2 h-2 rounded-full"
-              style={{ background: "#FF5500", boxShadow: "0 0 6px rgba(255,85,0,0.8)" }}
-            />
+        <div className="relative" ref={notifRef}>
+          <button
+            onClick={() => setNotifOpen((o) => !o)}
+            aria-label={hasNotif ? `Notifications (${notifications.length} new)` : "Notifications"}
+            aria-expanded={notifOpen}
+            className="relative p-1.5 rounded-lg transition-colors hover:bg-white/5"
+          >
+            <Bell size={20} style={{ color: "rgba(255,255,255,0.50)" }} />
+            {hasNotif && (
+              <span
+                className="absolute top-1 right-1 w-2 h-2 rounded-full"
+                style={{ background: "#FF5500", boxShadow: "0 0 6px rgba(255,85,0,0.8)" }}
+              />
+            )}
+          </button>
+
+          {notifOpen && (
+            <div
+              className="absolute right-0 mt-2 w-[300px] rounded-[12px] overflow-hidden z-50"
+              style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.10)", boxShadow: "0 16px 40px rgba(0,0,0,0.6)" }}
+            >
+              <div className="px-4 py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+                <span className="text-[13px] font-semibold text-white">Needs your attention</span>
+              </div>
+
+              {notifications.length === 0 ? (
+                <p className="px-4 py-6 text-[13px] text-center" style={{ color: "rgba(255,255,255,0.35)" }}>
+                  Nothing pending. You&apos;re current.
+                </p>
+              ) : (
+                <ul className="max-h-[320px] overflow-y-auto">
+                  {notifications.map((n) => (
+                    <li key={n.id}>
+                      <button
+                        onClick={() => { setNotifOpen(false); router.push(n.href); }}
+                        className="w-full text-left px-4 py-3 transition-colors hover:bg-white/5"
+                        style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
+                      >
+                        <span className="block text-[11px] uppercase tracking-wide mb-0.5" style={{ color: "#FF5500" }}>
+                          {n.label}
+                        </span>
+                        <span className="block text-[13px] text-white truncate">{n.detail}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           )}
-        </button>
+        </div>
 
         {/* Drift score pill */}
         <Link

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { UserCheck, Star, X } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
 
 export interface MentorProfile {
   id: string; full_name: string; imprint_score: number;
@@ -27,8 +28,11 @@ interface MentorsClientProps {
 }
 
 export default function MentorsClient({ userId, myMentorship, myMentees, eligibleToMentor, availableMentors }: MentorsClientProps) {
+  const router = useRouter();
+  const discoveryRef = useRef<HTMLHeadingElement>(null);
   const [showApply, setShowApply] = useState(false);
   const [showProfile, setShowProfile] = useState<MentorProfile | null>(null);
+  const [checkingIn, setCheckingIn] = useState(false);
 
   // Apply form state
   const [bio, setBio] = useState("");
@@ -44,23 +48,65 @@ export default function MentorsClient({ userId, myMentorship, myMentees, eligibl
 
   const handleApply = async () => {
     setApplying(true);
-    await fetch("/api/mentors/apply", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mentor_bio: bio, mentoring_style: style, max_mentees: maxMentees, accepting_mentees: true }),
-    });
-    setApplying(false);
-    setShowApply(false);
-    // Ideally router.refresh() here
+    try {
+      const res = await fetch("/api/mentors/apply", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mentor_bio: bio, mentoring_style: style, max_mentees: maxMentees, accepting_mentees: true }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      toast.success("You're listed as a mentor.");
+      setShowApply(false);
+      router.refresh();
+    } catch (err) {
+      console.error("[mentors] apply failed", err);
+      toast.error("Couldn't submit your application. Try again.");
+    } finally {
+      setApplying(false);
+    }
   };
 
   const handleRequest = async (mentorId: string) => {
     setRequesting(true);
-    await fetch("/api/mentors/request", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mentor_id: mentorId, message: requestMsg }),
-    });
-    setRequesting(false);
-    setShowProfile(null);
+    try {
+      const res = await fetch("/api/mentors/request", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mentor_id: mentorId, message: requestMsg }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      toast.success("Request sent.");
+      setShowProfile(null);
+      setRequestMsg("");
+      router.refresh();
+    } catch (err) {
+      console.error("[mentors] request failed", err);
+      toast.error("Couldn't send that request. Try again.");
+    } finally {
+      setRequesting(false);
+    }
+  };
+
+  const handleCheckin = async (mentorshipId: string) => {
+    setCheckingIn(true);
+    try {
+      const res = await fetch("/api/mentors/checkin", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mentorship_id: mentorshipId }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error ?? "Failed");
+
+      toast.success(
+        data.alreadyCheckedIn
+          ? "You've already checked in today."
+          : `Check-in logged — ${data.check_in_streak} in a row.`
+      );
+      router.refresh();
+    } catch (err) {
+      console.error("[mentors] check-in failed", err);
+      toast.error("Couldn't log that check-in. Try again.");
+    } finally {
+      setCheckingIn(false);
+    }
   };
 
   return (
@@ -77,8 +123,13 @@ export default function MentorsClient({ userId, myMentorship, myMentees, eligibl
           <div className="flex gap-3">
             <button onClick={() => setShowApply(true)} className="rounded-full font-medium transition-all hover:bg-white/5"
               style={{ height: 42, padding: "0 20px", border: "1px solid rgba(255,255,255,0.20)", color: "rgba(255,255,255,0.70)", fontSize: 14 }}>Become a Mentor</button>
-            <button className="rounded-full font-medium text-white"
-              style={{ height: 42, padding: "0 20px", background: "#FF5500", fontSize: 14 }}>Find a Mentor</button>
+            <button
+              onClick={() => discoveryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+              className="rounded-full font-medium text-white"
+              style={{ height: 42, padding: "0 20px", background: "#FF5500", fontSize: 14 }}
+            >
+              Find a Mentor
+            </button>
           </div>
         </motion.div>
 
@@ -108,8 +159,14 @@ export default function MentorsClient({ userId, myMentorship, myMentees, eligibl
                 </div>
               </div>
               <div className="flex gap-2">
-                <button className="rounded-full px-4 py-2 text-sm transition-all" style={{ border: "1px solid rgba(255,255,255,0.20)", color: "white" }}>Message</button>
-                <button className="rounded-full px-4 py-2 text-sm text-white font-medium" style={{ background: "#FF5500" }}>Schedule Check-in</button>
+                <button
+                  onClick={() => handleCheckin(myMentorship.id)}
+                  disabled={checkingIn}
+                  className="rounded-full px-4 py-2 text-sm text-white font-medium disabled:opacity-50"
+                  style={{ background: "#FF5500" }}
+                >
+                  {checkingIn ? "Logging…" : "Log Check-in"}
+                </button>
               </div>
             </div>
           </motion.div>
@@ -131,7 +188,7 @@ export default function MentorsClient({ userId, myMentorship, myMentees, eligibl
         )}
 
         {/* Browse Mentors */}
-        <h2 className="font-semibold text-white mb-4" style={{ fontSize: 20 }}>Browse Mentors</h2>
+        <h2 ref={discoveryRef} className="font-semibold text-white mb-4 scroll-mt-24" style={{ fontSize: 20 }}>Browse Mentors</h2>
         <div className="grid gap-5 mb-12" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))" }}>
           {availableMentors.filter(m => m.id !== userId).map((m, i) => (
             <motion.div key={m.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
@@ -164,7 +221,20 @@ export default function MentorsClient({ userId, myMentorship, myMentees, eligibl
             </motion.div>
           ))}
           {availableMentors.length === 0 && (
-            <p className="text-sm" style={{ color: "rgba(255,255,255,0.40)" }}>No mentors available at the moment.</p>
+            <div className="rounded-[16px] p-8 text-center" style={{ background: "#111111", border: "1px dashed rgba(255,255,255,0.10)" }}>
+              <p className="text-[15px] text-white mb-2">No mentors are open right now.</p>
+              <p className="text-sm mb-5" style={{ color: "rgba(255,255,255,0.40)" }}>
+                Mentors appear here once they open their doors. If your IMPRINT
+                score is above 500, that could be you.
+              </p>
+              <button
+                onClick={() => setShowApply(true)}
+                className="rounded-full px-6 py-2.5 text-sm font-medium text-white transition-all hover:opacity-90"
+                style={{ background: "#FF5500" }}
+              >
+                Become a Mentor
+              </button>
+            </div>
           )}
         </div>
       </div>

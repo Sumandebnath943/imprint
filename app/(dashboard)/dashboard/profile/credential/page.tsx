@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Identity Credential — IMPRINT",
+  title: "Identity Credential",
   description: "Your verified IMPRINT score and identity preservation credential.",
 };
 
@@ -18,24 +18,40 @@ export default async function CredentialPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("*")
+    .select(
+      "id, full_name, username, profession, profession_cluster, imprint_score, credential_code, credential_public"
+    )
     .eq("id", user.id)
     .single();
 
-  const { data: driftScores } = await supabase
+  // `status` is not a column on drift_scores — the label column is
+  // score_label. maybeSingle() because a new user has no drift score yet,
+  // and single() throws on zero rows.
+  const { data: driftScore } = await supabase
     .from("drift_scores")
-    .select("score, status")
+    .select("score, score_label")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(1)
-    .single();
+    .maybeSingle();
 
-  // Mocked Stats (until full relations are built)
+  // Real counts, replacing the previous hardcoded {4, 12, 8}.
+  const { data: statsRows } = await supabase.rpc("credential_stats", {
+    uid: user.id,
+  });
+  const s = Array.isArray(statsRows) ? statsRows[0] : statsRows;
+
   const stats = {
-    calibrations: 4,
-    streak: 12,
-    skillsTracked: 8,
+    calibrations: s?.calibrations ?? 0,
+    streak: s?.day_streak ?? 0,
+    skillsTracked: s?.skills_tracked ?? 0,
   };
 
-  return <CredentialClient profile={profile || {}} driftScore={driftScores || null} stats={stats} />;
+  return (
+    <CredentialClient
+      profile={profile!}
+      driftScore={driftScore}
+      stats={stats}
+    />
+  );
 }

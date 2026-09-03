@@ -1,24 +1,51 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Download, Link2, Copy, Share2, CheckCircle } from "lucide-react";
+import { Download, Copy, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import html2canvas from "html2canvas";
 
+export interface CredentialProfile {
+  id: string;
+  full_name: string | null;
+  username: string | null;
+  profession: string | null;
+  profession_cluster: string | null;
+  imprint_score: number | null;
+  credential_code: string | null;
+  credential_public: boolean | null;
+}
+
+export interface CredentialStats {
+  calibrations: number;
+  streak: number;
+  skillsTracked: number;
+}
+
 interface CredentialClientProps {
-  profile: any;
-  driftScore: any;
-  stats: any;
+  profile: CredentialProfile;
+  driftScore: { score: number } | null;
+  stats: CredentialStats;
 }
 
 export default function CredentialClient({ profile, driftScore, stats }: CredentialClientProps) {
-  const [isPublic, setIsPublic] = useState(profile.credential_public || false);
+  const router = useRouter();
+  const [isPublic, setIsPublic] = useState(profile.credential_public ?? false);
+  const [savingVisibility, setSavingVisibility] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
+  const [origin, setOrigin] = useState("");
+
+  // window is not available during SSR; resolve the real origin after mount so
+  // the share link and embed snippet point at this deployment rather than a
+  // hardcoded domain.
+  useEffect(() => setOrigin(window.location.origin), []);
 
   const verificationCode = profile.credential_code || `IMPRINT-${profile.id?.substring(0,8).toUpperCase()}-XXXXXX`;
-  const shareUrl = `${typeof window !== "undefined" ? window.location.origin : "https://imprint.app"}/credential/${verificationCode}`;
-  
+  const shareUrl = `${origin}/credential/${verificationCode}`;
+
   const imprintScore = profile.imprint_score || 0;
   const dScore = driftScore?.score || 0;
   
@@ -47,23 +74,123 @@ export default function CredentialClient({ profile, driftScore, stats }: Credent
       link.href = canvas.toDataURL("image/png");
       link.click();
       toast.success("Download complete.", { id: "dl" });
-    } catch (e) {
+    } catch (err) {
+      console.error("[credential] png export failed", err);
       toast.error("Failed to generate image.", { id: "dl" });
     } finally {
       setDownloading(false);
     }
   };
 
-  const copyLink = () => {
-    navigator.clipboard.writeText(shareUrl);
-    toast.success("Link copied!");
+  // Renders the card to a canvas, then hands it to the browser's own print
+  // dialog, where "Save as PDF" is a standard destination. Avoids shipping a
+  // PDF library for a single one-page export.
+  const handleDownloadPdf = async () => {
+    const card = document.getElementById("credential-card");
+    if (!card) return;
+
+    setDownloading(true);
+    toast("Preparing PDF…", { id: "pdf" });
+
+    try {
+      const canvas = await html2canvas(card, {
+        scale: 2,
+        backgroundColor: "#080808",
+        useCORS: true,
+      });
+
+      const win = window.open("", "_blank");
+      if (!win) {
+        toast.error("Allow pop-ups to export a PDF.", { id: "pdf" });
+        return;
+      }
+
+      win.document.write(
+        `<!doctype html><html><head><title>IMPRINT Credential — ${
+          profile.full_name ?? "Credential"
+        }</title><style>
+          @page { size: auto; margin: 16mm; }
+          html,body { margin:0; padding:0; background:#fff; }
+          img { width:100%; max-width:520px; display:block; margin:0 auto; }
+        </style></head><body><img src="${canvas.toDataURL("image/png")}" /></body></html>`
+      );
+      win.document.close();
+      // Give the image a tick to decode before invoking print.
+      win.onload = () => { win.focus(); win.print(); };
+      toast.success("Choose “Save as PDF” in the print dialog.", { id: "pdf" });
+    } catch (err) {
+      console.error("[credential] pdf export failed", err);
+      toast.error("Failed to prepare PDF.", { id: "pdf" });
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const copyToClipboard = async (text: string, message: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success(message);
+    } catch {
+      toast.error("Clipboard unavailable — copy the text manually.");
+    }
+  };
+
+  const copyLink = () => copyToClipboard(shareUrl, "Link copied!");
+
+  const embedSnippet = `<a href="${shareUrl}">
+  <img src="${origin}/api/credential/${verificationCode}/badge.png"
+       alt="IMPRINT Identity Credential"
+       width="480" />
+</a>`;
+
+  const copyEmbed = () => copyToClipboard(embedSnippet, "Embed code copied!");
+
+  const shareText = `My IMPRINT score is ${imprintScore}/1000 — a measure of how much of my thinking is still my own in the age of AI.`;
+
+  const shareOn = (network: "linkedin" | "x") => {
+    if (!isPublic) {
+      toast.error("Make your credential public first.");
+      return;
+    }
+    const url =
+      network === "linkedin"
+        ? `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`
+        : `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+    window.open(url, "_blank", "noopener,noreferrer,width=600,height=600");
   };
 
   const togglePublic = async () => {
+    if (savingVisibility) return;
     const newVal = !isPublic;
+
+    // Optimistic, reverted on failure. Previously this only set local state,
+    // so a credential could never actually become publicly viewable.
     setIsPublic(newVal);
-    toast.success(`Credential is now ${newVal ? "public" : "private"}.`);
-    // Ideally patch to /api/profile/update here
+    setSavingVisibility(true);
+
+    try {
+      const res = await fetch("/api/profile/update", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential_public: newVal }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      toast.success(`Credential is now ${newVal ? "public" : "private"}.`);
+      router.refresh();
+    } catch (err) {
+      console.error("[credential] visibility update failed", err);
+      setIsPublic(!newVal);
+      toast.error("Couldn't update visibility. Try again.");
+    } finally {
+      setSavingVisibility(false);
+    }
+  };
+
+  const handleRegenerate = () => {
+    setRegenerating(true);
+    router.refresh();
+    toast.success("Credential refreshed with your latest scores.");
+    setTimeout(() => setRegenerating(false), 800);
   };
 
   return (
@@ -148,7 +275,9 @@ export default function CredentialClient({ profile, driftScore, stats }: Credent
               <div className="text-center mb-6">
                 <span className="block text-[12px] text-white/30 mb-2">Verified {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
                 <span className="block text-[11px] text-white/20 font-mono mb-1">{verificationCode}</span>
-                <span className="block text-[10px] text-white/30">Verification: imprint.app/verify/{verificationCode.split('-')[1]}</span>
+                <span className="block text-[10px] text-white/30">
+                  Verify at {origin.replace(/^https?:\/\//, "")}/credential/{verificationCode}
+                </span>
               </div>
 
               <div className="h-[1px] w-full bg-[#FF5500] opacity-50 mb-4" />
@@ -158,7 +287,13 @@ export default function CredentialClient({ profile, driftScore, stats }: Credent
           
           <div className="mt-4 text-center">
             <span className="block text-[12px] text-white/40 mb-1">Last generated: {new Date().toLocaleDateString()}</span>
-            <button className="text-[13px] text-[#FF5500] hover:underline">Regenerate data</button>
+            <button
+              onClick={handleRegenerate}
+              disabled={regenerating}
+              className="text-[13px] text-[#FF5500] hover:underline disabled:opacity-50"
+            >
+              {regenerating ? "Refreshing…" : "Regenerate data"}
+            </button>
           </div>
 
         </div>
@@ -174,7 +309,11 @@ export default function CredentialClient({ profile, driftScore, stats }: Credent
               {downloading ? "Generating PNG..." : "Download as PNG"}
             </button>
             <p className="text-[12px] text-white/40 text-center mb-2">High resolution (2x). Suitable for LinkedIn, portfolio, CV.</p>
-            <button className="w-full flex items-center justify-center gap-2 py-3 rounded-full text-[14px] font-medium text-white border border-white/20 hover:bg-white/5 transition-all">
+            <button
+              onClick={handleDownloadPdf}
+              disabled={downloading}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-full text-[14px] font-medium text-white border border-white/20 hover:bg-white/5 transition-all disabled:opacity-50"
+            >
               Download as PDF
             </button>
           </div>
@@ -204,10 +343,16 @@ export default function CredentialClient({ profile, driftScore, stats }: Credent
                 </div>
                 
                 <div className="flex flex-col gap-2">
-                  <button className="flex items-center justify-center gap-2 py-2.5 rounded-[8px] bg-[#0A66C2] hover:bg-[#0854A1] text-white text-[13px] font-medium transition-colors">
+                  <button
+                    onClick={() => shareOn("linkedin")}
+                    className="flex items-center justify-center gap-2 py-2.5 rounded-[8px] bg-[#0A66C2] hover:bg-[#0854A1] text-white text-[13px] font-medium transition-colors"
+                  >
                     <Share2 size={16} /> Share on LinkedIn
                   </button>
-                  <button className="flex items-center justify-center gap-2 py-2.5 rounded-[8px] bg-white text-black hover:bg-gray-200 text-[13px] font-medium transition-colors">
+                  <button
+                    onClick={() => shareOn("x")}
+                    className="flex items-center justify-center gap-2 py-2.5 rounded-[8px] bg-white text-black hover:bg-gray-200 text-[13px] font-medium transition-colors"
+                  >
                     <Share2 size={16} /> Share on X
                   </button>
                 </div>
@@ -226,18 +371,17 @@ export default function CredentialClient({ profile, driftScore, stats }: Credent
             <h3 className="text-[16px] font-semibold text-white mb-2">Embed</h3>
             <p className="text-[14px] text-white/40 mb-4">Add to your portfolio or README</p>
             <div className="p-4 rounded-[10px] bg-[#0D0D0D] border border-white/5 mb-3 overflow-x-auto">
-              <pre className="text-[12px] text-white/50 font-mono leading-relaxed">
-{`<a href="${shareUrl}">
-  <img src="https://imprint.app/badge.png" 
-       alt="IMPRINT Identity Credential" 
-       width="480" />
-</a>`}
+              <pre className="text-[12px] text-white/50 font-mono leading-relaxed whitespace-pre-wrap break-all">
+{embedSnippet}
               </pre>
             </div>
-            <button className="text-[13px] font-medium text-white px-4 py-2 rounded-full border border-white/20 hover:bg-white/5 transition-colors mb-2">
+            <button
+              onClick={copyEmbed}
+              className="text-[13px] font-medium text-white px-4 py-2 rounded-full border border-white/20 hover:bg-white/5 transition-colors mb-2"
+            >
               Copy Embed Code
             </button>
-            <p className="text-[12px] text-white/30 italic">The badge image auto-updates when your scores change. (Feature updating soon)</p>
+            <p className="text-[12px] text-white/30 italic">The badge image is rendered on request, so it always reflects your current scores.</p>
           </div>
 
         </div>

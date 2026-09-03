@@ -11,10 +11,67 @@ interface SettingsClientProps {
   profile: any;
 }
 
+const DELETE_PHRASE = "DELETE MY ACCOUNT";
+
 export default function SettingsClient({ profile }: SettingsClientProps) {
   const [activeSection, setActiveSection] = useState("profile");
-  
+
   const supabase = createClient();
+
+  // Leaderboard opt-in — previously a static div hardcoded to "on".
+  const [leaderboardOptIn, setLeaderboardOptIn] = useState<boolean>(
+    profile?.leaderboard_opt_in ?? false
+  );
+  const [savingLeaderboard, setSavingLeaderboard] = useState(false);
+
+  // Account deletion
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [deleting, setDeleting] = useState(false);
+
+  const toggleLeaderboard = async () => {
+    if (savingLeaderboard) return;
+    const next = !leaderboardOptIn;
+    setLeaderboardOptIn(next);
+    setSavingLeaderboard(true);
+    try {
+      const res = await fetch("/api/profile/update", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ leaderboard_opt_in: next }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      toast.success(next ? "You're on the leaderboard." : "Removed from the leaderboard.");
+    } catch (err) {
+      console.error("[settings] leaderboard toggle failed", err);
+      setLeaderboardOptIn(!next);
+      toast.error("Couldn't save that. Try again.");
+    } finally {
+      setSavingLeaderboard(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirm !== DELETE_PHRASE || deleting) return;
+    setDeleting(true);
+    try {
+      const res = await fetch("/api/account/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirmation: deleteConfirm }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error ?? "Failed to delete account");
+
+      toast.success("Your account and all its data have been deleted.");
+      // Full reload so no cached authenticated state survives.
+      window.location.href = "/";
+    } catch (err) {
+      console.error("[settings] account deletion failed", err);
+      toast.error(err instanceof Error ? err.message : "Failed to delete account.");
+      setDeleting(false);
+    }
+  };
 
   // Local state for Protocol
   const [protocolActive, setProtocolActive] = useState(profile?.ai_reduction_protocol_active || false);
@@ -537,9 +594,23 @@ export default function SettingsClient({ profile }: SettingsClientProps) {
                   <p className="text-[15px] font-medium text-white mb-1">Leaderboard Visibility</p>
                   <p className="text-[13px] text-white/50">Show me on the global leaderboard.</p>
                 </div>
-                <div className="w-11 h-6 rounded-full bg-[#FF5500] relative cursor-pointer">
-                  <div className="absolute right-1 top-1 w-4 h-4 rounded-full bg-white" />
-                </div>
+                <button
+                  onClick={toggleLeaderboard}
+                  disabled={savingLeaderboard}
+                  role="switch"
+                  aria-checked={leaderboardOptIn}
+                  aria-label="Leaderboard visibility"
+                  className="w-11 h-6 rounded-full relative cursor-pointer transition-colors disabled:opacity-60"
+                  style={{
+                    background: leaderboardOptIn ? "#FF5500" : "#1A1A1A",
+                    border: leaderboardOptIn ? "none" : "1px solid rgba(255,255,255,0.2)",
+                  }}
+                >
+                  <div
+                    className="absolute top-[2px] w-5 h-5 rounded-full bg-white transition-all"
+                    style={{ left: leaderboardOptIn ? "22px" : "2px" }}
+                  />
+                </button>
               </div>
             </motion.div>
           )}
@@ -556,11 +627,77 @@ export default function SettingsClient({ profile }: SettingsClientProps) {
                   <p className="text-[15px] font-medium text-white mb-1">Delete Account</p>
                   <p className="text-[13px] text-white/50 max-w-[300px]">Permanently delete your account and all associated data. This cannot be undone. Ever.</p>
                 </div>
-                <button className="px-6 py-2.5 rounded-full text-[14px] font-medium text-[#FF2D2D] border border-[#FF2D2D]/30 hover:bg-[#FF2D2D]/10 transition-colors shrink-0">
+                <button
+                  onClick={() => { setDeleteConfirm(""); setShowDeleteDialog(true); }}
+                  className="px-6 py-2.5 rounded-full text-[14px] font-medium text-[#FF2D2D] border border-[#FF2D2D]/30 hover:bg-[#FF2D2D]/10 transition-colors shrink-0"
+                >
                   Delete Account
                 </button>
               </div>
             </motion.div>
+          )}
+
+          {/* DELETE CONFIRMATION DIALOG */}
+          {showDeleteDialog && (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center p-6"
+              style={{ background: "rgba(0,0,0,0.82)", backdropFilter: "blur(8px)" }}
+              onClick={() => !deleting && setShowDeleteDialog(false)}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                onClick={(e) => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="delete-account-title"
+                className="w-full max-w-md rounded-[16px] p-8"
+                style={{ background: "#111111", border: "1px solid rgba(255,45,45,0.25)" }}
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <AlertTriangle size={18} className="text-[#FF2D2D]" />
+                  <h3 id="delete-account-title" className="text-[18px] font-semibold text-white">
+                    Delete your account?
+                  </h3>
+                </div>
+                <p className="text-[14px] leading-relaxed mb-6" style={{ color: "rgba(255,255,255,0.55)" }}>
+                  This permanently removes your baseline, vault, journal, drift
+                  history, credentials and circle memberships. It cannot be
+                  undone.
+                </p>
+
+                <label className="block text-[13px] mb-2" style={{ color: "rgba(255,255,255,0.55)" }}>
+                  Type <span className="font-mono text-[#FF2D2D]">{DELETE_PHRASE}</span> to confirm
+                </label>
+                <input
+                  value={deleteConfirm}
+                  onChange={(e) => setDeleteConfirm(e.target.value)}
+                  disabled={deleting}
+                  autoComplete="off"
+                  aria-label="Deletion confirmation phrase"
+                  className="w-full rounded-[10px] px-4 py-3 text-[14px] text-white font-mono outline-none mb-6 disabled:opacity-50"
+                  style={{ background: "#0A0A0A", border: "1px solid rgba(255,255,255,0.12)" }}
+                />
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowDeleteDialog(false)}
+                    disabled={deleting}
+                    className="flex-1 py-3 rounded-full text-[14px] font-medium text-white border border-white/20 hover:bg-white/5 transition-colors disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDeleteAccount}
+                    disabled={deleteConfirm !== DELETE_PHRASE || deleting}
+                    className="flex-1 py-3 rounded-full text-[14px] font-medium text-white transition-colors disabled:opacity-40"
+                    style={{ background: "#FF2D2D" }}
+                  >
+                    {deleting ? "Deleting…" : "Delete forever"}
+                  </button>
+                </div>
+              </motion.div>
+            </div>
           )}
 
         </div>

@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { X, Settings, ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { motion } from "framer-motion";
+import { Settings, ArrowLeft } from "lucide-react";
 import type { HumanCircle, CircleMember } from "@/components/circles/CirclesClient";
 import { createClient } from "@/lib/supabase/client";
 import { getZoneColor, getZoneShortLabel } from "@/lib/drift/types";
@@ -31,6 +33,7 @@ function relTime(iso: string) {
 }
 
 export default function CircleDetail({ circle, userId, onClose }: CircleDetailProps) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<"Feed" | "Members" | "Challenges" | "Leaderboard">("Feed");
   const [checkins, setCheckins] = useState<Checkin[]>([]);
   const [members, setMembers] = useState<CircleMember[]>([]);
@@ -41,6 +44,8 @@ export default function CircleDetail({ circle, userId, onClose }: CircleDetailPr
   const [cDrift, setCDrift] = useState(false);
   const [posting, setPosting] = useState(false);
   const [userScore, setUserScore] = useState<number | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   
   const supabase = createClient();
 
@@ -115,7 +120,83 @@ export default function CircleDetail({ circle, userId, onClose }: CircleDetailPr
     }
   };
 
+  // Reactions are stored in checkin_reactions, which already had insert/delete
+  // policies — nothing was ever wired to them, so the buttons did nothing.
+  const toggleReaction = async (
+    checkinId: string,
+    reactionType: "strong" | "keep_going" | "eyes"
+  ) => {
+    const existing = checkins
+      .find(c => c.id === checkinId)
+      ?.reactions?.some(r => r.reaction_type === reactionType && r.user_id === userId);
+
+    // Optimistic update, rolled back if the write fails.
+    const apply = (add: boolean) =>
+      setCheckins(prev => prev.map(c => {
+        if (c.id !== checkinId) return c;
+        const others = (c.reactions ?? []).filter(
+          r => !(r.reaction_type === reactionType && r.user_id === userId)
+        );
+        return {
+          ...c,
+          reactions: add
+            ? [...others, { reaction_type: reactionType, user_id: userId }]
+            : others,
+        };
+      }));
+
+    apply(!existing);
+
+    try {
+      if (existing) {
+        const { error } = await supabase
+          .from("checkin_reactions")
+          .delete()
+          .eq("checkin_id", checkinId)
+          .eq("user_id", userId)
+          .eq("reaction_type", reactionType);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("checkin_reactions")
+          .insert({ checkin_id: checkinId, user_id: userId, reaction_type: reactionType });
+        if (error) throw error;
+      }
+    } catch (err) {
+      console.error("[CircleDetail] reaction failed", err);
+      apply(!!existing);
+      toast.error("Couldn't save that reaction.");
+    }
+  };
+
   const isAdmin = members.find(m => m.user_id === userId)?.role === "admin";
+
+  // Migration 006 added a DELETE policy letting a member remove themselves
+  // (and an admin remove anyone), so this no longer needs a server route.
+  const handleLeave = async () => {
+    if (leaving) return;
+    if (!window.confirm(`Leave ${circle.name}? You'll need the invite code to rejoin.`)) return;
+
+    setLeaving(true);
+    try {
+      const { error } = await supabase
+        .from("circle_members")
+        .delete()
+        .eq("circle_id", circle.id)
+        .eq("user_id", userId);
+      if (error) throw error;
+
+      toast.success(`You left ${circle.name}.`);
+      setShowSettings(false);
+      onClose();
+      router.refresh();
+    } catch (err) {
+      console.error("[CircleDetail] leave failed", err);
+      toast.error("Couldn't leave the circle. Try again.");
+    } finally {
+      setLeaving(false);
+    }
+  };
 
   return (
     <motion.div className="fixed inset-0 z-50 flex flex-col" style={{ background: "#080808" }}
@@ -134,11 +215,46 @@ export default function CircleDetail({ circle, userId, onClose }: CircleDetailPr
             <button onClick={() => navigator.clipboard.writeText(circle.invite_code)} className="rounded-full h-10 px-4 text-sm font-medium transition-all hover:bg-white/5" style={{ border: "1px solid rgba(255,255,255,0.20)", color: "rgba(255,255,255,0.70)" }}>
               Invite Code: {circle.invite_code}
             </button>
-            {isAdmin && (
-              <button className="w-10 h-10 rounded-full flex items-center justify-center transition-all hover:bg-white/5" style={{ border: "1px solid rgba(255,255,255,0.20)", color: "rgba(255,255,255,0.70)" }}>
+            <div className="relative">
+              <button
+                onClick={() => setShowSettings((s) => !s)}
+                aria-label="Circle settings"
+                aria-expanded={showSettings}
+                className="w-10 h-10 rounded-full flex items-center justify-center transition-all hover:bg-white/5"
+                style={{ border: "1px solid rgba(255,255,255,0.20)", color: "rgba(255,255,255,0.70)" }}
+              >
                 <Settings size={18} />
               </button>
-            )}
+
+              {showSettings && (
+                <div
+                  className="absolute right-0 mt-2 w-[220px] rounded-[12px] overflow-hidden z-50"
+                  style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.10)", boxShadow: "0 16px 40px rgba(0,0,0,0.6)" }}
+                >
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(circle.invite_code).catch(() => {});
+                      setShowSettings(false);
+                    }}
+                    className="w-full text-left px-4 py-3 text-[13px] text-white transition-colors hover:bg-white/5"
+                    style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+                  >
+                    Copy invite code
+                  </button>
+                  <button
+                    onClick={handleLeave}
+                    disabled={leaving}
+                    className="w-full text-left px-4 py-3 text-[13px] text-[#FF2D2D] transition-colors hover:bg-[#FF2D2D]/10 disabled:opacity-50"
+                  >
+                    {leaving
+                      ? "Leaving…"
+                      : isAdmin
+                        ? "Leave circle (you're an admin)"
+                        : "Leave circle"}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -205,10 +321,24 @@ export default function CircleDetail({ circle, userId, onClose }: CircleDetailPr
                     <div className="flex gap-2">
                       {(["strong", "keep_going", "eyes"] as const).map(rt => {
                         const count = ci.reactions?.filter(r => r.reaction_type === rt).length || 0;
+                        const mine = !!ci.reactions?.some(r => r.reaction_type === rt && r.user_id === userId);
                         const icon = rt === "strong" ? "💪" : rt === "keep_going" ? "🔥" : "👀";
                         return (
-                          <button key={rt} className="flex items-center gap-1.5 rounded-full px-3 py-1 transition-all hover:bg-white/5" style={{ border: "1px solid rgba(255,255,255,0.08)" }}>
-                            <span>{icon}</span> <span className="text-xs" style={{ color: "rgba(255,255,255,0.40)" }}>{count}</span>
+                          <button
+                            key={rt}
+                            onClick={() => toggleReaction(ci.id, rt)}
+                            aria-label={`React ${icon}`}
+                            aria-pressed={mine}
+                            className="flex items-center gap-1.5 rounded-full px-3 py-1 transition-all hover:bg-white/5"
+                            style={{
+                              border: mine
+                                ? "1px solid rgba(255,85,0,0.45)"
+                                : "1px solid rgba(255,255,255,0.08)",
+                              background: mine ? "rgba(255,85,0,0.10)" : "transparent",
+                            }}
+                          >
+                            <span>{icon}</span>
+                            <span className="text-xs" style={{ color: mine ? "#FF5500" : "rgba(255,255,255,0.40)" }}>{count}</span>
                           </button>
                         );
                       })}
