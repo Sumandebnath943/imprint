@@ -87,28 +87,24 @@ async function insert(table, rows, label = table) {
 
 // ── 1. Auth user ────────────────────────────────────────────────────────────
 
-async function findOrCreateUser() {
+async function findOrCreateUser(email = EMAIL, password = PASSWORD, fullName = "Ada Kessler") {
   // listUsers is paginated; the demo account is normally on page one, but
   // walk the pages so this still works on a populated project.
   for (let page = 1; page <= 20; page++) {
     const { data, error } = await db.auth.admin.listUsers({ page, perPage: 200 });
     if (error) throw new Error(`listUsers: ${error.message}`);
-    const found = data.users.find((u) => u.email?.toLowerCase() === EMAIL.toLowerCase());
-    if (found) {
-      console.log(`Reusing existing user ${EMAIL}`);
-      return found.id;
-    }
+    const found = data.users.find((u) => u.email?.toLowerCase() === email.toLowerCase());
+    if (found) return found.id;
     if (data.users.length < 200) break;
   }
 
   const { data, error } = await db.auth.admin.createUser({
-    email: EMAIL,
-    password: PASSWORD,
+    email,
+    password,
     email_confirm: true,
-    user_metadata: { full_name: "AdaKessler" },
+    user_metadata: { full_name: fullName },
   });
-  if (error) throw new Error(`createUser: ${error.message}`);
-  console.log(`Created user ${EMAIL}`);
+  if (error) throw new Error(`createUser ${email}: ${error.message}`);
   return data.user.id;
 }
 
@@ -360,6 +356,73 @@ function computeImprintScore() {
   )));
 }
 
+/**
+ * A second opted-in account.
+ *
+ * The mentor directory excludes you from your own results (`.neq("id",
+ * user.id)`), and the leaderboard is more legible with someone to rank
+ * against — so with only one seeded account both pages demo as empty states
+ * even when they are working correctly.
+ */
+const PEER_EMAIL = "demo-peer@imprint.local";
+
+async function seedPeer() {
+  const peerId = await findOrCreateUser(PEER_EMAIL, PASSWORD, "Rea Okonkwo");
+  await wipe(peerId);
+
+  const { error } = await db.from("profiles").upsert(
+    {
+      id: peerId,
+      email: PEER_EMAIL,
+      full_name: "Rea Okonkwo",
+      username: "rea",
+      age_group: "adult_19_64",
+      profession: "Editor",
+      profession_cluster: "language_voice",
+      ai_exposure_level: "light",
+      ai_use_context: ["writing"],
+      onboarding_completed: true,
+      onboarding_step: 6,
+      imprint_score: 641,
+      bio: "Edits other people's sentences for a living. Suspicious of easy ones.",
+      location: "Lisbon",
+      credential_public: false,
+      leaderboard_opt_in: true,
+      accepting_mentees: true,
+      max_mentees: 2,
+      mentor_bio: "Twelve years editing. I can help you hear your own voice again.",
+      created_at: daysAgo(120),
+    },
+    { onConflict: "id" }
+  );
+  if (error) throw new Error(`peer profile: ${error.message}`);
+
+  const created = daysAgo(4);
+  const { week, year } = isoWeek(created);
+  await insert("drift_scores", [{
+    user_id: peerId,
+    score: 31,
+    score_label: labelFor(31),
+    delta_from_previous: -3,
+    contributing_signals: {
+      baseline_divergence: 34, vault_inactivity: 28,
+      ai_dependence: 22, journal_irregularity: 36,
+    },
+    week_number: week, year, created_at: created,
+  }], "peer drift");
+
+  await insert("skill_vault", [
+    { user_id: peerId, skill_name: "Line editing", skill_category: "expression",
+      cluster: "language_voice", strength_level: 88, times_practiced: 14,
+      last_exercised: daysAgo(2), decay_rate: 0.5, created_at: daysAgo(115) },
+    { user_id: peerId, skill_name: "Reading aloud for rhythm", skill_category: "expression",
+      cluster: "language_voice", strength_level: 74, times_practiced: 9,
+      last_exercised: daysAgo(5), decay_rate: 0.5, created_at: daysAgo(110) },
+  ], "peer skills");
+
+  console.log("  peer account           1");
+}
+
 async function seed() {
   const userId = await findOrCreateUser();
   await wipe(userId);
@@ -384,6 +447,12 @@ async function seed() {
       bio: "Building things that do not need me to explain them twice.",
       location: "Rotterdam",
       credential_public: true,
+      // Opted in so the leaderboard and mentor directory have someone in them
+      // rather than demoing as empty states.
+      leaderboard_opt_in: true,
+      accepting_mentees: true,
+      max_mentees: 3,
+      mentor_bio: "Happy to talk through estimation, problem framing, and writing without a net.",
       // Migration 007 issues these on signup; set one explicitly so the demo
       // credential and its public share link work even before 007 is applied.
       credential_code: `IMPRINT-${userId.slice(0, 8).toUpperCase()}-DEMO01`,
@@ -568,7 +637,12 @@ async function seed() {
     },
   ]);
 
-  console.log(`\nDemo account ready\n  email    ${EMAIL}\n  password ${PASSWORD}\n`);
+  await seedPeer();
+
+  console.log(
+    `\nDemo account ready\n  email    ${EMAIL}\n  password ${PASSWORD}\n` +
+    `\nPeer account (for leaderboard + mentor directory)\n  email    ${PEER_EMAIL}\n  password ${PASSWORD}\n`
+  );
 }
 
 seed().catch((err) => {
