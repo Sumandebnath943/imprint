@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { AlertTriangle, FileDown, Copy, ChevronDown } from "lucide-react";
+import {motion} from "framer-motion";
+import {AlertTriangle, FileDown, Copy} from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { WeeklyRow, CalibrationSession, DriftSignalValues, RecoveryStep } from "@/lib/drift/types";
 import { getZoneColor, getZoneShortLabel, buildRecoverySteps, formatScoreDate } from "@/lib/drift/types";

@@ -1,10 +1,10 @@
 "use client";
 
 import { motion, animate } from "framer-motion";
-import { useEffect, useState, useRef } from "react";
+import {useEffect, useState} from "react";
 import DriftRing from "@/components/drift/DriftRing";
 import type { DriftScore, DriftSignalValues } from "@/lib/drift/types";
-import { getZoneColor, getZoneLabel, getZoneShortLabel, formatScoreDate } from "@/lib/drift/types";
+import {getZoneColor, getZoneLabel, formatScoreDate} from "@/lib/drift/types";
 
 interface DriftHeroProps {
   current: DriftScore;

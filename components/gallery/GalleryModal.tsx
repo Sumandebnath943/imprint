@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import {useState, useRef} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Download, Trash2, ChevronLeft, ChevronRight, Upload, Mic, FileText, Image as ImageIcon } from "lucide-react";
 import type { GalleryItem } from "@/components/gallery/GalleryCard";
@@ -273,6 +273,12 @@ export function GalleryUploadModal({ userId, onUploaded, onClose }: UploadModalP
           is_forge_entry: false,
           has_ai_assistance: false,
           drift_signals: {},
+          // Without these the detected type was shown optimistically and then
+          // lost on reload, when the gallery fell back to guessing from the
+          // file extension.
+          response_file_url: fileUrl,
+          item_type: type,
+          source: "direct_upload",
         })
         .select()
         .single();

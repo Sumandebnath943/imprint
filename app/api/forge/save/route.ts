@@ -84,6 +84,13 @@ export async function POST(req: Request) {
       else finalContent = `[Attached File: ${fileUrl}]`;
     }
 
+    // item_type/source/response_file_url were accepted from the client and then
+    // dropped, leaving the columns null. The gallery compensated by re-deriving
+    // the type from the file extension, which silently mislabels anything the
+    // extension list does not cover. Persist them instead.
+    const VALID_ITEM_TYPES = ["sketch", "handwriting", "photo", "voice", "document"];
+    const resolvedItemType = VALID_ITEM_TYPES.includes(item_type) ? item_type : null;
+
     const { data: entry, error: insertError } = await supabase
       .from("journal_entries")
       .insert({
@@ -96,6 +103,9 @@ export async function POST(req: Request) {
         was_timed: was_timed ?? false,
         time_limit_seconds: time_limit_seconds ?? null,
         drift_signals,
+        response_file_url: fileUrl || null,
+        item_type: resolvedItemType,
+        source: fileUrl ? "forge" : null,
       })
       .select("id")
       .single();

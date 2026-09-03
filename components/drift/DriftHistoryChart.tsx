@@ -2,10 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import {
-  ComposedChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
-  ReferenceLine, ReferenceArea, ResponsiveContainer, Dot,
-} from "recharts";
+import {ComposedChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, ReferenceArea, ResponsiveContainer} from "recharts";
 import type { DriftScore } from "@/lib/drift/types";
 import { getZoneColor, getZoneShortLabel, formatScoreDate } from "@/lib/drift/types";
 

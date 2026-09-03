@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Lock, User, Brain, Shield, ChevronDown, CheckCircle, Download, AlertTriangle, Eye, EyeOff } from "lucide-react";
+import {Brain, CheckCircle, AlertTriangle, Eye, EyeOff} from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";

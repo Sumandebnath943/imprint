@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import {useState, useEffect, useCallback} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PlusCircle, Shield } from "lucide-react";
 import { useRouter } from "next/navigation";

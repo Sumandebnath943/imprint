@@ -210,7 +210,7 @@ export default function ForgeClient({ userData }: ForgeClientProps) {
           was_timed: false,
           response_audio_url: path,
           tool: "voice-note",
-          item_type: "audio"
+          item_type: "voice"
         })
       });
     }
@@ -239,7 +239,8 @@ export default function ForgeClient({ userData }: ForgeClientProps) {
           was_timed: false,
           response_file_url: path,
           tool: "sketch-upload",
-          item_type: "file"
+          // The picker accepts image/* and .pdf; anything non-image is a document.
+          item_type: file.type.startsWith("image/") ? "sketch" : "document"
         })
       });
     }

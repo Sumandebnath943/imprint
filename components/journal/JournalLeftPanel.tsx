@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import {motion} from "framer-motion";
 import { Search, Flame } from "lucide-react";
 import type { JournalEntry, Mood } from "@/lib/journal/types";
 import { MOOD_COLORS, groupEntries, relativeDate, countWords, calcStreak } from "@/lib/journal/types";

@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import {motion} from "framer-motion";
 import { useRouter } from "next/navigation";
 import DriftRing from "@/components/drift/DriftRing";
-import { getZoneColor, getZoneLabel, getZoneShortLabel } from "@/lib/drift/types";
+import {getZoneColor, getZoneLabel} from "@/lib/drift/types";
 import type { CalibrationScoreResult } from "@/lib/calibration/types";
 
 // ── Processing Overlay ───────────────────────────────────────────────────

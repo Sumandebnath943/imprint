@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import {AnimatePresence} from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import MirrorSessionViewer from "@/components/mirror/MirrorSessionViewer";
 import type { MirrorPastSession } from "@/lib/mirror/types";

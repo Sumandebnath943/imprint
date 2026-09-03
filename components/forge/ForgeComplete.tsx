@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CheckCircle } from "lucide-react";
+import {} from "lucide-react";
 import type { ForgeTool } from "@/lib/forge/types";
 import { formatTime, countWords, calcWPM } from "@/lib/forge/types";
 

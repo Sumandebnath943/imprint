@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, Info, X } from "lucide-react";
 import CircleDetail from "@/components/circles/CircleDetail";
-import { createClient } from "@/lib/supabase/client";
+import {} from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 

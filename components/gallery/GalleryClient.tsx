@@ -2,7 +2,9 @@
 
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Grid, List, PenTool, Mic, Image, FileText, Palette, Upload, Plus } from "lucide-react";
+// `Image` is aliased: unaliased it shadows next/image to both readers and the
+// jsx-a11y linter, which flags it as an <img> missing an alt prop.
+import { Grid, List, PenTool, Mic, Image as ImageIcon, FileText, Palette, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import GalleryCard, { type GalleryItem, useSupabaseUrl } from "@/components/gallery/GalleryCard";
 import { GalleryItemViewer, GalleryUploadModal } from "@/components/gallery/GalleryModal";
@@ -16,7 +18,7 @@ const TYPE_FILTERS: { value: FilterType; label: string; icon: React.ReactNode }[
   { value: "All", label: "All", icon: null },
   { value: "sketch", label: "Sketches", icon: <PenTool size={13} /> },
   { value: "handwriting", label: "Handwriting", icon: <PenTool size={13} /> },
-  { value: "photo", label: "Photos", icon: <Image size={13} /> },
+  { value: "photo", label: "Photos", icon: <ImageIcon size={13} /> },
   { value: "voice", label: "Voice Notes", icon: <Mic size={13} /> },
   { value: "document", label: "Documents", icon: <FileText size={13} /> },
 ];

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import {} from "react";
 import { Search, ArrowUpDown } from "lucide-react";
 import type { FilterType, SortType } from "@/lib/vault/types";
 

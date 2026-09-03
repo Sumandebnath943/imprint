@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useMotionValue, useTransform, animate } from "framer-motion";
+import {animate} from "framer-motion";
 import { useEffect, useState } from "react";
 import { getZoneColor } from "@/lib/drift/types";
 

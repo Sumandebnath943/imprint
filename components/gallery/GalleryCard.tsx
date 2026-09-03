@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Mic, FileText, Image, Maximize2 } from "lucide-react";
+import {Mic, FileText, Maximize2} from "lucide-react";
 
 export interface GalleryItem {
   id: string; user_id: string; file_url: string; file_type: string;

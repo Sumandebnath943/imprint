@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, Trash2 } from "lucide-react";
 import type { JournalEntry, Mood } from "@/lib/journal/types";
-import { MOOD_COLORS, relativeDate, countWords, readingMinutes } from "@/lib/journal/types";
+import {MOOD_COLORS, countWords, readingMinutes} from "@/lib/journal/types";
 
 interface JournalViewerProps {
   entry: JournalEntry;

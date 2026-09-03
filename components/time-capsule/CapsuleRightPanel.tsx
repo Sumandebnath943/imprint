@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Lock, Unlock, BookOpen, Trash2 } from "lucide-react";
+import {Lock, Unlock, Trash2} from "lucide-react";
 import { getZoneColor, getZoneShortLabel } from "@/lib/drift/types";
 import type { TimeCapsule } from "@/components/time-capsule/CapsuleList";
 import { daysRemaining, fmtDate, capsuleIsUnlocked, progressPct } from "@/components/time-capsule/CapsuleList";
