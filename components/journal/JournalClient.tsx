@@ -149,7 +149,7 @@ export default function JournalClient({ pageData }: JournalClientProps) {
   };
 
   return (
-    <div className="absolute flex overflow-hidden" style={{ top: 64, left: 0, right: 0, bottom: 0, background: "#080808", zIndex: 10 }}>
+    <div className="absolute flex flex-col md:flex-row overflow-hidden" style={{ top: 64, left: 0, right: 0, bottom: 0, background: "#080808", zIndex: 10 }}>
 
       {/* LEFT PANEL — hidden in focus mode */}
       <AnimatePresence>
@@ -188,7 +188,7 @@ export default function JournalClient({ pageData }: JournalClientProps) {
                 </p>
                 {entries.length === 0 && (
                   <button onClick={handleNew}
-                    className="mt-2 rounded-full h-11 px-8 text-sm font-medium text-white"
+                    className="mt-2 rounded-full h-11 px-8 text-sm font-medium text-on-accent"
                     style={{ background: "#FF5500" }}>
                     Write Your First Entry
                   </button>

@@ -78,7 +78,7 @@ export default function AboutClient() {
                   <h3 className="font-bold text-white mb-3" style={{ fontSize: 20 }}>{b.title}</h3>
                   <p className="text-[16px]" style={{ color: "rgba(255,255,255,0.60)", lineHeight: 1.7 }}>{b.body}</p>
                   {i === 3 && (
-                    <Link href="/signup" className="inline-block mt-6 px-6 py-3 rounded-full text-sm font-medium text-white transition-all hover:opacity-90" style={{ background: "#FF5500" }}>
+                    <Link href="/signup" className="inline-block mt-6 px-6 py-3 rounded-full text-sm font-medium text-on-accent transition-all hover:opacity-90" style={{ background: "#FF5500" }}>
                       Begin your Baseline Imprint →
                     </Link>
                   )}
@@ -161,7 +161,7 @@ export default function AboutClient() {
               We built IMPRINT because we wanted a way to check. A way to say: set aside the tools for 20 minutes. Answer from your own mind. Compare it to who you were 3 months ago. See the truth.<br/><br/>It turns out the truth is worth seeing.
             </p>
             <div className="flex flex-col sm:flex-row items-center gap-4 mt-12">
-              <Link href="/signup" className="w-full sm:w-auto rounded-full px-8 py-3.5 font-medium text-white text-center transition-all hover:opacity-90" style={{ background: "#FF5500" }}>Begin Your Imprint →</Link>
+              <Link href="/signup" className="w-full sm:w-auto rounded-full px-8 py-3.5 font-medium text-on-accent text-center transition-all hover:opacity-90" style={{ background: "#FF5500" }}>Begin Your Imprint →</Link>
               <button disabled className="w-full sm:w-auto rounded-full px-8 py-3.5 font-medium text-center transition-all opacity-50 cursor-not-allowed" style={{ border: "1px solid rgba(255,255,255,0.20)", color: "white" }}>Read the science →</button>
             </div>
           </div>
@@ -190,7 +190,7 @@ export default function AboutClient() {
           <p className="text-[18px] md:text-[20px] mx-auto mb-12 relative z-10" style={{ color: "rgba(255,255,255,0.50)", maxWidth: 480 }}>
             Your thinking. Your voice. Your instincts. They are worth protecting.
           </p>
-          <Link href="/signup" className="inline-block rounded-full px-10 py-4 font-bold text-white text-[16px] relative z-10 transition-all hover:scale-105" style={{ background: "#FF5500", boxShadow: "0 10px 30px rgba(255,85,0,0.3)" }}>
+          <Link href="/signup" className="inline-block rounded-full px-10 py-4 font-bold text-on-accent text-[16px] relative z-10 transition-all hover:scale-105" style={{ background: "#FF5500", boxShadow: "0 10px 30px rgba(255,85,0,0.3)" }}>
             Begin Your Imprint →
           </Link>
         </div>

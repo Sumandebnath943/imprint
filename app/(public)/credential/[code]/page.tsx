@@ -174,7 +174,7 @@ export default async function PublicCredentialPage({ params }: { params: { code:
       </div>
 
       <div className="flex flex-col sm:flex-row items-center gap-4">
-        <Link href="/signup" className="px-8 py-3 rounded-full text-[14px] font-medium text-white transition-all hover:opacity-90" style={{ background: "#FF5500" }}>
+        <Link href="/signup" className="px-8 py-3 rounded-full text-[14px] font-medium text-on-accent transition-all hover:opacity-90" style={{ background: "#FF5500" }}>
           Create your own IMPRINT credential
         </Link>
         <Link href="/about" className="px-8 py-3 rounded-full text-[14px] font-medium text-white border border-white/20 transition-all hover:bg-white/5">

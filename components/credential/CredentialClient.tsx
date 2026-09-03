@@ -317,8 +317,8 @@ export default function CredentialClient({ profile, driftScore, stats }: Credent
           
           {/* DOWNLOAD */}
           <div>
-            <h3 className="text-[16px] font-semibold text-white mb-4">Download</h3>
-            <button onClick={handleDownload} disabled={downloading} className="w-full flex items-center justify-center gap-2 py-3 rounded-full text-[14px] font-medium text-white mb-2 transition-all hover:opacity-90 disabled:opacity-50" style={{ background: "#FF5500" }}>
+            <h3 className="text-[16px] font-semibold text-on-accent mb-4">Download</h3>
+            <button onClick={handleDownload} disabled={downloading} className="w-full flex items-center justify-center gap-2 py-3 rounded-full text-[14px] font-medium text-on-accent mb-2 transition-all hover:opacity-90 disabled:opacity-50" style={{ background: "#FF5500" }}>
               <Download size={16} />
               {downloading ? "Generating PNG..." : "Download as PNG"}
             </button>

@@ -37,7 +37,7 @@ function EmptyState() {
           Complete your first Calibration Session to get your real score — and start tracking your identity over time.
         </p>
         <button onClick={() => router.push("/dashboard/calibration")}
-          className="rounded-full h-12 px-10 text-base font-semibold text-white mb-4"
+          className="rounded-full h-12 px-10 text-base font-semibold text-on-accent mb-4"
           style={{ background: "#FF5500", boxShadow: "0 0 40px rgba(255,85,0,0.25)" }}>
           Begin First Calibration →
         </button>

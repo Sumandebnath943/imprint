@@ -150,7 +150,7 @@ export function VaultChallengeBanner({ challenge, onBegin }: ChallengeBannerProp
           </span>
         </div>
         <button onClick={onBegin}
-          className="rounded-full h-9 px-5 text-sm font-medium text-white transition-all hover:opacity-90"
+          className="rounded-full h-9 px-5 text-sm font-medium text-on-accent transition-all hover:opacity-90"
           style={{ background: "#FF5500" }}>
           Begin Challenge →
         </button>

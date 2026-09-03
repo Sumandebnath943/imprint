@@ -41,7 +41,7 @@ export default function FinalCTASection() {
           <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
             <Link
               href="/signup"
-              className="inline-flex items-center justify-center h-14 px-10 rounded-pill font-bold text-white text-base"
+              className="inline-flex items-center justify-center h-14 px-10 rounded-pill font-bold text-on-accent text-base"
               style={{ background: "#FF5500", boxShadow: "0 0 40px rgba(255,85,0,0.35), 0 4px 20px rgba(255,85,0,0.20)" }}
             >
               Begin Your Imprint

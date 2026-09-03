@@ -131,7 +131,7 @@ export default function CapsuleCompose({ userId, userName, currentDriftScore, on
           </span>
           <button onClick={onCancel} className="text-sm" style={{ color: "rgba(255,255,255,0.66)" }}>Cancel</button>
           <button onClick={() => setShowSealModal(true)}
-            className="rounded-full h-8 px-4 text-xs font-medium text-white"
+            className="rounded-full h-8 px-4 text-xs font-medium text-on-accent"
             style={{ background: "#FF5500" }}>
             Seal Capsule →
           </button>
@@ -198,7 +198,7 @@ export default function CapsuleCompose({ userId, userName, currentDriftScore, on
           {wc} words · {readMins(wc)} min read
         </span>
         <button onClick={() => setShowSealModal(true)}
-          className="rounded-full font-semibold text-white"
+          className="rounded-full font-semibold text-on-accent"
           style={{ height: 52, padding: "0 32px", background: "#FF5500", fontSize: 15 }}>
           Seal Capsule →
         </button>
@@ -224,7 +224,7 @@ export default function CapsuleCompose({ userId, userName, currentDriftScore, on
               </p>
               <p className="font-bold mb-6" style={{ fontSize: 24, color: "#FF5500" }}>{fmtDate(unlockDate.toISOString())}</p>
               <button onClick={handleSeal} disabled={sealing}
-                className="w-full rounded-full h-12 font-semibold text-white mb-3 disabled:opacity-60"
+                className="w-full rounded-full h-12 font-semibold text-on-accent mb-3 disabled:opacity-60"
                 style={{ background: "#FF5500" }}>{sealing ? "Sealing…" : "Seal It"}</button>
               <button onClick={() => setShowSealModal(false)}
                 className="w-full rounded-full h-12 text-sm transition-all hover:bg-white/5"

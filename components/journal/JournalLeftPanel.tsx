@@ -47,17 +47,19 @@ export default function JournalLeftPanel({ entries, activeId, onSelect, onNew }:
   const groups = useMemo(() => groupEntries(filtered), [filtered]);
 
   return (
-    <div className="flex flex-col h-full" style={{
-      width: 300, minWidth: 300,
-      background: "#0D0D0D",
-      borderRight: "1px solid rgba(255,255,255,0.06)",
-    }}>
+    <div
+      // Width moved out of inline style so the breakpoint can override it —
+      // a fixed 300px left 75px for the editor on a 375px screen. Below md the
+      // panel becomes a capped-height strip above the editor instead.
+      className="flex flex-col shrink-0 w-full max-h-[38vh] border-b md:w-[300px] md:min-w-[300px] md:max-h-none md:h-full md:border-b-0 md:border-r"
+      style={{ background: "#0D0D0D", borderColor: "rgba(255,255,255,0.06)" }}
+    >
       {/* Top bar */}
       <div className="shrink-0 px-4 pt-5 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <div className="flex items-center justify-between mb-3">
           <span className="font-bold text-white" style={{ fontSize: 18 }}>Journal</span>
           <button onClick={onNew}
-            className="rounded-full h-8 px-3 text-xs font-medium text-white transition-all hover:opacity-90"
+            className="rounded-full h-8 px-3 text-xs font-medium text-on-accent transition-all hover:opacity-90"
             style={{ background: "#FF5500" }}>
             + New Entry
           </button>

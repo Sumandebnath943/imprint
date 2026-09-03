@@ -186,7 +186,7 @@ export default function ForgeVoice({ onSave }: ForgeVoiceProps) {
             {/* Actions */}
             <div className="flex gap-3">
               <button onClick={handleSave}
-                className="rounded-full h-10 px-6 text-sm font-medium text-white"
+                className="rounded-full h-10 px-6 text-sm font-medium text-on-accent"
                 style={{ background: "#FF5500" }}>
                 Save Recording
               </button>

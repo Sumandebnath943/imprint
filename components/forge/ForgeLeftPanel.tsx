@@ -46,10 +46,11 @@ export default function ForgeLeftPanel({
 
   return (
     <div
-      className="flex flex-col h-full overflow-y-auto"
+      // See JournalLeftPanel: fixed 280px squeezed the editor on phones.
+      className="flex flex-col shrink-0 overflow-y-auto w-full max-h-[38vh] border-b md:w-[280px] md:min-w-[280px] md:max-h-none md:h-full md:border-b-0 md:border-r"
       style={{
-        width: 280, minWidth: 280, background: "#0A0A0A",
-        borderRight: "1px solid rgba(255,255,255,0.05)",
+        background: "#0A0A0A",
+        borderColor: "rgba(255,255,255,0.05)",
         padding: "24px 16px",
         scrollbarWidth: "none",
       }}

@@ -418,7 +418,7 @@ export default function ProfileClient({
                     </div>
                   </div>
                   <div className="flex justify-end">
-                    <button onClick={handleSave} disabled={saving} className="rounded-full px-6 py-2.5 text-[14px] font-medium text-white disabled:opacity-50 transition-all hover:opacity-90" style={{ background: "#FF5500" }}>
+                    <button onClick={handleSave} disabled={saving} className="rounded-full px-6 py-2.5 text-[14px] font-medium text-on-accent disabled:opacity-50 transition-all hover:opacity-90" style={{ background: "#FF5500" }}>
                       {saving ? "Saving..." : "Save Changes"}
                     </button>
                   </div>

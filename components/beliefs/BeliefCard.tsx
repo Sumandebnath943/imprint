@@ -83,7 +83,7 @@ function ReviewModal({ belief, onUpdate, onClose }: ReviewModalProps) {
           style={{ background: "#0D0D0D", border: "1px solid rgba(255,255,255,0.06)", padding: "12px 14px", minHeight: 72, color: "rgba(255,255,255,0.70)", lineHeight: 1.6 }} />
 
         <button onClick={() => onUpdate(belief.id, conf, note)}
-          className="w-full rounded-full h-12 font-medium text-white mb-3"
+          className="w-full rounded-full h-12 font-medium text-on-accent mb-3"
           style={{ background: "#FF5500" }}>Update Belief</button>
         <button onClick={() => onUpdate(belief.id, belief.confidence_level, "")}
           className="w-full rounded-full h-12 text-sm transition-all hover:bg-white/5"

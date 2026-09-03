@@ -208,7 +208,7 @@ export default function CompletePage() {
           transition={{ delay: 0.65 }}
           whileHover={{ scale: 1.02, boxShadow: "0 0 40px rgba(255,85,0,0.40)" }}
           whileTap={{ scale: 0.97 }}
-          className="h-14 px-10 rounded-pill text-white font-medium text-base mb-5"
+          className="h-14 px-10 rounded-pill text-on-accent font-medium text-base mb-5"
           style={{ background: "#FF5500", boxShadow: "0 0 24px rgba(255,85,0,0.25)" }}
         >
           Enter IMPRINT →

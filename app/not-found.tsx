@@ -32,7 +32,7 @@ export default function NotFound() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link
             href="/"
-            className="px-8 py-3 rounded-full text-[14px] font-medium text-white transition-all hover:opacity-90"
+            className="px-8 py-3 rounded-full text-[14px] font-medium text-on-accent transition-all hover:opacity-90"
             style={{ background: "#FF5500" }}
           >
             Back to home

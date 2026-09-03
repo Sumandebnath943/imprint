@@ -229,7 +229,7 @@ export default function SignInPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full h-[52px] rounded-pill text-white font-medium text-sm flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed mt-4"
+            className="w-full h-[52px] rounded-pill text-on-accent font-medium text-sm flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed mt-4"
             style={{
               background: "#FF5500",
               boxShadow: isLoading ? "none" : "0 4px 20px rgba(255,85,0,0.25)",

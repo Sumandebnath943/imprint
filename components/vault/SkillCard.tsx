@@ -55,7 +55,7 @@ export default function SkillCard({ skill, decayedStrength, hasActiveChallenge, 
 
       {/* Challenge active ribbon */}
       {hasActiveChallenge && (
-        <div className="absolute top-0 right-0 text-white text-xs font-semibold"
+        <div className="absolute top-0 right-0 text-on-accent text-xs font-semibold"
           style={{ background: "#FF5500", padding: "4px 10px", borderRadius: "0 16px 0 8px", fontSize: 10 }}>
           CHALLENGE ACTIVE
         </div>

@@ -132,8 +132,8 @@ export default function PublicCoursesClient() {
               <>
                 <h3 className="font-semibold text-white mb-2" style={{ fontSize: 18 }}>Be first when courses go live.</h3>
                 <p className="text-[14px] mb-6" style={{ color: "rgba(255,255,255,0.66)" }}>We&apos;ll notify you the moment your first course is ready. No spam. Ever.</p>
-                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Your email address" className="w-full text-[15px] outline-none text-white mb-3" style={{ background: "#1A1A1A", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 100, height: 52, padding: "0 20px" }} />
-                <button onClick={() => handleJoin("top")} disabled={joining || !email} className="w-full rounded-full font-medium text-white mb-4 disabled:opacity-50 transition-all hover:opacity-90" style={{ background: "#FF5500", height: 52 }}>
+                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Your email address" className="w-full text-[15px] outline-none text-on-accent mb-3" style={{ background: "#1A1A1A", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 100, height: 52, padding: "0 20px" }} />
+                <button onClick={() => handleJoin("top")} disabled={joining || !email} className="w-full rounded-full font-medium text-on-accent mb-4 disabled:opacity-50 transition-all hover:opacity-90" style={{ background: "#FF5500", height: 52 }}>
                   {joining ? "Joining..." : "Join Waitlist"}
                 </button>
               </>
@@ -179,7 +179,7 @@ export default function PublicCoursesClient() {
                   
                   {/* Slide up button on hover */}
                   <div className="absolute bottom-8 left-0 right-0 flex justify-center translate-y-[200%] opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 px-6">
-                    <button onClick={() => router.push("/signup")} className="w-full rounded-full py-3 text-sm font-bold text-white shadow-lg" style={{ background: "#FF5500" }}>
+                    <button onClick={() => router.push("/signup")} className="w-full rounded-full py-3 text-sm font-bold text-on-accent shadow-lg" style={{ background: "#FF5500" }}>
                       Join Waitlist to Access →
                     </button>
                   </div>
@@ -249,8 +249,8 @@ export default function PublicCoursesClient() {
               </motion.div>
             ) : (
               <>
-                <input type="email" value={bottomEmail} onChange={e => setBottomEmail(e.target.value)} placeholder="Your email address" className="w-full text-[15px] outline-none text-white mb-3 text-center" style={{ background: "#1A1A1A", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 100, height: 52, padding: "0 20px" }} />
-                <button onClick={() => handleJoin("bottom")} disabled={bottomJoining || !bottomEmail} className="w-full rounded-full font-medium text-white disabled:opacity-50 transition-all hover:opacity-90" style={{ background: "#FF5500", height: 52 }}>
+                <input type="email" value={bottomEmail} onChange={e => setBottomEmail(e.target.value)} placeholder="Your email address" className="w-full text-[15px] outline-none text-on-accent mb-3 text-center" style={{ background: "#1A1A1A", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 100, height: 52, padding: "0 20px" }} />
+                <button onClick={() => handleJoin("bottom")} disabled={bottomJoining || !bottomEmail} className="w-full rounded-full font-medium text-on-accent disabled:opacity-50 transition-all hover:opacity-90" style={{ background: "#FF5500", height: 52 }}>
                   {bottomJoining ? "Joining..." : "Join Waitlist"}
                 </button>
               </>

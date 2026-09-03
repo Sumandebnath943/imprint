@@ -97,7 +97,7 @@ export function AddSkillPanel({ userCluster, existingSkills, onAdd }: AddSkillPa
                     className="w-full accent-orange-500" style={{ height: 4 }} />
                 </div>
                 <button onClick={() => handleAdd(customName, strength)} disabled={!customName.trim() || adding}
-                  className="rounded-full h-10 px-6 text-sm font-medium text-white transition-all hover:opacity-90 disabled:opacity-40"
+                  className="rounded-full h-10 px-6 text-sm font-medium text-on-accent transition-all hover:opacity-90 disabled:opacity-40"
                   style={{ background: "#FF5500", whiteSpace: "nowrap" }}>
                   {adding ? "Adding..." : "Add to Vault"}
                 </button>

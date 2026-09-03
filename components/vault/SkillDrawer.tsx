@@ -229,7 +229,7 @@ export default function SkillDrawer({ skill, decayedStrength, onClose, onGenerat
             {/* Sticky bottom actions */}
             <div className="p-6 flex flex-col gap-3" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
               <button onClick={() => router.push(`/dashboard/forge?practice_skill_id=${skill.id}&practice_skill_name=${encodeURIComponent(skill.skill_name)}`)}
-                className="w-full rounded-full h-11 text-sm font-medium text-white"
+                className="w-full rounded-full h-11 text-sm font-medium text-on-accent"
                 style={{ background: "#FF5500" }}>
                 Practice in Forge
               </button>

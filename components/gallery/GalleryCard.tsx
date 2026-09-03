@@ -154,7 +154,7 @@ function VoiceCard({ item, onOpen }: { item: GalleryItem; onOpen: (item: Gallery
         <span className="text-xs" style={{ color: "rgba(255,255,255,0.62)" }}>{fmtRelTime(item.created_at)}</span>
         {hovered && (
           <button onClick={togglePlay}
-            className="rounded-full h-8 px-4 text-xs font-medium text-white"
+            className="rounded-full h-8 px-4 text-xs font-medium text-on-accent"
             style={{ background: "#FF5500" }}>
             {playing ? "Pause" : "Play"}
           </button>

@@ -137,7 +137,7 @@ export default function ForgeComplete({
           Return to Forge
         </button>
         <button onClick={onDashboard}
-          className="rounded-full h-11 px-7 text-sm font-medium text-white"
+          className="rounded-full h-11 px-7 text-sm font-medium text-on-accent"
           style={{ background: "#FF5500" }}>
           Go to Dashboard
         </button>

@@ -43,7 +43,7 @@ export default function CapsuleList({ capsules, selectedId, onSelect, onNew }: C
       <div className="flex items-center justify-between px-4 py-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <span className="font-bold text-white" style={{ fontSize: 17 }}>Time Capsule</span>
         <button onClick={onNew}
-          className="flex items-center gap-1 rounded-full px-3 text-white text-xs font-medium"
+          className="flex items-center gap-1 rounded-full px-3 text-on-accent text-xs font-medium"
           style={{ height: 30, background: "#FF5500" }}>
           <Plus size={12} /> Write
         </button>

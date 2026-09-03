@@ -253,7 +253,7 @@ export default function CalibrationSessionView({ session, sessionNumber, onCompl
 
         {/* Right */}
         <button onClick={handleNext} disabled={!canContinue}
-          className="rounded-full font-medium text-white transition-all hover:opacity-90 disabled:opacity-40"
+          className="rounded-full font-medium text-on-accent transition-all hover:opacity-90 disabled:opacity-40"
           style={{ background: "#FF5500", height: currentIdx === total - 1 ? 46 : 40, padding: "0 28px", fontSize: currentIdx === total - 1 ? 15 : 14 }}>
           {currentIdx === total - 1 ? "Complete Calibration →" : "Next Prompt →"}
         </button>

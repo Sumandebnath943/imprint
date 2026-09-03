@@ -124,7 +124,7 @@ function UnlockedView({ capsule, currentDriftScore, onReply, onDelete }: Unlocke
               Written {daysSinceWriting} days ago, sealed until today.
             </p>
             <button onClick={handleReveal}
-              className="rounded-full font-medium text-white"
+              className="rounded-full font-medium text-on-accent"
               style={{ height: 48, padding: "0 32px", background: "#FF5500", fontSize: 15 }}>
               Open it →
             </button>

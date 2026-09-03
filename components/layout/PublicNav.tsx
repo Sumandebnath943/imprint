@@ -101,7 +101,7 @@ export default function PublicNav() {
             </Link>
             <Link
               href="/signup"
-              className="h-9 px-5 rounded-pill flex items-center text-sm font-medium text-white transition-all duration-200 hover:opacity-90"
+              className="h-9 px-5 rounded-pill flex items-center text-sm font-medium text-on-accent transition-all duration-200 hover:opacity-90"
               style={{
                 background: "#FF5500",
                 boxShadow: "0 0 20px rgba(255,85,0,0.25)",
@@ -174,7 +174,7 @@ export default function PublicNav() {
                 </Link>
                 <Link
                   href="/signup"
-                  className="h-11 flex items-center justify-center rounded-pill text-sm font-medium text-white"
+                  className="h-11 flex items-center justify-center rounded-pill text-sm font-medium text-on-accent"
                   style={{ background: "#FF5500" }}
                 >
                   Begin Your Imprint

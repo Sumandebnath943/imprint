@@ -6,10 +6,8 @@ import { motion } from "framer-motion";
 import Sidebar from "@/components/dashboard/Sidebar";
 import TopBar from "@/components/dashboard/TopBar";
 import type { DashboardProfile, DashboardDriftScore } from "@/lib/dashboard/types";
+import { readSidebarCollapsed, onSidebarCollapsedChange, SIDEBAR_COLLAPSED_W, SIDEBAR_EXPANDED_W } from "@/lib/dashboard/sidebar-state";
 
-const COLLAPSED_W = 68;
-const EXPANDED_W = 240;
-const LS_KEY = "imprint_sidebar_collapsed";
 
 interface DashboardShellProps {
   children: React.ReactNode;
@@ -21,18 +19,12 @@ export default function DashboardShell({ children, profile, driftScore }: Dashbo
   const [collapsed, setCollapsed] = useState(true);
   const pathname = usePathname();
 
-  // Sync with sidebar's localStorage state
+  // Event-driven, not polled. The old version ran setInterval(sync, 300) for
+  // the lifetime of every dashboard page and still lagged the toggle by up to
+  // 300ms; this updates in the same tick as the click.
   useEffect(() => {
-    const sync = () => {
-      const saved = localStorage.getItem(LS_KEY);
-      setCollapsed(saved !== "false");
-    };
-    sync();
-    // Re-sync on storage events (if sidebar toggle happens in another component)
-    window.addEventListener("storage", sync);
-    // Poll on interval for same-tab updates
-    const id = setInterval(sync, 300);
-    return () => { window.removeEventListener("storage", sync); clearInterval(id); };
+    setCollapsed(readSidebarCollapsed());
+    return onSidebarCollapsedChange(setCollapsed);
   }, []);
 
   // The sidebar is hidden below md, so nothing should be offset for it there.
@@ -48,7 +40,7 @@ export default function DashboardShell({ children, profile, driftScore }: Dashbo
     return () => mq.removeEventListener("change", apply);
   }, []);
 
-  const sidebarWidth = isDesktop ? (collapsed ? COLLAPSED_W : EXPANDED_W) : 0;
+  const sidebarWidth = isDesktop ? (collapsed ? SIDEBAR_COLLAPSED_W : SIDEBAR_EXPANDED_W) : 0;
 
   return (
     // overflow-x-hidden: several pages place a decorative ghost-word watermark

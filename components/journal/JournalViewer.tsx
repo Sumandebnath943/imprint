@@ -193,7 +193,7 @@ export function PrivacyNotice({ onDismiss }: { onDismiss: () => void }) {
           You own everything you write here.
         </p>
         <button onClick={onDismiss}
-          className="rounded-full h-11 px-8 text-sm font-medium text-white w-full"
+          className="rounded-full h-11 px-8 text-sm font-medium text-on-accent w-full"
           style={{ background: "#FF5500" }}>
           Got it.
         </button>

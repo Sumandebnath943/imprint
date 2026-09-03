@@ -255,7 +255,7 @@ export default function ForgeClient({ userData }: ForgeClientProps) {
   const isTextTool = ["free-write", "timed-write", "memory-recall", "vault-challenge"].includes(activeTool);
 
   return (
-    <div className="absolute flex overflow-hidden" style={{ top: 64, left: 0, right: 0, bottom: 0, background: "#040404", zIndex: 10 }}>
+    <div className="absolute flex flex-col md:flex-row overflow-hidden" style={{ top: 64, left: 0, right: 0, bottom: 0, background: "#040404", zIndex: 10 }}>
 
       {/* Draft recovery banner */}
       <AnimatePresence>
@@ -346,7 +346,7 @@ export default function ForgeClient({ userData }: ForgeClientProps) {
                         ? `Due ${formatDate(userData.activeChallenge.due_date)}`
                         : "No due date"}
                     </p>
-                    <span className="inline-flex items-center gap-2 rounded-full h-10 px-6 text-sm font-medium text-white" style={{ background: "#FF5500" }}>
+                    <span className="inline-flex items-center gap-2 rounded-full h-10 px-6 text-sm font-medium text-on-accent" style={{ background: "#FF5500" }}>
                       <Zap size={14} /> Begin Challenge →
                     </span>
                   </motion.div>

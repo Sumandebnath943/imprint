@@ -249,7 +249,7 @@ export default function JournalEditor({
 
           {/* Save */}
           <button onClick={handleManualSave}
-            className="rounded-full h-8 px-4 text-xs font-medium text-white transition-all hover:opacity-90"
+            className="rounded-full h-8 px-4 text-xs font-medium text-on-accent transition-all hover:opacity-90"
             style={{ background: "#FF5500" }}>
             Save
           </button>
@@ -340,7 +340,7 @@ export default function JournalEditor({
         <div className="flex items-center gap-3 ml-auto">
           <span className="text-xs" style={{ color: "rgba(255,255,255,0.50)" }}>⌘S to save</span>
           <button onClick={handleManualSave}
-            className="rounded-full h-9 px-5 text-sm font-medium text-white"
+            className="rounded-full h-9 px-5 text-sm font-medium text-on-accent"
             style={{ background: "#FF5500" }}>
             Save Entry
           </button>

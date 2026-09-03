@@ -128,3 +128,14 @@ body {
     background: rgba(8, 8, 8, 0.92);
   }
 }
+
+/* ── Text on the brand orange ──────────────────────────────────────────────
+   White on #FF5500 measures 3.21:1 — below the 4.5:1 AA needs for the 14–16px
+   labels our buttons use, and they are not large enough to qualify for the 3:1
+   large-text allowance. Near-black on the same orange measures 6.18:1, which
+   fixes it without touching the brand colour itself. Buttons fade via
+   disabled:opacity-50 rather than swapping background, so the ratio holds in
+   the disabled state too.                                                   */
+.text-on-accent {
+  color: #0a0a0a;
+}

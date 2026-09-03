@@ -150,7 +150,7 @@ export default function DashboardCoursesClient({ waitlistJoined, userEmail }: Da
                 />
                 <button
                   onClick={handleJoin} disabled={joining || !email}
-                  className="w-full rounded-full font-medium text-white mb-4 disabled:opacity-50 transition-all hover:opacity-90"
+                  className="w-full rounded-full font-medium text-on-accent mb-4 disabled:opacity-50 transition-all hover:opacity-90"
                   style={{ background: "#FF5500", height: 52 }}>
                   {joining ? "Joining..." : "Join Waitlist"}
                 </button>
@@ -234,7 +234,7 @@ export default function DashboardCoursesClient({ waitlistJoined, userEmail }: Da
             <textarea value={suggestion} onChange={e => setSuggestion(e.target.value)} placeholder="I want a course on..." maxLength={200}
               className="w-full flex-1 rounded-[10px] outline-none text-[14px] resize-none"
               style={{ background: "#1A1A1A", padding: "12px 14px", color: "white", minHeight: 48 }} rows={2} />
-            <button onClick={handleSuggest} disabled={suggesting || !suggestion.trim()} className="shrink-0 rounded-full px-5 py-2.5 text-sm font-medium text-white transition-all hover:opacity-90 disabled:opacity-50" style={{ background: "#FF5500" }}>
+            <button onClick={handleSuggest} disabled={suggesting || !suggestion.trim()} className="shrink-0 rounded-full px-5 py-2.5 text-sm font-medium text-on-accent transition-all hover:opacity-90 disabled:opacity-50" style={{ background: "#FF5500" }}>
               {suggested ? "Received ✓" : suggesting ? "Sending…" : "Submit Suggestion"}
             </button>
           </div>

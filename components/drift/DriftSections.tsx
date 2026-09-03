@@ -31,7 +31,7 @@ export function DriftWeeklyTable({ rows }: WeeklyTableProps) {
             Complete your first calibration to see your score history.
           </p>
           <a href="/dashboard/calibration"
-            className="rounded-full h-11 px-8 text-sm font-medium text-white inline-block text-center"
+            className="rounded-full h-11 px-8 text-sm font-medium text-on-accent inline-block text-center"
             style={{ background: "#FF5500", lineHeight: "44px" }}>
             Begin Calibration →
           </a>
@@ -183,7 +183,7 @@ export function DriftCalibration({ calibrations }: CalibrationProps) {
           <p className="text-sm mb-6 mx-auto max-w-sm" style={{ color: "rgba(255,255,255,0.72)", lineHeight: 1.7 }}>
             Your Drift Score is based on your initial baseline. Complete your first calibration to get your real score.
           </p>
-          <a href="/dashboard/calibration" className="inline-block rounded-full h-11 px-8 text-sm font-medium text-white"
+          <a href="/dashboard/calibration" className="inline-block rounded-full h-11 px-8 text-sm font-medium text-on-accent"
             style={{ background: "#FF5500", lineHeight: "44px" }}>
             Begin First Calibration →
           </a>

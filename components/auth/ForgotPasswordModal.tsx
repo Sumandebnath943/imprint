@@ -113,7 +113,7 @@ export default function ForgotPasswordModal({
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full h-[52px] rounded-pill text-white text-sm font-medium transition-all duration-200 disabled:opacity-60 flex items-center justify-center gap-2"
+                      className="w-full h-[52px] rounded-pill text-on-accent text-sm font-medium transition-all duration-200 disabled:opacity-60 flex items-center justify-center gap-2"
                       style={{
                         background: "#FF5500",
                         marginTop: 4,

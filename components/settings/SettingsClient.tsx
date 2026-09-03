@@ -365,7 +365,7 @@ export default function SettingsClient({ profile }: SettingsClientProps) {
                 </div>
 
                 <div className="flex justify-end">
-                  <button onClick={handleUpdatePassword} disabled={updatingPassword} className="px-6 py-2 rounded-full text-[14px] font-medium text-white transition-all hover:opacity-90 disabled:opacity-50" style={{ background: "#FF5500" }}>
+                  <button onClick={handleUpdatePassword} disabled={updatingPassword} className="px-6 py-2 rounded-full text-[14px] font-medium text-on-accent transition-all hover:opacity-90 disabled:opacity-50" style={{ background: "#FF5500" }}>
                     {updatingPassword ? "Updating..." : "Update Password"}
                   </button>
                 </div>
@@ -542,7 +542,7 @@ export default function SettingsClient({ profile }: SettingsClientProps) {
                     ))}
                   </div>
 
-                  <button onClick={startProtocol} disabled={startingProtocol} className="w-full py-3 rounded-full font-medium text-white transition-all hover:opacity-90" style={{ background: "#FF5500" }}>
+                  <button onClick={startProtocol} disabled={startingProtocol} className="w-full py-3 rounded-full font-medium text-on-accent transition-all hover:opacity-90" style={{ background: "#FF5500" }}>
                     {startingProtocol ? "Starting..." : "Start Protocol"}
                   </button>
                 </div>

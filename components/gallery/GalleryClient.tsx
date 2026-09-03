@@ -103,7 +103,7 @@ export default function GalleryClient({ items: initial, userId }: GalleryClientP
             <p style={{ fontSize: 15, color: "rgba(255,255,255,0.66)" }}>Your creative fingerprint, preserved.</p>
           </div>
           <button onClick={() => setShowUpload(true)}
-            className="flex items-center gap-1.5 rounded-full font-medium text-white"
+            className="flex items-center gap-1.5 rounded-full font-medium text-on-accent"
             style={{ height: 42, padding: "0 20px", background: "#FF5500", fontSize: 14 }}>
             <Upload size={14} /> Upload to Gallery
           </button>
@@ -137,7 +137,7 @@ export default function GalleryClient({ items: initial, userId }: GalleryClientP
             {TYPE_FILTERS.map(({ value, label, icon }) => (
               <button key={value} onClick={() => setTypeFilter(value)}
                 className="flex items-center gap-1.5 rounded-full text-xs px-3 py-1.5 transition-all"
-                style={{ background: typeFilter === value ? "#FF5500" : "#1A1A1A", border: typeFilter === value ? "1px solid #FF5500" : "1px solid rgba(255,255,255,0.08)", color: typeFilter === value ? "white" : "rgba(255,255,255,0.55)" }}>
+                style={{ background: typeFilter === value ? "#FF5500" : "#1A1A1A", border: typeFilter === value ? "1px solid #FF5500" : "1px solid rgba(255,255,255,0.08)", color: typeFilter === value ? "#0A0A0A" : "rgba(255,255,255,0.55)" }}>
                 {icon}{label}
               </button>
             ))}
@@ -154,7 +154,7 @@ export default function GalleryClient({ items: initial, userId }: GalleryClientP
               {([["grid", <Grid key="g" size={14} />], ["list", <List key="l" size={14} />]] as const).map(([mode, icon]) => (
                 <button key={mode} onClick={() => setViewMode(mode as "grid" | "list")}
                   className="w-9 h-9 flex items-center justify-center transition-all"
-                  style={{ background: viewMode === mode ? "#FF5500" : "#1A1A1A", color: viewMode === mode ? "white" : "rgba(255,255,255,0.40)" }}>
+                  style={{ background: viewMode === mode ? "#FF5500" : "#1A1A1A", color: viewMode === mode ? "#0A0A0A" : "rgba(255,255,255,0.40)" }}>
                   {icon}
                 </button>
               ))}
@@ -172,7 +172,7 @@ export default function GalleryClient({ items: initial, userId }: GalleryClientP
             </p>
             <div className="flex gap-3">
               <button onClick={() => router.push("/dashboard/forge")}
-                className="rounded-full font-medium text-white"
+                className="rounded-full font-medium text-on-accent"
                 style={{ height: 44, padding: "0 24px", background: "#FF5500" }}>Open The Forge →</button>
               <button onClick={() => setShowUpload(true)}
                 className="rounded-full transition-all hover:bg-white/5"

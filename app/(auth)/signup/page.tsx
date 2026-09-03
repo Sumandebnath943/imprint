@@ -286,7 +286,7 @@ export default function SignUpPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-[52px] rounded-pill text-white font-medium text-sm flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full h-[52px] rounded-pill text-on-accent font-medium text-sm flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
                   style={{
                     background: "#FF5500",
                     boxShadow: isLoading ? "none" : "0 4px 20px rgba(255,85,0,0.25)",

@@ -122,7 +122,7 @@ export default function CirclesClient({ userId, circles, memberships }: CirclesC
           <div className="flex gap-3">
             <button onClick={() => setShowJoin(true)} className="rounded-full font-medium transition-all hover:bg-white/5"
               style={{ height: 42, padding: "0 20px", border: "1px solid rgba(255,255,255,0.20)", color: "rgba(255,255,255,0.70)", fontSize: 14 }}>Join with Code</button>
-            <button onClick={() => setShowCreate(true)} className="rounded-full font-medium text-white"
+            <button onClick={() => setShowCreate(true)} className="rounded-full font-medium text-on-accent"
               style={{ height: 42, padding: "0 20px", background: "#FF5500", fontSize: 14 }}>Create Circle</button>
           </div>
         </motion.div>
@@ -147,7 +147,7 @@ export default function CirclesClient({ userId, circles, memberships }: CirclesC
             <h2 className="font-semibold text-white mb-2" style={{ fontSize: 24 }}>You&apos;re not in any circles.</h2>
             <p className="mb-6" style={{ fontSize: 16, color: "rgba(255,255,255,0.66)", maxWidth: 400 }}>Circles are where accountability lives. Create one or join with an invite code.</p>
             <div className="flex gap-3">
-              <button onClick={() => setShowCreate(true)} className="rounded-full text-white font-medium px-6 py-2.5" style={{ background: "#FF5500" }}>Create a Circle</button>
+              <button onClick={() => setShowCreate(true)} className="rounded-full text-on-accent font-medium px-6 py-2.5" style={{ background: "#FF5500" }}>Create a Circle</button>
               <button onClick={() => setShowJoin(true)} className="rounded-full px-6 py-2.5 transition-all hover:bg-white/5" style={{ border: "1px solid rgba(255,255,255,0.20)", color: "rgba(255,255,255,0.65)" }}>Join with Code</button>
             </div>
           </div>
@@ -217,7 +217,7 @@ export default function CirclesClient({ userId, circles, memberships }: CirclesC
                 <span className="text-sm" style={{ color: "rgba(255,255,255,0.80)" }}>Private circle — join by invite only</span>
               </label>
 
-              <button onClick={handleCreate} disabled={creating || !createName.trim()} className="w-full rounded-full h-14 font-medium text-white disabled:opacity-50" style={{ background: "#FF5500", fontSize: 16 }}>{creating ? "Creating…" : "Create Circle →"}</button>
+              <button onClick={handleCreate} disabled={creating || !createName.trim()} className="w-full rounded-full h-14 font-medium text-on-accent disabled:opacity-50" style={{ background: "#FF5500", fontSize: 16 }}>{creating ? "Creating…" : "Create Circle →"}</button>
             </motion.div>
           </motion.div>
         )}
@@ -237,7 +237,7 @@ export default function CirclesClient({ userId, circles, memberships }: CirclesC
                 <button onClick={copyCode} className="rounded-full px-6 py-2.5 transition-all text-sm" style={{ border: "1px solid rgba(255,255,255,0.20)", color: "white" }}>{copied ? "Copied! ✓" : "Copy Code"}</button>
               </div>
 
-              <button onClick={() => { setShowCreate(false); setCreatedCode(null); router.refresh(); }} className="w-full rounded-full h-14 font-medium text-white" style={{ background: "#FF5500", fontSize: 16 }}>Done</button>
+              <button onClick={() => { setShowCreate(false); setCreatedCode(null); router.refresh(); }} className="w-full rounded-full h-14 font-medium text-on-accent" style={{ background: "#FF5500", fontSize: 16 }}>Done</button>
             </motion.div>
           </motion.div>
         )}
@@ -252,7 +252,7 @@ export default function CirclesClient({ userId, circles, memberships }: CirclesC
               
               {joinError && <p className="text-sm text-red-500 mb-4">{joinError}</p>}
               
-              <button onClick={handleJoin} disabled={joining || joinCode.length !== 6} className="w-full rounded-full h-14 font-medium text-white disabled:opacity-50" style={{ background: "#FF5500", fontSize: 16 }}>{joining ? "Checking..." : "Join Circle →"}</button>
+              <button onClick={handleJoin} disabled={joining || joinCode.length !== 6} className="w-full rounded-full h-14 font-medium text-on-accent disabled:opacity-50" style={{ background: "#FF5500", fontSize: 16 }}>{joining ? "Checking..." : "Join Circle →"}</button>
             </motion.div>
           </motion.div>
         )}

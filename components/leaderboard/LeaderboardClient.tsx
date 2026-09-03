@@ -82,7 +82,7 @@ export default function LeaderboardClient({ userId, isOptedIn, rankings, userRan
               <p className="text-[14px]" style={{ color: "rgba(255,255,255,0.60)" }}>Join to see how you rank against other humans doing the same work.</p>
             </div>
             <div className="text-right">
-              <button onClick={handleOptIn} disabled={optingIn} className="rounded-full font-medium text-white px-5 py-2.5 text-sm transition-all mb-2 disabled:opacity-50" style={{ background: "#FF5500" }}>{optingIn ? "Joining…" : "Join Leaderboard"}</button>
+              <button onClick={handleOptIn} disabled={optingIn} className="rounded-full font-medium text-on-accent px-5 py-2.5 text-sm transition-all mb-2 disabled:opacity-50" style={{ background: "#FF5500" }}>{optingIn ? "Joining…" : "Join Leaderboard"}</button>
               <p className="text-[12px] italic" style={{ color: "rgba(255,255,255,0.66)" }}>Only username & IMPRINT Score visible.</p>
             </div>
           </motion.div>
@@ -180,7 +180,7 @@ export default function LeaderboardClient({ userId, isOptedIn, rankings, userRan
                   </span>
                 </div>
                 <div className="col-span-2 text-right">
-                  <p className="text-[15px] font-bold text-white">{r.imprint_score}</p>
+                  <p className="text-[15px] font-bold text-on-accent">{r.imprint_score}</p>
                   <div className="w-[60px] h-[3px] rounded-full ml-auto mt-1" style={{ background: "rgba(255,255,255,0.10)" }}>
                     <div className="h-full rounded-full" style={{ background: "#FF5500", width: `${Math.min(100, (r.imprint_score / 1000) * 100)}%` }} />
                   </div>

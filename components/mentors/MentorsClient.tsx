@@ -125,7 +125,7 @@ export default function MentorsClient({ userId, myMentorship, myMentees, eligibl
               style={{ height: 42, padding: "0 20px", border: "1px solid rgba(255,255,255,0.20)", color: "rgba(255,255,255,0.70)", fontSize: 14 }}>Become a Mentor</button>
             <button
               onClick={() => discoveryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
-              className="rounded-full font-medium text-white"
+              className="rounded-full font-medium text-on-accent"
               style={{ height: 42, padding: "0 20px", background: "#FF5500", fontSize: 14 }}
             >
               Find a Mentor
@@ -162,7 +162,7 @@ export default function MentorsClient({ userId, myMentorship, myMentees, eligibl
                 <button
                   onClick={() => handleCheckin(myMentorship.id)}
                   disabled={checkingIn}
-                  className="rounded-full px-4 py-2 text-sm text-white font-medium disabled:opacity-50"
+                  className="rounded-full px-4 py-2 text-sm text-on-accent font-medium disabled:opacity-50"
                   style={{ background: "#FF5500" }}
                 >
                   {checkingIn ? "Logging…" : "Log Check-in"}
@@ -232,7 +232,7 @@ export default function MentorsClient({ userId, myMentorship, myMentees, eligibl
               </p>
               <button
                 onClick={() => setShowApply(true)}
-                className="rounded-full px-6 py-2.5 text-sm font-medium text-white transition-all hover:opacity-90"
+                className="rounded-full px-6 py-2.5 text-sm font-medium text-on-accent transition-all hover:opacity-90"
                 style={{ background: "#FF5500" }}
               >
                 Become a Mentor
@@ -273,9 +273,9 @@ export default function MentorsClient({ userId, myMentorship, myMentees, eligibl
               </div>
 
               <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 24 }}>
-                <p className="text-sm mb-3 text-white font-medium">Request Mentorship</p>
+                <p className="text-sm mb-3 text-on-accent font-medium">Request Mentorship</p>
                 <textarea value={requestMsg} onChange={e => setRequestMsg(e.target.value)} placeholder="What are you working on? What do you want to preserve?" className="w-full rounded-xl p-3 text-sm outline-none resize-none mb-4" style={{ background: "#1A1A1A", border: "1px solid rgba(255,255,255,0.08)", color: "white", minHeight: 100 }} />
-                <button onClick={() => handleRequest(showProfile.id)} disabled={requesting || !requestMsg.trim()} className="w-full rounded-full h-12 font-medium text-white disabled:opacity-50" style={{ background: "#FF5500" }}>
+                <button onClick={() => handleRequest(showProfile.id)} disabled={requesting || !requestMsg.trim()} className="w-full rounded-full h-12 font-medium text-on-accent disabled:opacity-50" style={{ background: "#FF5500" }}>
                   {requesting ? "Sending…" : "Send Request →"}
                 </button>
               </div>
@@ -309,7 +309,7 @@ export default function MentorsClient({ userId, myMentorship, myMentees, eligibl
                 </div>
               </div>
 
-              <button onClick={handleApply} disabled={applying || !bio.trim()} className="w-full rounded-full h-14 font-medium text-white disabled:opacity-50" style={{ background: "#FF5500", fontSize: 16 }}>{applying ? "Submitting…" : "Submit Application →"}</button>
+              <button onClick={handleApply} disabled={applying || !bio.trim()} className="w-full rounded-full h-14 font-medium text-on-accent disabled:opacity-50" style={{ background: "#FF5500", fontSize: 16 }}>{applying ? "Submitting…" : "Submit Application →"}</button>
             </motion.div>
           </motion.div>
         )}

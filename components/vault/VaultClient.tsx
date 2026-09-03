@@ -191,7 +191,7 @@ export default function VaultClient({ pageData }: VaultClientProps) {
                 panelDiv?.scrollIntoView({ behavior: 'smooth', block: 'center' });
               }
             }}
-            className="flex items-center gap-2 rounded-full h-10 px-5 text-sm font-medium text-white transition-all hover:opacity-90"
+            className="flex items-center gap-2 rounded-full h-10 px-5 text-sm font-medium text-on-accent transition-all hover:opacity-90"
             style={{ background: "#FF5500" }}>
             <PlusCircle size={16} />Add Skill
           </button>
@@ -239,7 +239,7 @@ export default function VaultClient({ pageData }: VaultClientProps) {
               Add the skills you want to protect.<br />The ones AI is quietly replacing.
             </p>
             <button onClick={() => { setSearch(""); setFilter("All"); }}
-              className="rounded-full h-11 px-8 text-sm font-medium text-white"
+              className="rounded-full h-11 px-8 text-sm font-medium text-on-accent"
               style={{ background: "#FF5500" }}>
               Add Your First Skill
             </button>

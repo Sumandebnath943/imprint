@@ -165,7 +165,7 @@ export function GalleryItemViewer({ item, items, userId, onClose, onDelete, onCa
                     className="w-full rounded-lg outline-none resize-none text-sm"
                     style={{ background: "#1A1A1A", border: "1px solid rgba(255,85,0,0.30)", padding: "10px 12px", color: "rgba(255,255,255,0.80)", minHeight: 80 }} />
                   <div className="flex gap-2 mt-2">
-                    <button onClick={handleSaveCaption} className="text-xs rounded-full px-3 py-1 text-white" style={{ background: "#FF5500" }}>Save</button>
+                    <button onClick={handleSaveCaption} className="text-xs rounded-full px-3 py-1 text-on-accent" style={{ background: "#FF5500" }}>Save</button>
                     <button onClick={() => setEditingCaption(false)} className="text-xs" style={{ color: "rgba(255,255,255,0.66)" }}>Cancel</button>
                   </div>
                 </div>
@@ -361,7 +361,7 @@ export function GalleryUploadModal({ userId, onUploaded, onClose }: UploadModalP
               {TYPE_OPTIONS.map((t) => (
                 <button key={t} onClick={() => setType(t)}
                   className="rounded-full text-xs px-3 py-1.5 capitalize transition-all"
-                  style={{ background: type === t ? "#FF5500" : "#1A1A1A", border: type === t ? "1px solid #FF5500" : "1px solid rgba(255,255,255,0.08)", color: type === t ? "white" : "rgba(255,255,255,0.55)" }}>
+                  style={{ background: type === t ? "#FF5500" : "#1A1A1A", border: type === t ? "1px solid #FF5500" : "1px solid rgba(255,255,255,0.08)", color: type === t ? "#0A0A0A" : "rgba(255,255,255,0.55)" }}>
                   {t}
                 </button>
               ))}
@@ -370,7 +370,7 @@ export function GalleryUploadModal({ userId, onUploaded, onClose }: UploadModalP
         )}
 
         <button onClick={handleUpload} disabled={!file || uploading}
-          className="w-full rounded-full h-12 font-medium text-white disabled:opacity-40"
+          className="w-full rounded-full h-12 font-medium text-on-accent disabled:opacity-40"
           style={{ background: "#FF5500" }}>
           {uploading ? "Uploading…" : "Add to Gallery"}
         </button>

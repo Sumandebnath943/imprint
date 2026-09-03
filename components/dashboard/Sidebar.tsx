@@ -12,6 +12,7 @@ import {
 import type { DashboardProfile } from "@/lib/dashboard/types";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
+import { readSidebarCollapsed, setSidebarCollapsed } from "@/lib/dashboard/sidebar-state";
 
 const NAV_GROUPS = [
   {
@@ -48,7 +49,7 @@ const NAV_GROUPS = [
 
 const COLLAPSED_W = 68;
 const EXPANDED_W = 240;
-const LS_KEY = "imprint_sidebar_collapsed";
+// Collapsed state lives in lib/dashboard/sidebar-state.
 
 interface NavItemProps {
   href: string;
@@ -148,14 +149,15 @@ export default function Sidebar({ profile }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(true);
 
   useEffect(() => {
-    const saved = localStorage.getItem(LS_KEY);
-    if (saved !== null) setCollapsed(saved === "true");
+    setCollapsed(readSidebarCollapsed());
   }, []);
 
   const toggle = () => {
     const next = !collapsed;
     setCollapsed(next);
-    localStorage.setItem(LS_KEY, String(next));
+    // Persists and notifies the shell/top bar in the same tick, replacing the
+    // 300ms poll they used to run.
+    setSidebarCollapsed(next);
   };
 
   const handleSignOut = async () => {

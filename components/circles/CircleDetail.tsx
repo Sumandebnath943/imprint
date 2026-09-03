@@ -279,7 +279,7 @@ export default function CircleDetail({ circle, userId, onClose }: CircleDetailPr
                 <p className="text-sm mb-3" style={{ color: "rgba(255,255,255,0.66)" }}>Post a check-in</p>
                 <div className="flex gap-2 flex-wrap mb-4">
                   {CHECKIN_TYPES.map(t => (
-                    <button key={t} onClick={() => setCType(t)} className="rounded-full text-xs px-3 py-1.5 transition-all" style={{ background: cType === t ? "#FF5500" : "#1A1A1A", border: cType === t ? "1px solid #FF5500" : "1px solid rgba(255,255,255,0.08)", color: cType === t ? "white" : "rgba(255,255,255,0.55)" }}>{t}</button>
+                    <button key={t} onClick={() => setCType(t)} className="rounded-full text-xs px-3 py-1.5 transition-all" style={{ background: cType === t ? "#FF5500" : "#1A1A1A", border: cType === t ? "1px solid #FF5500" : "1px solid rgba(255,255,255,0.08)", color: cType === t ? "#0A0A0A" : "rgba(255,255,255,0.55)" }}>{t}</button>
                   ))}
                 </div>
                 <textarea value={cContent} onChange={e => setCContent(e.target.value)} placeholder="What did you work on today?" className="w-full rounded-xl outline-none resize-none px-4 py-3 text-sm mb-3" style={{ background: "#1A1A1A", border: "1px solid rgba(255,255,255,0.08)", color: "white", minHeight: 80 }} />
@@ -292,7 +292,7 @@ export default function CircleDetail({ circle, userId, onClose }: CircleDetailPr
                   )}
                   <div className="flex items-center gap-3 ml-auto">
                     <span className="text-xs font-mono" style={{ color: cContent.length > 280 ? "#FF2D2D" : "rgba(255,255,255,0.30)" }}>{cContent.length}/280</span>
-                    <button onClick={handlePost} disabled={posting || !cContent.trim() || cContent.length > 280} className="rounded-full px-5 py-2 text-sm font-medium text-white disabled:opacity-50" style={{ background: "#FF5500" }}>{posting ? "Posting…" : "Post Check-in"}</button>
+                    <button onClick={handlePost} disabled={posting || !cContent.trim() || cContent.length > 280} className="rounded-full px-5 py-2 text-sm font-medium text-on-accent disabled:opacity-50" style={{ background: "#FF5500" }}>{posting ? "Posting…" : "Post Check-in"}</button>
                   </div>
                 </div>
               </div>

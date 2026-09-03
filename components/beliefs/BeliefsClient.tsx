@@ -159,7 +159,7 @@ export default function BeliefsClient({ beliefs: initial, userId }: BeliefsClien
             <p style={{ fontSize: 15, color: "rgba(255,255,255,0.66)" }}>What you actually think. Recorded. Watched. Owned.</p>
           </div>
           <button onClick={() => setShowForm(true)}
-            className="flex items-center gap-1.5 rounded-full font-medium text-white"
+            className="flex items-center gap-1.5 rounded-full font-medium text-on-accent"
             style={{ height: 42, padding: "0 20px", background: "#FF5500", fontSize: 14 }}>
             <Plus size={15} /> Record a Belief
           </button>
@@ -205,7 +205,7 @@ export default function BeliefsClient({ beliefs: initial, userId }: BeliefsClien
                   {CATEGORIES.map((c) => (
                     <button key={c} onClick={() => setCategory(c)}
                       className="rounded-full text-xs px-3 py-1.5 transition-all"
-                      style={{ background: category === c ? "#FF5500" : "#1A1A1A", border: category === c ? "1px solid #FF5500" : "1px solid rgba(255,255,255,0.08)", color: category === c ? "white" : "rgba(255,255,255,0.55)" }}>
+                      style={{ background: category === c ? "#FF5500" : "#1A1A1A", border: category === c ? "1px solid #FF5500" : "1px solid rgba(255,255,255,0.08)", color: category === c ? "#0A0A0A" : "rgba(255,255,255,0.55)" }}>
                       {c}
                     </button>
                   ))}
@@ -232,7 +232,7 @@ export default function BeliefsClient({ beliefs: initial, userId }: BeliefsClien
                   <button onClick={() => setShowForm(false)}
                     className="rounded-full h-10 px-5 text-sm" style={{ border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.50)" }}>Cancel</button>
                   <button onClick={handleAddBelief} disabled={saving || !statement.trim()}
-                    className="rounded-full h-10 px-6 text-sm font-medium text-white disabled:opacity-50"
+                    className="rounded-full h-10 px-6 text-sm font-medium text-on-accent disabled:opacity-50"
                     style={{ background: "#FF5500" }}>
                     {saving ? "Recording…" : "Record This Belief"}
                   </button>
@@ -248,7 +248,7 @@ export default function BeliefsClient({ beliefs: initial, userId }: BeliefsClien
           {[...FILTERS, ...CATEGORIES].map((f) => (
             <button key={f} onClick={() => setFilter(f)}
               className="rounded-full text-xs px-3 py-1.5 transition-all"
-              style={{ background: filter === f ? "#FF5500" : "#1A1A1A", border: filter === f ? "1px solid #FF5500" : "1px solid rgba(255,255,255,0.08)", color: filter === f ? "white" : "rgba(255,255,255,0.55)" }}>
+              style={{ background: filter === f ? "#FF5500" : "#1A1A1A", border: filter === f ? "1px solid #FF5500" : "1px solid rgba(255,255,255,0.08)", color: filter === f ? "#0A0A0A" : "rgba(255,255,255,0.55)" }}>
               {f}
             </button>
           ))}

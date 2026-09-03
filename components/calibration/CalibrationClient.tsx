@@ -106,7 +106,7 @@ export default function CalibrationClient({ pageData }: CalibrationClientProps) 
             </p>
           </div>
           <button onClick={handleBegin}
-            className="rounded-full h-10 px-6 text-sm font-medium text-white"
+            className="rounded-full h-10 px-6 text-sm font-medium text-on-accent"
             style={{ background: "#FF5500" }}>
             Resume Session →
           </button>

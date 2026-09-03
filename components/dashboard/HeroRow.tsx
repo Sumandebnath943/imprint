@@ -284,7 +284,7 @@ export default function HeroRow({ driftScore, nextChallenge, calibration }: Hero
           )}
           <Link
             href="/dashboard/forge"
-            className="mt-auto self-start rounded-full h-9 px-5 text-sm font-medium text-white transition-all hover:opacity-80"
+            className="mt-auto self-start rounded-full h-9 px-5 text-sm font-medium text-on-accent transition-all hover:opacity-80"
             style={{ background: "#FF5500", lineHeight: "36px" }}
           >
             Enter The Forge →
@@ -350,7 +350,7 @@ export default function HeroRow({ driftScore, nextChallenge, calibration }: Hero
               <p className="text-sm" style={{ color: "rgba(255,255,255,0.72)" }}>Your Drift Score needs updating</p>
               <Link
                 href="/dashboard/calibration"
-                className="mt-auto self-start rounded-full h-9 px-5 text-sm font-medium text-white"
+                className="mt-auto self-start rounded-full h-9 px-5 text-sm font-medium text-on-accent"
                 style={{ background: "#FF5500", lineHeight: "36px" }}
               >
                 Begin Session →

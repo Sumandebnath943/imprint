@@ -219,7 +219,7 @@ export function CalibrationResults({ result, sessionNumber, previousSessionNumbe
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.0 }}
           className="flex gap-4">
           <button onClick={() => router.push("/dashboard/drift")}
-            className="rounded-full font-medium text-white" style={{ background: "#FF5500", height: 46, padding: "0 32px" }}>
+            className="rounded-full font-medium text-on-accent" style={{ background: "#FF5500", height: 46, padding: "0 32px" }}>
             View Full Report →
           </button>
           <button onClick={() => router.push("/dashboard")}
