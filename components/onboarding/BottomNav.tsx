@@ -24,7 +24,7 @@ export default function BottomNav({
 }: BottomNavProps) {
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-between px-12 py-5"
+      className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-between gap-3 px-5 py-4 md:px-12 md:py-5"
       style={{
         background: "rgba(8,8,8,0.90)",
         backdropFilter: "blur(20px)",
@@ -33,7 +33,7 @@ export default function BottomNav({
       }}
     >
       {/* Back */}
-      <div className="w-32">
+      <div className="shrink-0 md:w-32">
         {!hideBack && onBack && (
           <motion.button
             onClick={onBack}
@@ -49,12 +49,12 @@ export default function BottomNav({
       </div>
 
       {/* Step indicator */}
-      <p className="text-xs" style={{ color: "rgba(255,255,255,0.62)" }}>
-        Step {step} of {total}
+      <p className="text-xs whitespace-nowrap" style={{ color: "rgba(255,255,255,0.62)" }}>
+        <span className="hidden sm:inline">Step </span>{step}<span className="hidden sm:inline"> of</span><span className="sm:hidden">/</span>{total}
       </p>
 
       {/* Continue */}
-      <div className="w-48 flex justify-end">
+      <div className="shrink-0 md:w-48 flex justify-end">
         <motion.button
           onClick={onContinue}
           disabled={continueDisabled}

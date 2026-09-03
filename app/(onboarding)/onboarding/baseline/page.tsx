@@ -255,7 +255,7 @@ export default function BaselinePage() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden md:h-full md:min-h-0 md:flex md:flex-col md:pb-[84px]">
+    <div className="relative min-h-screen overflow-hidden lg:h-full lg:min-h-0">
       {/* Ghost word */}
       <div
         className="fixed select-none pointer-events-none"
@@ -284,8 +284,11 @@ export default function BaselinePage() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="relative z-10 max-w-[720px] mx-auto px-6 pt-24 pb-36 md:w-full md:flex-1 md:min-h-0 md:overflow-y-auto md:pt-16 md:pb-6"
+          className="relative z-10 w-full max-w-[1180px] mx-auto px-6 md:px-10 pt-24 pb-32 lg:pt-[84px] lg:pb-[100px] lg:h-full lg:flex lg:flex-col"
         >
+          <div className="lg:flex lg:flex-row lg:gap-14 lg:flex-1 lg:min-h-0">
+          {/* Left — module context and the prompt. Fixed, always readable. */}
+          <div className="lg:w-[40%] lg:shrink-0 lg:overflow-y-auto lg:pr-1">
           {/* Module label */}
           <div className="mb-8 md:mb-4">
             <p className="uppercase tracking-widest text-xs mb-3" style={{ color: "rgba(255,255,255,0.62)" }}>
@@ -315,6 +318,10 @@ export default function BaselinePage() {
             </p>
           </div>
 
+          </div>
+
+          {/* Right — the writing surface. */}
+          <div className="lg:flex-1 lg:min-w-0 lg:flex lg:flex-col lg:min-h-0 mt-8 lg:mt-0">
           {/* Response area */}
           {isFinalModule ? (
             <FinalModuleContent
@@ -362,7 +369,7 @@ export default function BaselinePage() {
                   timerSeconds={currentModule.timed ? currentModule.timed * 60 : 0}
                   onTimerEnd={handleContinue}
                   disableBackspace={currentModule.disableBackspace}
-                  minHeight={150}
+                  minHeight={220}
                 />
               ) : (
                 <VoiceRecorder onRecordingComplete={(blob, _secs) => { setAudioBlob(blob); }} />
@@ -375,16 +382,18 @@ export default function BaselinePage() {
               timerSeconds={currentModule.timed ? currentModule.timed * 60 : 0}
               onTimerEnd={handleContinue}
               disableBackspace={currentModule.disableBackspace}
-              minHeight={150}
+              minHeight={220}
             />
           )}
 
           {/* Min words hint */}
           {currentModule.minWords && inputMode === "text" && (
-            <p className="mt-3 text-xs" style={{ color: "rgba(255,255,255,0.54)" }}>
+            <p className="mt-3 text-xs shrink-0" style={{ color: "rgba(255,255,255,0.54)" }}>
               Minimum {currentModule.minWords} words · {Math.max(0, currentModule.minWords - countWords(textValue))} to go
             </p>
           )}
+          </div>
+          </div>
         </motion.div>
       </AnimatePresence>
 

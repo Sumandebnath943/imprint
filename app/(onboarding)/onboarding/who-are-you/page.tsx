@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search } from "lucide-react";
 import { useOnboardingStore } from "@/lib/store/onboarding.store";
 import BottomNav from "@/components/onboarding/BottomNav";
+import StepLayout from "@/components/onboarding/StepLayout";
 import {
   AGE_GROUPS,
   PROFESSIONS,
@@ -42,152 +43,164 @@ export default function WhoAreYouPage() {
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col overflow-hidden px-6 pt-28 pb-28 md:pt-[72px] md:pb-[100px] md:h-full">
-      {/* Ghost word */}
-      <div
-        className="fixed select-none pointer-events-none"
-        style={{ fontSize: 200, fontWeight: 700, color: "#FFFFFF", opacity: 0.03, top: "40%", left: "50%", transform: "translate(-50%,-50%)", whiteSpace: "nowrap", letterSpacing: "-0.04em", zIndex: 0 }}
-      >
-        HUMAN
-      </div>
-
-      <div className="relative z-10 max-w-[720px] w-full mx-auto flex flex-col md:flex-1 md:min-h-0">
-        {/* Headline */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-4 md:mb-3"
-        >
-          <h1 className="font-bold leading-tight" style={{ fontSize: "clamp(36px,5vw,48px)" }}>
-            <span className="text-white">Tell us who </span>
-            <span style={{ color: "#FF5500" }}>you are.</span>
-          </h1>
-        </motion.div>
-
-        <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.08 }}
-          className="mb-12 md:mb-6"
-          style={{ fontSize: 17, color: "rgba(255,255,255,0.50)", maxWidth: 500, lineHeight: 1.7 }}
-        >
-          Not your job title. Not your LinkedIn bio.<br />Who you actually are, right now.
-        </motion.p>
-
-        {/* Age Group */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.14 }}
-          className="mb-10 md:mb-6"
-        >
-          <p className="uppercase tracking-widest text-xs font-medium mb-4" style={{ color: "rgba(255,255,255,0.50)" }}>
-            How old are you?
-          </p>
-          <div className="flex flex-wrap gap-3">
-            {AGE_GROUPS.map((ag) => {
-              const selected = answers.ageGroup === ag.value;
-              return (
-                <button
-                  key={ag.value}
-                  onClick={() => setAgeGroup(ag.value)}
-                  className="rounded-pill px-6 py-3 text-sm font-medium transition-all duration-200"
-                  style={{
-                    background: selected ? "rgba(255,85,0,0.15)" : "#1A1A1A",
-                    border: `1px solid ${selected ? "rgba(255,85,0,0.50)" : "rgba(255,255,255,0.10)"}`,
-                    color: selected ? "#FF5500" : "white",
-                  }}
-                >
-                  {ag.label}
-                </button>
-              );
-            })}
-          </div>
-        </motion.div>
-
-        {/* Profession */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.20 }}
-          className="flex flex-col md:flex-1 md:min-h-0"
-        >
-          <p className="uppercase tracking-widest text-xs font-medium mb-4" style={{ color: "rgba(255,255,255,0.50)" }}>
-            What do you do?
-          </p>
-
-          {/* Search */}
-          <div className="relative mb-5">
-            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "rgba(255,255,255,0.58)" }} />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search your profession..."
-              className="w-full h-[52px] pl-10 pr-4 text-sm text-white outline-none transition-all duration-200"
-              style={{
-                background: "#1A1A1A",
-                border: "1px solid rgba(255,255,255,0.10)",
-                borderRadius: 12,
-                caretColor: "#FF5500",
-              }}
-              onFocus={(e) => { e.currentTarget.style.border = "1px solid rgba(255,85,0,0.50)"; }}
-              onBlur={(e) => { e.currentTarget.style.border = "1px solid rgba(255,255,255,0.10)"; }}
-            />
-          </div>
-
-          {/* Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6 md:flex-1 md:min-h-0 md:overflow-y-auto md:content-start md:pr-1">
-            {filteredProfessions.map((p) => {
-              const selected = answers.profession === p.name;
-              const clusterColor = CLUSTER_COLORS[p.cluster] ?? "#FF5500";
-              return (
-                <button
-                  key={p.name}
-                  onClick={() => setProfession(p.name, p.cluster)}
-                  className="relative text-left rounded-2xl p-4 transition-all duration-200"
-                  style={{
-                    background: selected ? "rgba(255,85,0,0.10)" : "#111111",
-                    border: `1px solid ${selected ? "rgba(255,85,0,0.40)" : "rgba(255,255,255,0.07)"}`,
-                    boxShadow: selected ? "0 0 20px rgba(255,85,0,0.08)" : "none",
-                  }}
-                >
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: clusterColor }} />
-                    <span className="text-xs" style={{ color: "rgba(255,255,255,0.62)" }}>
-                      {CLUSTER_LABELS[p.cluster]}
-                    </span>
-                  </div>
-                  <p className="text-sm font-medium text-white">{p.name}</p>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Cluster confirmation */}
+    <>
+      <StepLayout
+        ghost="HUMAN"
+        eyebrow="Step 2 · About you"
+        title={
+          <>
+            Tell us who <span style={{ color: "#FF5500" }}>you are.</span>
+          </>
+        }
+        description={
+          <>
+            Not your job title. Not your LinkedIn bio.
+            <br />
+            Who you actually are, right now.
+          </>
+        }
+        aside={
           <AnimatePresence>
             {answers.profession && answers.professionCluster && (
               <motion.p
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className="text-sm italic"
+                className="text-sm"
                 style={{ color: "rgba(255,255,255,0.66)" }}
               >
                 You&apos;re in the{" "}
-                <span className="font-medium" style={{ color: CLUSTER_COLORS[answers.professionCluster] }}>
+                <span
+                  className="font-medium"
+                  style={{ color: CLUSTER_COLORS[answers.professionCluster] }}
+                >
                   {CLUSTER_LABELS[answers.professionCluster]}
                 </span>{" "}
                 cluster. Your baseline will be tailored for you.
               </motion.p>
             )}
           </AnimatePresence>
-        </motion.div>
-      </div>
+        }
+        wide
+      >
+        {/* Age — a short row, so it stays fixed above the scrolling grid. */}
+        <div className="shrink-0 mb-6">
+          <p
+            className="uppercase tracking-widest text-[11px] font-medium mb-3"
+            style={{ color: "rgba(255,255,255,0.55)" }}
+          >
+            How old are you?
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {AGE_GROUPS.map((g) => {
+              const selected = answers.ageGroup === g.value;
+              return (
+                <button
+                  key={g.value}
+                  onClick={() => setAgeGroup(g.value)}
+                  className="rounded-full px-5 h-11 text-sm font-medium transition-all duration-200"
+                  style={{
+                    background: selected ? "rgba(255,85,0,0.12)" : "#141414",
+                    border: `1px solid ${selected ? "rgba(255,85,0,0.45)" : "rgba(255,255,255,0.08)"}`,
+                    color: selected ? "#FF5500" : "rgba(255,255,255,0.72)",
+                  }}
+                >
+                  {g.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
-      {/* Bottom spacer */}
-      <div className="h-28 md:hidden" />
+        {/* Search — pinned, so filtering never scrolls out of reach. */}
+        <div className="shrink-0 mb-3">
+          <div className="flex items-baseline justify-between mb-3">
+            <p
+              className="uppercase tracking-widest text-[11px] font-medium"
+              style={{ color: "rgba(255,255,255,0.55)" }}
+            >
+              What do you do?
+            </p>
+            <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.45)" }}>
+              {filteredProfessions.length} of {PROFESSIONS.length}
+            </span>
+          </div>
+          <div className="relative">
+            <Search
+              size={16}
+              className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"
+              style={{ color: "rgba(255,255,255,0.5)" }}
+            />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search your profession..."
+              className="w-full h-12 pl-10 pr-4 text-sm text-white outline-none transition-all duration-200"
+              style={{
+                background: "#141414",
+                border: "1px solid rgba(255,255,255,0.10)",
+                borderRadius: 12,
+                caretColor: "#FF5500",
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.border = "1px solid rgba(255,85,0,0.50)";
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.border = "1px solid rgba(255,255,255,0.10)";
+              }}
+            />
+          </div>
+        </div>
+
+        {/* The list is 35 items — it cannot fit on one screen and should not
+            try. It scrolls in its own pane with a floor of 260px, so there is
+            always more than a sliver of it visible. */}
+        <div
+          className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 overflow-y-auto content-start pr-1 -mr-1 min-h-[260px] lg:flex-1 lg:min-h-[260px]"
+          style={{ scrollbarWidth: "thin" }}
+        >
+          {filteredProfessions.map((p) => {
+            const selected = answers.profession === p.name;
+            const clusterColor = CLUSTER_COLORS[p.cluster] ?? "#FF5500";
+            return (
+              <button
+                key={p.name}
+                onClick={() => setProfession(p.name, p.cluster)}
+                className="relative text-left rounded-xl p-3.5 transition-all duration-200 h-fit"
+                style={{
+                  background: selected ? "rgba(255,85,0,0.10)" : "#111111",
+                  border: `1px solid ${selected ? "rgba(255,85,0,0.45)" : "rgba(255,255,255,0.07)"}`,
+                }}
+              >
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <div
+                    className="w-1.5 h-1.5 rounded-full shrink-0"
+                    style={{ background: clusterColor }}
+                  />
+                  <span
+                    className="text-[10px] truncate"
+                    style={{ color: "rgba(255,255,255,0.55)" }}
+                  >
+                    {CLUSTER_LABELS[p.cluster]}
+                  </span>
+                </div>
+                <p className="text-[13px] font-medium text-white leading-snug">
+                  {p.name}
+                </p>
+              </button>
+            );
+          })}
+
+          {filteredProfessions.length === 0 && (
+            <p
+              className="col-span-full text-sm py-8 text-center"
+              style={{ color: "rgba(255,255,255,0.5)" }}
+            >
+              No profession matches “{search}”. Try a broader word.
+            </p>
+          )}
+        </div>
+      </StepLayout>
 
       <BottomNav
         step={STEP}
@@ -196,6 +209,6 @@ export default function WhoAreYouPage() {
         onContinue={handleContinue}
         continueDisabled={!canContinue}
       />
-    </div>
+    </>
   );
 }
