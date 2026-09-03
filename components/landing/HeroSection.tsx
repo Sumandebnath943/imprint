@@ -11,10 +11,12 @@ export default function HeroSection() {
         background: "linear-gradient(135deg, #FF4500 0%, #D92600 100%)",
       }}
     >
-      {/* Mobile Background Image (Hidden on Desktop) */}
+      {/* Mobile Background Image (Hidden on Desktop).
+          768px-wide WebP: this sits behind a luminosity blend and an overlay,
+          so full resolution buys nothing and cost 1.6MB on the LCP element. */}
       <div
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-90 mix-blend-luminosity md:hidden"
-        style={{ backgroundImage: "url('/hero-bg.png')" }}
+        style={{ backgroundImage: "url('/hero-bg-mobile.webp')" }}
       />
 
       {/* Desktop Background Media - Video with Image Fallback (Hidden on Mobile) */}
@@ -23,7 +25,7 @@ export default function HeroSection() {
         loop
         muted
         playsInline
-        poster="/hero-bg.png"
+        poster="/hero-bg.webp"
         className="hidden md:block absolute inset-0 z-0 w-full h-full object-cover opacity-90 mix-blend-luminosity scale-[1.15]"
       >
         <source src="/hero-bg.mp4" type="video/mp4" />
