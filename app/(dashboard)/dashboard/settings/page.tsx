@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Settings — IMPRINT",
+  title: "Settings",
   description: "Manage your IMPRINT account and engine preferences.",
 };
 

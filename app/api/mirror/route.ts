@@ -1,7 +1,44 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
+import { z } from "zod";
+import { rateLimit } from "@/lib/api/rate-limit";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+// gpt-4o is billed per call, so cap how fast one account can drive it.
+const RATE_LIMIT = 30;
+const RATE_WINDOW_MS = 5 * 60_000;
+
+const MAX_MESSAGE_CHARS = 4000;
+const MAX_CONTEXT_CHARS = 120;
+
+const MessageSchema = z.object({
+  role: z.string().max(20),
+  content: z.string().max(MAX_MESSAGE_CHARS),
+});
+
+const MirrorRequestSchema = z.object({
+  message: z.string().max(MAX_MESSAGE_CHARS).optional().default(""),
+  conversationHistory: z.array(MessageSchema).max(120).optional().default([]),
+  sessionContext: z.string().max(MAX_CONTEXT_CHARS).optional().default("Something Else"),
+  dependencyFlagCount: z.number().int().min(0).max(999).optional().default(0),
+  mode: z.enum(["question", "summary"]).optional().default("question"),
+});
+
+/**
+ * The session context is user-authored free text that lands inside the system
+ * prompt, so strip the characters and phrases used to escape a prompt or issue
+ * a competing instruction. Cheap defence, but it removes the obvious lever.
+ */
+function sanitizeContext(raw: string): string {
+  return raw
+    .replace(/[\r\n]+/g, " ")
+    .replace(/[`{}<>#*_[\]]/g, "")
+    .replace(/\b(ignore|disregard|forget|override|system prompt|you are now|new instructions?)\b/gi, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, MAX_CONTEXT_CHARS) || "open reflection";
+}
 
 const DEPENDENCY_TRIGGERS = [
   "tell me", "should i", "what should", "recommend", "advise",
@@ -91,18 +128,57 @@ export async function POST(req: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const body = await req.json();
-    const {
-      message,
-      conversationHistory = [],
-      sessionContext = "Something Else",
-      userCluster = "life_personal",
-      baselineSummary = { avgWordCount: 300, vocabularyRichness: 0.6, avgSentenceLength: 15, commonPhrases: [], writingStyle: "thoughtful" },
-      dependencyFlagCount = 0,
-      mode = "question", // "question" | "summary"
-    } = body;
+    const limit = rateLimit(`mirror:${user.id}`, RATE_LIMIT, RATE_WINDOW_MS);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        {
+          response: "You're moving faster than reflection allows. Take a breath and come back in a moment.",
+          dependencyFlagged: false,
+          rateLimited: true,
+        },
+        { status: 429, headers: { "Retry-After": String(limit.retryAfter) } }
+      );
+    }
 
-    // Rate limit: max 60 messages
+    const parsed = MirrorRequestSchema.safeParse(await req.json());
+    if (!parsed.success) {
+      return NextResponse.json(
+        { response: "That message couldn't be read. Try rephrasing it.", dependencyFlagged: false, error: true },
+        { status: 400 }
+      );
+    }
+
+    const { message, conversationHistory, dependencyFlagCount, mode } = parsed.data;
+    const sessionContext = sanitizeContext(parsed.data.sessionContext);
+
+    // The cluster and baseline shape the system prompt, so read them from the
+    // database rather than the request body. Previously the client supplied
+    // both, which let a user fabricate their own baseline — and the Mirror's
+    // whole purpose is to compare against a baseline they cannot edit.
+    const [{ data: profile }, { data: baselines }] = await Promise.all([
+      supabase.from("profiles").select("profession_cluster").eq("id", user.id).single(),
+      supabase
+        .from("baseline_imprints")
+        .select("word_count, vocabulary_richness, avg_sentence_length")
+        .eq("user_id", user.id),
+    ]);
+
+    const rows = baselines ?? [];
+    const avg = (pick: (r: (typeof rows)[number]) => number | null, fallback: number) =>
+      rows.length > 0
+        ? rows.reduce((s, r) => s + (pick(r) ?? fallback), 0) / rows.length
+        : fallback;
+
+    const userCluster = profile?.profession_cluster ?? "life_personal";
+    const baselineSummary = {
+      avgWordCount: Math.round(avg((r) => r.word_count, 300)),
+      vocabularyRichness: Number(avg((r) => r.vocabulary_richness, 0.6).toFixed(3)),
+      avgSentenceLength: Number(avg((r) => r.avg_sentence_length, 15).toFixed(1)),
+      commonPhrases: [] as string[],
+      writingStyle: "thoughtful",
+    };
+
+    // Session length cap — keeps a single reflection from running forever.
     if (conversationHistory.length > 60) {
       return NextResponse.json({
         response: "Sessions have a 60 message limit. This keeps the reflection meaningful. End this session and reflect on what you've discovered.",

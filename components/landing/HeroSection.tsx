@@ -44,18 +44,23 @@ export default function HeroSection() {
         </motion.h1>
       </div>
 
-      {/* Main Content Container */}
-      <div className="relative z-20 flex-1 w-full max-w-[1600px] mx-auto px-8 md:px-16 pt-32 pb-16 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-0">
+      {/* Main Content Container
+          The columns must be able to shrink between the lg breakpoint (1024px)
+          and ~1330px. Previously the left column, a min-w-[300px] spacer and
+          the right column had fixed widths totalling more than the viewport,
+          so the right-hand text was clipped by the section's overflow-hidden
+          on any window narrower than about 1330px. */}
+      <div className="relative z-20 flex-1 w-full max-w-[1600px] mx-auto px-8 md:px-12 xl:px-16 pt-32 pb-16 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-8">
 
         {/* LEFT COLUMN */}
         <motion.div
           initial={{ opacity: 0, x: -40 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="w-full lg:w-[420px] flex flex-col gap-10"
+          className="w-full lg:w-auto lg:max-w-[420px] lg:shrink flex flex-col gap-10"
         >
           <div>
-            <h2 className="text-3xl md:text-4xl lg:text-[42px] font-light leading-[1.1] tracking-tight mb-5 uppercase">
+            <h2 className="text-3xl md:text-4xl lg:text-[36px] xl:text-[42px] font-light leading-[1.1] tracking-tight mb-5 uppercase">
               Preserve your<br />
               human identity<br />
               with <span className="font-semibold">our expert<br />engine.</span>
@@ -93,18 +98,20 @@ export default function HeroSection() {
           </div>
         </motion.div>
 
-        {/* CENTER SPACER (For the silhouette image) */}
-        <div className="hidden lg:block flex-1 min-w-[300px]" />
+        {/* CENTER SPACER (keeps the silhouette visible between the columns).
+            No min-width: it must be the first thing to collapse when the
+            viewport is tight, rather than pushing the right column off-screen. */}
+        <div className="hidden lg:block flex-1 min-w-0" />
 
         {/* RIGHT COLUMN */}
         <motion.div
           initial={{ opacity: 0, x: 40 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="w-full lg:w-[480px] flex flex-col items-start lg:items-end text-left lg:text-right gap-10"
+          className="w-full lg:w-auto lg:max-w-[480px] lg:shrink flex flex-col items-start lg:items-end text-left lg:text-right gap-10"
         >
           <div>
-            <h2 className="text-5xl md:text-6xl lg:text-[72px] font-light leading-[0.9] tracking-tighter uppercase mb-6">
+            <h2 className="text-5xl md:text-6xl lg:text-[56px] xl:text-[72px] font-light leading-[0.9] tracking-tighter uppercase mb-6">
               Identity<br />
               <span className="font-bold">Preservation</span><br />
               Engine

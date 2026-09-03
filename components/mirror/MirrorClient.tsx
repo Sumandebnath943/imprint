@@ -137,7 +137,14 @@ export default function MirrorClient({ userData }: MirrorClientProps) {
     setIsTyping(false);
 
     if (!res.ok) {
-      setMessages((p) => [...p, { id: nanoid(), role: "system", content: "The Mirror is momentarily unavailable. Your thoughts are still here.", timestamp: Date.now() }]);
+      // The API returns a human-readable `response` for expected failures
+      // (rate limit, malformed input); fall back only when it doesn't.
+      const fallback = "The Mirror is momentarily unavailable. Your thoughts are still here.";
+      const content = await res
+        .json()
+        .then((d) => (typeof d?.response === "string" ? d.response : fallback))
+        .catch(() => fallback);
+      setMessages((p) => [...p, { id: nanoid(), role: "system", content, timestamp: Date.now() }]);
       return;
     }
 
