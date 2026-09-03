@@ -33,36 +33,44 @@ export async function POST(req: Request) {
     // Uniqueness is enforced by the UNIQUE constraint on invite_code; we retry
     // on collision rather than pre-checking (the old pre-check read circles the
     // user cannot see, so it could not detect a collision anyway).
+    // The id is generated here rather than read back from the insert.
+    //
+    // Chaining .select() adds a RETURNING clause, and RETURNING is checked
+    // against the SELECT policy — which is "NOT is_private OR
+    // is_circle_member(id)". The creator's membership row is written after the
+    // circle, so at that instant they are not a member yet, and a private
+    // circle fails its own SELECT check. Postgres reports that as "new row
+    // violates row-level security policy", which made creating a private
+    // circle impossible — and private is the default.
     let circle: { id: string; invite_code: string } | null = null;
     let inviteCode = "";
     let lastError: string | null = null;
 
     for (let attempt = 0; attempt < 5 && !circle; attempt++) {
       inviteCode = randomInviteCode();
-      const { data, error } = await supabase
-        .from("human_circles")
-        .insert({
-          name,
-          description,
-          cluster_focus: clusterFocus,
-          created_by: user.id,
-          member_limit: 8,
-          is_private: isPrivate,
-          invite_code: inviteCode,
-        })
-        .select("id, invite_code")
-        .single();
+      const circleId = crypto.randomUUID();
 
-      if (data) {
-        circle = data;
+      const { error } = await supabase.from("human_circles").insert({
+        id: circleId,
+        name,
+        description,
+        cluster_focus: clusterFocus,
+        created_by: user.id,
+        member_limit: 8,
+        is_private: isPrivate,
+        invite_code: inviteCode,
+      });
+
+      if (!error) {
+        circle = { id: circleId, invite_code: inviteCode };
         break;
       }
       // 23505 = unique_violation → the code was taken, try another.
-      if (error && error.code !== "23505") {
+      if (error.code !== "23505") {
         lastError = error.message;
         break;
       }
-      lastError = error?.message ?? null;
+      lastError = error.message;
     }
 
     if (!circle) {
