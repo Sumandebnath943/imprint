@@ -16,6 +16,7 @@ import ForgeRightPanel from "@/components/forge/ForgeRightPanel";
 import type { ForgeTool, ForgeUserData } from "@/lib/forge/types";
 import { countWords, formatTime } from "@/lib/forge/types";
 import { createClient } from "@/lib/supabase/client";
+import { formatDate } from "@/lib/utils/format";
 
 type SessionState = "idle" | "active" | "complete";
 
@@ -342,7 +343,7 @@ export default function ForgeClient({ userData }: ForgeClientProps) {
                     <p className="font-semibold text-white text-xl mb-2">{userData.activeChallenge.title}</p>
                     <p className="text-sm mb-5" style={{ color: "rgba(255,255,255,0.45)" }}>
                       {userData.activeChallenge.due_date
-                        ? `Due ${new Date(userData.activeChallenge.due_date).toLocaleDateString()}`
+                        ? `Due ${formatDate(userData.activeChallenge.due_date)}`
                         : "No due date"}
                     </p>
                     <span className="inline-flex items-center gap-2 rounded-full h-10 px-6 text-sm font-medium text-white" style={{ background: "#FF5500" }}>

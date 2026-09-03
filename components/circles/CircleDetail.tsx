@@ -8,6 +8,7 @@ import { Settings, ArrowLeft } from "lucide-react";
 import type { HumanCircle, CircleMember } from "@/components/circles/CirclesClient";
 import { createClient } from "@/lib/supabase/client";
 import { getZoneColor, getZoneShortLabel } from "@/lib/drift/types";
+import { formatDate } from "@/lib/utils/format";
 
 interface Checkin {
   id: string; user_id: string; checkin_type: string; content: string; drift_score_shared: number | null; created_at: string;
@@ -357,7 +358,7 @@ export default function CircleDetail({ circle, userId, onClose }: CircleDetailPr
                     <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium" style={{ background: "rgba(255,255,255,0.08)", color: "white" }}>{m.profile?.full_name?.charAt(0) || "?"}</div>
                     <div>
                       <p className="text-sm font-medium text-white">{m.profile?.full_name || "Unknown"}</p>
-                      <p className="text-xs" style={{ color: "rgba(255,255,255,0.40)" }}>Joined {new Date(m.joined_at!).toLocaleDateString()}</p>
+                      <p className="text-xs" style={{ color: "rgba(255,255,255,0.40)" }}>Joined {formatDate(m.joined_at)}</p>
                     </div>
                   </div>
                   <span className="text-xs rounded-full px-2 py-0.5" style={{ background: m.role === "admin" ? "rgba(255,85,0,0.15)" : "transparent", color: m.role === "admin" ? "#FF5500" : "rgba(255,255,255,0.30)", border: m.role === "admin" ? "none" : "1px solid rgba(255,255,255,0.15)" }}>

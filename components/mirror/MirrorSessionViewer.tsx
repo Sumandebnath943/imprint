@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import MirrorMessageBubble from "./MirrorMessage";
 import type { MirrorMessage } from "@/lib/mirror/types";
 import { formatTime } from "@/lib/mirror/types";
+import { formatDate } from "@/lib/utils/format";
 
 interface MirrorSessionViewerProps {
   sessionId: string;
@@ -61,7 +62,7 @@ export default function MirrorSessionViewer({ sessionId, onClose }: MirrorSessio
             <p className="font-semibold text-white">Past Reflection</p>
             {sessionData && (
               <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
-                {new Date(sessionData.created_at).toLocaleDateString()} · {(sessionData.topics || []).join(", ")}
+                {formatDate(sessionData.created_at)} · {(sessionData.topics || []).join(", ")}
               </p>
             )}
           </div>

@@ -8,6 +8,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { PROFESSIONS, CLUSTER_LABELS } from "@/lib/onboarding/modules";
+import { formatNumber } from "@/lib/utils/format";
 
 interface ProfileData {
   id: string;
@@ -343,7 +344,7 @@ export default function ProfileClient({
             <p className="text-[12px] mt-2" style={{ color: "rgba(255,255,255,0.30)" }}>{stats.bestDriftDate || "N/A"}</p>
           </div>
           <div className="rounded-[16px] p-6" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
-            <span className="block font-bold text-white mb-1" style={{ fontSize: 32, lineHeight: 1 }}>{stats.wordsWritten.toLocaleString()}</span>
+            <span className="block font-bold text-white mb-1" style={{ fontSize: 32, lineHeight: 1 }}>{formatNumber(stats.wordsWritten)}</span>
             <span className="text-[13px]" style={{ color: "rgba(255,255,255,0.40)" }}>Words written in IMPRINT</span>
           </div>
           <div className="rounded-[16px] p-6" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FileText, Timer, Zap, Mic, PenTool, Brain } from "lucide-react";
 import type { ForgeTool, ForgeChallenge, ForgeSession } from "@/lib/forge/types";
 import { MEMORY_TOPICS, formatTime } from "@/lib/forge/types";
+import { formatDate } from "@/lib/utils/format";
 
 const TOOLS = [
   { id: "free-write" as ForgeTool, icon: FileText, name: "Free Write", desc: "Open session, no timer" },
@@ -160,7 +161,7 @@ export default function ForgeLeftPanel({
                   )}
                   {challenge.due_date && (
                     <span className="text-xs rounded-full px-2 py-0.5" style={{ background: "rgba(255,184,0,0.15)", color: "#FFB800" }}>
-                      Due {new Date(challenge.due_date).toLocaleDateString()}
+                      Due {formatDate(challenge.due_date)}
                     </span>
                   )}
                 </div>
