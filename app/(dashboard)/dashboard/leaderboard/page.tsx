@@ -10,7 +10,7 @@ async function getData() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return empty;
 
-    // Check user's opt-in status
+    // Check the viewer's own opt-in status (own row — normal profiles access).
     const { data: profile } = await supabase
       .from("profiles")
       .select("leaderboard_opt_in")
@@ -19,54 +19,41 @@ async function getData() {
 
     const isOptedIn = profile?.leaderboard_opt_in ?? false;
 
-    // Fetch top 100 profiles
-    // Using a lateral join / subquery concept via postgREST: we fetch profiles and their most recent drift score
-    // In supabase-js, we can do this by selecting the related table with an order and limit.
+    // Ranked list comes from the public_profiles view (migration 006).
+    // `profiles` is owner-only, so reading it here would return just the
+    // viewer's own row and the board would always look empty.
+    //
+    // latest_drift_score is resolved inside the view with an ORDER BY, so it
+    // is genuinely the most recent score rather than an arbitrary row.
     const { data: rankingsData } = await supabase
-      .from("profiles")
-      .select(`
-        id, 
-        full_name, 
-        imprint_score,
-        latest_drift:drift_scores(score)
-      `)
+      .from("public_profiles")
+      .select("id, full_name, profession_cluster, imprint_score, latest_drift_score")
       .eq("leaderboard_opt_in", true)
       .order("imprint_score", { ascending: false })
       .limit(100);
 
-    // Format the rankings to ensure latest_drift is just the single most recent score
-    // PostgREST returns an array for the join, we only need the first one (we should logically order it by created_at desc, 
-    // but the query builder syntax for that on joined tables requires some tricky formatting. For now, we take [0]).
-    const rankings: RankedProfile[] = (rankingsData ?? []).map((r: RankedProfile & { latest_drift: { score: number }[] }) => ({
-      ...r,
-      latest_drift: Array.isArray(r.latest_drift) && r.latest_drift.length > 0 ? r.latest_drift[0] : null
+    const rankings: RankedProfile[] = (rankingsData ?? []).map((r) => ({
+      id: r.id,
+      full_name: r.full_name,
+      profession_cluster: r.profession_cluster,
+      imprint_score: r.imprint_score ?? 0,
+      latest_drift:
+        r.latest_drift_score === null || r.latest_drift_score === undefined
+          ? null
+          : { score: r.latest_drift_score },
     }));
 
-    // Find user rank
-    let userRank = null;
-    if (isOptedIn) {
-      const idx = rankings.findIndex((r) => r.id === user.id);
-      if (idx !== -1) {
-        userRank = idx + 1;
-      } else {
-        // If not in top 100, we'd need a separate count query. 
-        // For simplicity, we just say >100.
-        userRank = 101; 
-      }
-    }
+    const idx = isOptedIn ? rankings.findIndex((r) => r.id === user.id) : -1;
+    const userRank = isOptedIn ? (idx === -1 ? null : idx + 1) : null;
 
-    return {
-      userId: user.id,
-      isOptedIn,
-      rankings,
-      userRank
-    };
+    return { userId: user.id, isOptedIn, rankings, userRank };
   } catch {
     return empty;
   }
 }
 
-export const revalidate = 3600; // Cache for 1 hour
+// Per-user data behind a cookie session — must not be statically cached.
+export const dynamic = "force-dynamic";
 
 export default async function LeaderboardPage() {
   const data = await getData();

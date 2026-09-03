@@ -49,21 +49,27 @@ async function getForgeData(): Promise<ForgeUserData> {
 
     // Map history entries — infer tool from drift_signals or content pattern for old entries
     const history = (historyRes.data ?? []).map((h) => {
-      const signals = h.drift_signals as Record<string, unknown>;
+      const signals = (h.drift_signals ?? {}) as Record<string, unknown>;
       const hasFile = ((h as Record<string, unknown>).content as string || "").includes("[Attached File:");
       const title = ((h as Record<string, unknown>).title as string || "").toLowerCase();
-      let tool = signals?.forge_tool;
+
+      // drift_signals is untyped JSONB, so narrow before use.
+      const rawTool = signals.forge_tool;
+      let tool = typeof rawTool === "string" ? rawTool : "";
       if (!tool) {
         if (hasFile && title.includes("voice")) tool = "voice-note";
         else if (hasFile) tool = "sketch-upload";
         else tool = "free-write";
       }
+
+      const rawTime = signals.time_spent_seconds;
+
       return {
         id: h.id,
         created_at: h.created_at,
         tool,
         word_count: h.word_count ?? 0,
-        time_spent_seconds: signals?.time_spent_seconds ?? 0,
+        time_spent_seconds: typeof rawTime === "number" ? rawTime : 0,
         drift_signals: signals,
       };
     });

@@ -25,7 +25,7 @@ export default function MirrorHistoryClient({ initialSessions }: { initialSessio
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {initialSessions.length === 0 && (
-            <p className="text-sm" style={{ color: "rgba(255,255,255,0.3)" }}>You haven't completed any mirror sessions yet.</p>
+            <p className="text-sm" style={{ color: "rgba(255,255,255,0.3)" }}>You haven&apos;t completed any mirror sessions yet.</p>
           )}
           {initialSessions.map((s) => (
             <div key={s.id} onClick={() => setViewingSessionId(s.id)}

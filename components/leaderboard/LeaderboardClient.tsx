@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 
 export interface RankedProfile {
   id: string; full_name: string; imprint_score: number;
+  profession_cluster?: string | null;
   latest_drift?: { score: number; } | null;
 }
 
@@ -18,7 +19,16 @@ interface LeaderboardProps {
   userRank: number | null;
 }
 
-const CLUSTERS = ["All Clusters", "Language & Voice", "Technical & Analytical", "Visual & Creative", "Human & Social", "Leadership & Strategy", "Life & Personal"];
+// Label → profession_cluster value stored on the profile.
+const CLUSTERS: { label: string; value: string | null }[] = [
+  { label: "All Clusters", value: null },
+  { label: "Language & Voice", value: "language_voice" },
+  { label: "Technical & Analytical", value: "technical_analytical" },
+  { label: "Visual & Creative", value: "visual_creative" },
+  { label: "Human & Social", value: "human_social" },
+  { label: "Leadership & Strategy", value: "leadership_strategy" },
+  { label: "Life & Personal", value: "life_personal" },
+];
 
 export default function LeaderboardClient({ userId, isOptedIn, rankings, userRank }: LeaderboardProps) {
   const router = useRouter();
@@ -40,8 +50,13 @@ export default function LeaderboardClient({ userId, isOptedIn, rankings, userRan
     router.refresh();
   };
 
-  const top3 = rankings.slice(0, 3);
-  const rest = rankings.slice(3);
+  const activeCluster = CLUSTERS.find((c) => c.label === filter)?.value ?? null;
+  const visible = activeCluster
+    ? rankings.filter((r) => r.profession_cluster === activeCluster)
+    : rankings;
+
+  const top3 = visible.slice(0, 3);
+  const rest = visible.slice(3);
 
   return (
     <div className="relative" style={{ background: "#080808", minHeight: "100%", paddingBottom: isOptedIn ? 120 : 80 }}>
@@ -74,12 +89,23 @@ export default function LeaderboardClient({ userId, isOptedIn, rankings, userRan
         )}
 
         <div className="flex items-center justify-between mb-10">
-          <div className="flex gap-2">
-            {["All Time", "This Month", "This Week"].map(t => (
-              <button key={t} className="rounded-full text-xs px-3 py-1.5 transition-all" style={{ background: t === "All Time" ? "rgba(255,255,255,0.08)" : "transparent", color: t === "All Time" ? "white" : "rgba(255,255,255,0.40)" }}>{t}</button>
+          <div className="flex gap-2 flex-wrap">
+            {CLUSTERS.map(c => (
+              <button
+                key={c.label}
+                onClick={() => setFilter(c.label)}
+                aria-pressed={filter === c.label}
+                className="rounded-full text-xs px-3 py-1.5 transition-all hover:bg-white/10"
+                style={{
+                  background: filter === c.label ? "rgba(255,255,255,0.08)" : "transparent",
+                  color: filter === c.label ? "white" : "rgba(255,255,255,0.40)",
+                }}
+              >
+                {c.label}
+              </button>
             ))}
           </div>
-          <p className="text-[13px]" style={{ color: "rgba(255,255,255,0.40)" }}>Showing {rankings.length} humans</p>
+          <p className="text-[13px] shrink-0 ml-4" style={{ color: "rgba(255,255,255,0.40)" }}>Showing {visible.length} humans</p>
         </div>
 
         {/* Podium */}
@@ -125,8 +151,12 @@ export default function LeaderboardClient({ userId, isOptedIn, rankings, userRan
           </div>
         )}
         
-        {rankings.length > 0 && <div className="h-px w-full mb-4" style={{ background: "rgba(255,255,255,0.06)" }} />}
-        <p className="text-center text-[13px] mb-10" style={{ color: "rgba(255,255,255,0.30)" }}>{rankings.length} humans competing this month</p>
+        {visible.length > 0 && <div className="h-px w-full mb-4" style={{ background: "rgba(255,255,255,0.06)" }} />}
+        <p className="text-center text-[13px] mb-10" style={{ color: "rgba(255,255,255,0.30)" }}>
+          {visible.length === 0
+            ? "No one here yet — be the first to join this board."
+            : `${visible.length} ${visible.length === 1 ? "human" : "humans"} preserving their identity`}
+        </p>
 
         {/* Table */}
         <div className="rounded-2xl overflow-hidden mb-12" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
@@ -181,8 +211,20 @@ export default function LeaderboardClient({ userId, isOptedIn, rankings, userRan
               <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.40)" }}>IMPRINT Score</p>
             </div>
             <div className="flex items-center gap-4 text-right">
-              <span className="text-[13px]" style={{ color: "rgba(255,255,255,0.40)" }}>— No change</span>
-              <button className="rounded-full px-4 py-2 text-sm transition-all hover:bg-white/5" style={{ border: "1px solid rgba(255,255,255,0.20)", color: "white" }}>View My Profile →</button>
+              <button
+                onClick={handleOptOut}
+                className="rounded-full px-4 py-2 text-sm transition-all hover:bg-white/5"
+                style={{ border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.60)" }}
+              >
+                Leave board
+              </button>
+              <button
+                onClick={() => router.push("/dashboard/profile")}
+                className="rounded-full px-4 py-2 text-sm transition-all hover:bg-white/5"
+                style={{ border: "1px solid rgba(255,255,255,0.20)", color: "white" }}
+              >
+                View My Profile →
+              </button>
             </div>
           </div>
         </motion.div>

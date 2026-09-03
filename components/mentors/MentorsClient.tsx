@@ -11,7 +11,7 @@ export interface MentorProfile {
   mentor_bio: string | null; mentoring_style: string[];
 }
 
-interface Mentorship {
+export interface Mentorship {
   id: string; mentor_id: string; mentee_id: string; status: string;
   started_at: string; check_in_streak: number; last_checkin: string | null;
   mentor?: MentorProfile;

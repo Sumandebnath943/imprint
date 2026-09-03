@@ -12,7 +12,7 @@ export default function HeroSection() {
       }}
     >
       {/* Mobile Background Image (Hidden on Desktop) */}
-      <div 
+      <div
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-90 mix-blend-luminosity md:hidden"
         style={{ backgroundImage: "url('/hero-bg.png')" }}
       />

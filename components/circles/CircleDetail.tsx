@@ -46,19 +46,56 @@ export default function CircleDetail({ circle, userId, onClose }: CircleDetailPr
 
   useEffect(() => {
     async function load() {
-      const { data: cData } = await supabase.from("circle_checkins")
-        .select(`*, profiles(full_name), reactions:checkin_reactions(reaction_type, user_id)`)
-        .eq("circle_id", circle.id).order("created_at", { ascending: false }).limit(20);
-      if (cData) setCheckins(cData as unknown as Checkin[]);
+      try {
+        // Member directory comes from a SECURITY DEFINER function (migration
+        // 006) scoped to circles the caller belongs to. Embedding
+        // `profiles(full_name)` returned null for everyone — profiles is
+        // owner-only under RLS.
+        const { data: mData } = await supabase.rpc("circle_member_profiles", {
+          cid: circle.id,
+        });
 
-      const { data: mData } = await supabase.from("circle_members")
-        .select(`*, profile:profiles(full_name, imprint_score)`)
-        .eq("circle_id", circle.id);
-      if (mData) setMembers(mData as unknown as CircleMember[]);
+        const nameById = new Map<string, string>();
+        if (mData) {
+          const rows = mData as {
+            user_id: string; full_name: string; avatar_url: string | null;
+            imprint_score: number; role: string; joined_at: string;
+          }[];
+          for (const m of rows) nameById.set(m.user_id, m.full_name);
+          setMembers(
+            rows.map((m) => ({
+              id: m.user_id,
+              circle_id: circle.id,
+              user_id: m.user_id,
+              role: m.role,
+              joined_at: m.joined_at,
+              profile: {
+                full_name: m.full_name,
+                imprint_score: m.imprint_score,
+              },
+            })) as unknown as CircleMember[]
+          );
+        }
 
-      const { data: sData } = await supabase.from("drift_scores")
-        .select("score").eq("user_id", userId).order("created_at", { ascending: false }).limit(1).single();
-      if (sData) setUserScore(sData.score);
+        const { data: cData } = await supabase.from("circle_checkins")
+          .select(`*, reactions:checkin_reactions(reaction_type, user_id)`)
+          .eq("circle_id", circle.id).order("created_at", { ascending: false }).limit(20);
+        if (cData) {
+          setCheckins(
+            (cData as unknown as Checkin[]).map((c) => ({
+              ...c,
+              profiles: { full_name: nameById.get(c.user_id) ?? "A member" },
+            }))
+          );
+        }
+
+        const { data: sData } = await supabase.from("drift_scores")
+          .select("score").eq("user_id", userId)
+          .order("created_at", { ascending: false }).limit(1).maybeSingle();
+        if (sData) setUserScore(sData.score);
+      } catch (err) {
+        console.error("[CircleDetail] load failed", err);
+      }
     }
     load();
   }, [circle.id, supabase, userId]);

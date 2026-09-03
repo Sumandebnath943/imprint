@@ -11,39 +11,41 @@ export const metadata: Metadata = {
 export default async function PublicCredentialPage({ params }: { params: { code: string } }) {
   const supabase = createClient();
 
+  // Reads the public_profiles view (see migration 006), which exposes only
+  // non-sensitive columns for users who opted into a public credential.
+  // Querying `profiles` directly here would always fail: this page runs with
+  // no session, and profiles is owner-only.
   const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
+    .from("public_profiles")
+    .select(
+      "id, full_name, profession, profession_cluster, imprint_score, latest_drift_score"
+    )
     .eq("credential_code", params.code)
     .eq("credential_public", true)
-    .single();
+    .maybeSingle();
 
   if (!profile) {
     notFound();
   }
 
-  const { data: driftScores } = await supabase
-    .from("drift_scores")
-    .select("score, status")
-    .eq("user_id", profile.id)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .single();
+  const { data: statsRows } = await supabase.rpc("credential_stats", {
+    uid: profile.id,
+  });
+  const s = Array.isArray(statsRows) ? statsRows[0] : statsRows;
+
+  const stats = {
+    calibrations: s?.calibrations ?? 0,
+    streak: s?.day_streak ?? 0,
+    skillsTracked: s?.skills_tracked ?? 0,
+  };
 
   const imprintScore = profile.imprint_score || 0;
-  const dScore = driftScores?.score || 0;
-  
+  const dScore = profile.latest_drift_score ?? 0;
+
   const dColor = dScore < 40 ? "#00D97E" : dScore < 60 ? "#FFB800" : dScore < 80 ? "#FF5500" : "#FF2D2D";
   const dLabel = dScore < 40 ? "Anchored" : dScore < 60 ? "Stable" : dScore < 80 ? "Drifting" : "Critical";
   const iLabel = imprintScore >= 800 ? "Anchored" : imprintScore >= 600 ? "Strong" : imprintScore >= 400 ? "Solid" : imprintScore >= 200 ? "Building" : "Establishing";
   const iColor = imprintScore >= 800 ? "#00D97E" : imprintScore >= 600 ? "#00D97E" : imprintScore >= 400 ? "#FFB800" : imprintScore >= 200 ? "#FF5500" : "#FF2D2D";
-
-  // Mocked Stats (until full relations are built)
-  const stats = {
-    calibrations: 4,
-    streak: 12,
-    skillsTracked: 8,
-  };
 
   return (
     <div className="relative pt-24 pb-32 max-w-[1200px] mx-auto px-6 flex flex-col items-center">

@@ -458,7 +458,7 @@ export default function SettingsClient({ profile }: SettingsClientProps) {
                 <div className="text-center py-6">
                   <Brain size={32} className="mx-auto mb-4 text-white/15" />
                   <p className="text-[16px] font-medium text-white mb-1">No reduction protocol active.</p>
-                  <p className="text-[14px] text-white/40 mb-8">Start one when your Drift Score signals it's needed.</p>
+                  <p className="text-[14px] text-white/40 mb-8">Start one when your Drift Score signals it&apos;s needed.</p>
                   
                   <div className="text-left mb-6">
                     <label className="text-[13px] font-medium text-white/60 mb-2 block">Duration</label>
@@ -499,7 +499,7 @@ export default function SettingsClient({ profile }: SettingsClientProps) {
                     <div className="h-full bg-[#FF5500]" style={{ width: '10%' }} />
                   </div>
                   
-                  <p className="text-[14px] text-white/50 italic mb-6">"{protocolLevel}"</p>
+                  <p className="text-[14px] text-white/50 italic mb-6">&ldquo;{protocolLevel}&rdquo;</p>
                   
                   <button onClick={endProtocol} className="text-[13px] text-red-400 hover:text-red-300 transition-colors">
                     End Protocol Early

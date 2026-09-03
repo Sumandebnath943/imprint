@@ -65,7 +65,7 @@ export function calcStreak(entries: JournalEntry[]): number {
   let streak = 0;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  let check = new Date(today);
+  const check = new Date(today);
 
   while (true) {
     if (dates.has(check.toDateString())) {

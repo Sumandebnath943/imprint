@@ -43,8 +43,11 @@ export async function updateSession(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
-  // Protected routes — require session
-  const isProtectedRoute = pathname.startsWith("/dashboard");
+  // Protected routes — require session.
+  // /onboarding was previously unguarded: it rendered fine with no session,
+  // then every save silently 401'd part-way through the flow.
+  const isProtectedRoute =
+    pathname.startsWith("/dashboard") || pathname.startsWith("/onboarding");
 
   // Auth routes — redirect to dashboard if already logged in
   const isAuthRoute =

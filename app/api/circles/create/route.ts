@@ -1,7 +1,17 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 
+const CreateCircleSchema = z.object({
+  name: z.string().trim().min(2, "Name must be at least 2 characters").max(60),
+  description: z.string().trim().max(500).optional().default(""),
+  clusterFocus: z.string().trim().min(1, "Cluster focus required").max(60),
+  isPrivate: z.boolean().optional().default(true),
+});
 
+function randomInviteCode() {
+  return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
 
 export async function POST(req: Request) {
   try {
@@ -9,66 +19,77 @@ export async function POST(req: Request) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const body = await req.json();
-    const { name, description, clusterFocus, isPrivate } = body;
-    
-    console.log('Creating circle for user:', user.id);
-    console.log('Circle data:', { name, description, clusterFocus, isPrivate });
-
-    if (!name || !clusterFocus) {
-      return NextResponse.json({ error: "Name and cluster focus required" }, { status: 400 });
+    const parsed = CreateCircleSchema.safeParse(await req.json());
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message ?? "Invalid request" },
+        { status: 400 }
+      );
     }
+    const { name, description, clusterFocus, isPrivate } = parsed.data;
 
-    // Generate unique invite code
+    // Migration 006 replaced the recursive circle_members policy with
+    // SECURITY DEFINER helpers, so this no longer needs the service-role key.
+    // Uniqueness is enforced by the UNIQUE constraint on invite_code; we retry
+    // on collision rather than pre-checking (the old pre-check read circles the
+    // user cannot see, so it could not detect a collision anyway).
+    let circle: { id: string; invite_code: string } | null = null;
     let inviteCode = "";
-    let isUnique = false;
-    while (!isUnique) {
-      inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-      const { data } = await supabase.from("human_circles").select("id").eq("invite_code", inviteCode).single();
-      if (!data) isUnique = true;
+    let lastError: string | null = null;
+
+    for (let attempt = 0; attempt < 5 && !circle; attempt++) {
+      inviteCode = randomInviteCode();
+      const { data, error } = await supabase
+        .from("human_circles")
+        .insert({
+          name,
+          description,
+          cluster_focus: clusterFocus,
+          created_by: user.id,
+          member_limit: 8,
+          is_private: isPrivate,
+          invite_code: inviteCode,
+        })
+        .select("id, invite_code")
+        .single();
+
+      if (data) {
+        circle = data;
+        break;
+      }
+      // 23505 = unique_violation → the code was taken, try another.
+      if (error && error.code !== "23505") {
+        lastError = error.message;
+        break;
+      }
+      lastError = error?.message ?? null;
     }
 
-    // Use service role to bypass RLS recursion for both circle and member
-    const { createClient: createAdminClient } = await import("@supabase/supabase-js");
-    const supabaseAdmin = createAdminClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-
-    // Insert circle
-    const { data: circle, error: circleError } = await supabaseAdmin
-      .from("human_circles")
-      .insert({
-        name,
-        description: description || "",
-        cluster_focus: clusterFocus || "",
-        created_by: user.id,
-        member_limit: 8,
-        is_private: isPrivate ?? true,
-        invite_code: inviteCode
-      })
-      .select()
-      .single();
-
-    if (circleError || !circle) {
-      console.error("Circle create error:", circleError);
-      return NextResponse.json({ error: circleError?.message || "Failed to create circle" }, { status: 500 });
+    if (!circle) {
+      console.error("[circles/create]", lastError);
+      return NextResponse.json(
+        { error: lastError ?? "Failed to create circle" },
+        { status: 500 }
+      );
     }
 
-    const { error: memberError } = await supabaseAdmin
+    const { error: memberError } = await supabase
       .from("circle_members")
-      .insert({
-        circle_id: circle.id,
-        user_id: user.id,
-        role: "admin",
-      });
+      .insert({ circle_id: circle.id, user_id: user.id, role: "admin" });
 
     if (memberError) {
-      console.error("Circle member error:", memberError);
+      // The circle exists but the creator is not in it — unusable. Roll back.
+      console.error("[circles/create] member insert failed", memberError);
+      await supabase.from("human_circles").delete().eq("id", circle.id);
+      return NextResponse.json(
+        { error: "Failed to create circle" },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({ success: true, circle, inviteCode });
-  } catch (_err) {
+  } catch (err) {
+    console.error("[circles/create]", err);
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
