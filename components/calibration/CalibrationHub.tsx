@@ -75,7 +75,7 @@ export default function CalibrationHub({ pageData, onBegin }: HubProps) {
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}
           className="rounded-3xl mb-8"
           style={{ background: "linear-gradient(135deg, #111111, #0F0F0F)", border: "1px solid rgba(255,255,255,0.07)", padding: "36px 40px" }}>
-          <div className="grid gap-8" style={{ gridTemplateColumns: "1fr auto 1fr" }}>
+          <div className="grid gap-8 grid-cols-1 lg:[grid-template-columns:1fr_auto_1fr]">
             {/* Col 1 — Next session */}
             <div>
               <p className="font-bold text-white mb-1" style={{ fontSize: 48, lineHeight: 1 }}>
@@ -166,7 +166,7 @@ export default function CalibrationHub({ pageData, onBegin }: HubProps) {
         {/* First-time info cards */}
         {sessionCount === 0 && (
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16 }}
-            className="grid grid-cols-3 gap-4 mb-8">
+            className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
             {[
               { icon: Timer, title: "15–20 minutes", body: "A series of prompts tailored to your cluster. Same structure as your baseline — different content." },
               { icon: Fingerprint, title: "No right answers", body: "The calibration measures HOW you respond — not what you know. Your depth, vocabulary, and reasoning patterns are what matter." },

@@ -20,7 +20,7 @@ export default function ActivityRow({ journalCount, activityData, streak = 0 }: 
   const weekDots = data.map(d => d.value > 0 ? "#FF5500" : "rgba(255,255,255,0.15)");
 
   return (
-    <div className="flex gap-5 mb-6">
+    <div className="flex flex-col lg:flex-row gap-5 mb-6">
       {/* Weekly Activity Chart (60%) */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}

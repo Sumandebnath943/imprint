@@ -66,7 +66,9 @@ export function VaultSummaryStats({ skills, decayedStrengths }: SummaryStatsProp
   ];
 
   return (
-    <div className="grid grid-cols-4 gap-4 mb-6" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
+    // Four fixed columns left ~60px per stat on a phone; auto-fit lets them
+    // reflow to two rows instead of running off the edge.
+    <div className="grid gap-4 mb-6" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))" }}>
       {cards.map((c, i) => (
         <motion.div key={i} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.06 }}
@@ -112,14 +114,14 @@ export function VaultChallengeBanner({ challenge, onBegin }: ChallengeBannerProp
 
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-      className="flex items-center justify-between rounded-2xl mb-6"
+      className="flex flex-wrap items-center justify-between gap-4 rounded-2xl mb-6"
       style={{
         background: "rgba(255,85,0,0.06)", border: "1px solid rgba(255,85,0,0.25)",
         borderLeft: isToday ? "3px solid #FF2D2D" : "1px solid rgba(255,85,0,0.25)",
         padding: "20px 28px",
         boxShadow: isToday ? "inset 0 0 20px rgba(255,45,45,0.05)" : "none",
       }}>
-      <div className="flex-1 min-w-0 pr-8">
+      <div className="flex-1 min-w-0 pr-0 sm:pr-8">
         <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: "#FF5500" }}>
           Active Vault Challenge
         </p>

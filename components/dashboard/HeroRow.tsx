@@ -152,7 +152,8 @@ export default function HeroRow({ driftScore, nextChallenge, calibration }: Hero
     : null;
 
   return (
-    <div className="flex gap-5 mb-6" style={{ alignItems: "stretch" }}>
+    // Stacks below lg — the 65/35 split left ~240px per column on a phone.
+    <div className="flex flex-col lg:flex-row gap-5 mb-6" style={{ alignItems: "stretch" }}>
       {/* LEFT — Drift Score Card (65%) */}
       <motion.div
         key={pathname} // force remount on route change → ring re-animates
@@ -161,7 +162,7 @@ export default function HeroRow({ driftScore, nextChallenge, calibration }: Hero
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         className="flex flex-col rounded-[20px] p-8"
         style={{
-          flex: "0 0 calc(65% - 10px)",
+          flex: "1 1 auto",
           background: "#111111",
           border: "1px solid rgba(255,255,255,0.07)",
           minHeight: 340,
@@ -188,7 +189,7 @@ export default function HeroRow({ driftScore, nextChallenge, calibration }: Hero
         </div>
 
         {/* Main content row */}
-        <div className="flex gap-10 flex-1 items-center">
+        <div className="flex flex-col sm:flex-row gap-6 sm:gap-10 flex-1 items-center">
           {/* Ring */}
           <DriftRing score={score} color={color} />
 
@@ -238,7 +239,7 @@ export default function HeroRow({ driftScore, nextChallenge, calibration }: Hero
       </motion.div>
 
       {/* RIGHT — Quick action cards (35%) */}
-      <div className="flex flex-col gap-4" style={{ flex: "0 0 calc(35% - 10px)" }}>
+      <div className="flex flex-col gap-4 w-full lg:w-auto" style={{ flex: "1 1 auto" }}>
         {/* Forge card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

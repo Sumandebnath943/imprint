@@ -35,7 +35,20 @@ export default function DashboardShell({ children, profile, driftScore }: Dashbo
     return () => { window.removeEventListener("storage", sync); clearInterval(id); };
   }, []);
 
-  const sidebarWidth = collapsed ? COLLAPSED_W : EXPANDED_W;
+  // The sidebar is hidden below md, so nothing should be offset for it there.
+  // Previously the rail's width was reserved at every viewport, which left
+  // 243px of usable content width on a 375px screen and pushed 69 elements
+  // off-screen.
+  const [isDesktop, setIsDesktop] = useState(true);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const apply = () => setIsDesktop(mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
+
+  const sidebarWidth = isDesktop ? (collapsed ? COLLAPSED_W : EXPANDED_W) : 0;
 
   return (
     // overflow-x-hidden: several pages place a decorative ghost-word watermark
@@ -79,9 +92,11 @@ export default function DashboardShell({ children, profile, driftScore }: Dashbo
         className="relative z-10 min-h-screen"
         style={{ paddingTop: 64 }}
       >
+        {/* Tighter gutters on mobile, and bottom clearance so the 60px fixed
+            MobileTabBar does not sit on top of the last row of content. */}
         <div
-          className="mx-auto"
-          style={{ maxWidth: 1400, padding: "40px 32px 48px" }}
+          className="mx-auto px-4 pt-6 pb-28 md:px-8 md:pt-10 md:pb-12"
+          style={{ maxWidth: 1400 }}
         >
           {children}
         </div>

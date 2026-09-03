@@ -111,7 +111,7 @@ export default function GalleryClient({ items: initial, userId }: GalleryClientP
 
         {/* Stats row */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.06 }}
-          className="flex items-center gap-2 mb-8 text-sm" style={{ color: "rgba(255,255,255,0.66)" }}>
+          className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-8 text-sm" style={{ color: "rgba(255,255,255,0.66)" }}>
           {[
             // One entry per filter tab. "sketches" previously folded in
             // handwriting, so the header claimed a count the Sketches filter

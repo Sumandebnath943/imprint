@@ -38,7 +38,11 @@ export function DriftWeeklyTable({ rows }: WeeklyTableProps) {
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto">
+          {/* max-w-full + min-w-0: the wrapper already had overflow-x-auto,
+              but a flex/grid child defaults to min-width:auto, so it grew to
+              the 700px table instead of scrolling it — and the shell then
+              clipped the overflow on phones. */}
+          <div className="overflow-x-auto max-w-full min-w-0">
             <table className="w-full" style={{ minWidth: 700 }}>
               <thead>
                 <tr style={{ background: "#0D0D0D", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>

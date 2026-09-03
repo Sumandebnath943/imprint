@@ -178,7 +178,10 @@ export default function Sidebar({ profile }: SidebarProps) {
     <motion.aside
       animate={{ width: collapsed ? COLLAPSED_W : EXPANDED_W }}
       transition={{ duration: 0.25, ease: "easeInOut" }}
-      className="fixed top-0 left-0 h-full z-50 flex flex-col overflow-hidden"
+      // hidden below md: MobileTabBar (md:hidden) is the navigation there, and
+      // this rail was rendering alongside it — two nav systems at once, with
+      // the rail eating 68px of a 375px viewport.
+      className="fixed top-0 left-0 h-full z-50 hidden md:flex flex-col overflow-hidden"
       style={{
         background: "#0D0D0D",
         borderRight: "1px solid rgba(255,255,255,0.06)",

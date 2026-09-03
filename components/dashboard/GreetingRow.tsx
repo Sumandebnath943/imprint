@@ -20,7 +20,9 @@ export default function GreetingRow({ profile, streak }: GreetingRowProps) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className="flex items-start justify-between pb-8"
+      // Wraps on narrow screens: the date + streak block ran ~33px past the
+      // right edge when forced onto one line with the greeting on a phone.
+      className="flex flex-wrap items-start justify-between gap-y-3 pb-8"
     >
       {/* Left */}
       <div>
@@ -54,10 +56,10 @@ export default function GreetingRow({ profile, streak }: GreetingRowProps) {
       </div>
 
       {/* Right */}
-      <div className="text-right">
+      <div className="text-left sm:text-right w-full sm:w-auto">
         <p className="text-sm mb-2" style={{ color: "rgba(255,255,255,0.66)" }}>{dateStr}</p>
         {streak > 0 ? (
-          <div className="flex items-center justify-end gap-1.5">
+          <div className="flex items-center justify-start sm:justify-end gap-1.5">
             <Flame size={16} style={{ color: "#FF5500" }} />
             <span className="font-semibold text-sm" style={{ color: "#FF5500", fontFamily: "Space Grotesk, sans-serif" }}>
               {streak} day streak

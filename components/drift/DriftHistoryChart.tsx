@@ -83,7 +83,7 @@ export default function DriftHistoryChart({ allScores, currentColor }: DriftHist
           <h2 className="font-semibold text-white mb-1" style={{ fontSize: 18 }}>Score History</h2>
           <p className="text-sm" style={{ color: "rgba(255,255,255,0.66)" }}>How your drift has moved over time</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {RANGE_LABELS.map(({ value, label }) => {
             const sel = range === value;
             return (

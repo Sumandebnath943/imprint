@@ -20,7 +20,7 @@ export default function SkillsRow({ skills }: SkillsRowProps) {
           <Link href="/dashboard/vault" className="text-sm" style={{ color: "#FF5500" }}>Add your first skill →</Link>
         </div>
       ) : (
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {skills.slice(0, 4).map((skill, i) => {
             const color = getSkillColor(skill.strength_level);
             const lastDays = daysAgo(skill.last_exercised);

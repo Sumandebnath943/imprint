@@ -31,7 +31,9 @@ export default function BottomRow({ profile, calibration, nextChallenge, streak 
   upcoming.push({ label: "Weekly Reflection Prompt", badge: "This week" });
 
   return (
-    <div className="grid grid-cols-3 gap-5">
+    // One column on phones — three fixed columns pushed the later cards past
+    // the viewport edge, where the shell clipped them.
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
       {/* Coming Up */}
       <motion.div
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
