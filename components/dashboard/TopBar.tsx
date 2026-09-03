@@ -148,17 +148,29 @@ export default function TopBar({ profile, driftScore, sidebarWidth }: TopBarProp
     : "?";
 
   return (
+    // Same frosted treatment as the public nav (see .imprint-glass in
+    // globals.css), so the two fixed bars read as one material. Always on
+    // here — unlike the landing nav there is no transparent-over-hero state.
     <div
-      className="fixed top-0 right-0 z-40 flex items-center px-8 gap-6"
+      className="fixed top-0 right-0 z-40 flex items-center px-8 gap-6 imprint-glass"
+      data-glass="on"
       style={{
         left: sidebarWidth,
         height: 64,
-        background: "rgba(8,8,8,0.85)",
-        backdropFilter: "blur(20px)",
-        borderBottom: "1px solid rgba(255,255,255,0.05)",
+        borderBottom: "1px solid rgba(255,255,255,0.07)",
         transition: "left 0.25s ease",
       }}
     >
+      {/* 1px light catch along the top edge. */}
+      <div
+        aria-hidden
+        className="absolute inset-x-0 top-0 h-px pointer-events-none"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent, rgba(255,255,255,0.08) 20%, rgba(255,255,255,0.08) 80%, transparent)",
+        }}
+      />
+
       {/* Page title */}
       <h1
         className="font-semibold text-white whitespace-nowrap"

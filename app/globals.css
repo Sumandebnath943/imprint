@@ -92,3 +92,39 @@ body {
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
+
+/* ── Frosted glass surfaces (nav + dashboard top bar) ──────────────────────
+   backdrop-filter needs a background translucent enough to see through, so
+   the fill sits at 0.60 rather than the near-solid 0.85 used before. The
+   saturate() is what keeps colour in whatever bleeds through — without it a
+   heavy blur over a dark page turns flat grey and stops reading as glass.
+   -webkit- prefix is still required by Safari.                            */
+.imprint-glass[data-glass="on"] {
+  background: rgba(8, 8, 8, 0.6);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  backdrop-filter: blur(24px) saturate(160%);
+}
+
+.imprint-glass[data-glass="off"] {
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* Without backdrop-filter there is nothing to blur, and a 0.60 fill would
+   leave the bar's text sitting on raw page content. Fall back to the opaque
+   background these surfaces used previously. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .imprint-glass[data-glass="on"] {
+    background: rgba(8, 8, 8, 0.94);
+  }
+}
+
+/* Blur is expensive to composite and is a common motion-sickness trigger. */
+@media (prefers-reduced-motion: reduce) {
+  .imprint-glass[data-glass="on"] {
+    -webkit-backdrop-filter: saturate(160%);
+    backdrop-filter: saturate(160%);
+    background: rgba(8, 8, 8, 0.92);
+  }
+}

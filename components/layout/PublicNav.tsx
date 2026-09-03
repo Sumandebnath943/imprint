@@ -24,16 +24,32 @@ export default function PublicNav() {
 
   return (
     <>
+      {/* Frosted glass, applied only once scrolled — the bar stays fully
+          transparent over the hero. The previous background sat at 0.85
+          opacity, which is near-solid, so the blur underneath it was never
+          actually visible. Dropping to 0.60 lets content read through, and
+          saturate() keeps what bleeds through coloured rather than going grey,
+          which is what makes it read as glass rather than fog. */}
       <header
-        className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+        className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 imprint-glass"
+        data-glass={scrolled ? "on" : "off"}
         style={{
-          background: scrolled ? "rgba(8,8,8,0.85)" : "transparent",
-          backdropFilter: scrolled ? "blur(20px)" : "none",
           borderBottom: scrolled
-            ? "1px solid rgba(255,255,255,0.06)"
+            ? "1px solid rgba(255,255,255,0.07)"
             : "1px solid transparent",
         }}
       >
+        {/* 1px light catch along the top edge — the detail that sells glass. */}
+        {scrolled && (
+          <div
+            aria-hidden
+            className="absolute inset-x-0 top-0 h-px pointer-events-none"
+            style={{
+              background:
+                "linear-gradient(90deg, transparent, rgba(255,255,255,0.08) 20%, rgba(255,255,255,0.08) 80%, transparent)",
+            }}
+          />
+        )}
         <nav className="max-w-[1440px] mx-auto px-6 md:px-12 h-16 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-0.5 group">
