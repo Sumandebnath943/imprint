@@ -30,6 +30,32 @@ export interface BaselineSummary {
   writingStyle: string;
 }
 
+/**
+ * A short prose description of how someone writes, derived from their baseline
+ * metrics. It goes into the Mirror's system prompt so its questions can name
+ * the user's habits back to them.
+ *
+ * This used to be read from baseline_imprints.writing_style, a column that was
+ * never created. Selecting it made Postgres reject the whole query, so the
+ * Mirror silently fell back to generic defaults and compared every user's live
+ * writing against 300 words / 0.6 richness / 15-word sentences rather than
+ * their own baseline.
+ */
+export function describeWritingStyle(
+  avgSentenceLength: number,
+  vocabularyRichness: number
+): string {
+  const cadence =
+    avgSentenceLength < 12 ? "terse" : avgSentenceLength <= 20 ? "measured" : "expansive";
+  const range =
+    vocabularyRichness < 0.5
+      ? "plain-spoken"
+      : vocabularyRichness <= 0.7
+      ? "varied"
+      : "wide-ranging";
+  return `${cadence} and ${range}`;
+}
+
 export interface MirrorUserData {
   userId: string;
   userCluster: string;

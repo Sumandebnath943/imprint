@@ -78,11 +78,11 @@ function isoWeek(iso) {
 
 const labelFor = (s) => (s <= 39 ? "anchored" : s <= 59 ? "drifting" : s <= 79 ? "critical" : "crisis");
 
-async function insert(table, rows) {
+async function insert(table, rows, label = table) {
   if (!rows.length) return;
   const { error } = await db.from(table).insert(rows);
-  if (error) throw new Error(`${table}: ${error.message}`);
-  console.log(`  ${table.padEnd(22)} ${rows.length}`);
+  if (error) throw new Error(`${label}: ${error.message}`);
+  console.log(`  ${label.padEnd(22)} ${rows.length}`);
 }
 
 // ── 1. Auth user ────────────────────────────────────────────────────────────
@@ -186,6 +186,160 @@ const MIRROR = [
   [22, 7, 7, 2, ["skills"], 455],
 ];
 
+// ── Generated media ─────────────────────────────────────────────────────────
+// Built here rather than committed so the repo carries no binary fixtures.
+// SVG and WAV are both plain formats a browser renders directly.
+
+function sketchSvg(seed, hue) {
+  // Deterministic pseudo-random so re-seeding produces the same drawings.
+  let s = seed;
+  const rnd = () => ((s = (s * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
+  const path = Array.from({ length: 7 }, () => {
+    const pts = Array.from({ length: 5 }, () => `${(rnd() * 620 + 20).toFixed(0)},${(rnd() * 420 + 20).toFixed(0)}`);
+    return `<polyline points="${pts.join(" ")}" fill="none" stroke="hsl(${hue} 80% ${45 + rnd() * 25}%)" stroke-width="${(rnd() * 3 + 1).toFixed(1)}" stroke-linecap="round" opacity="${(0.35 + rnd() * 0.5).toFixed(2)}"/>`;
+  }).join("");
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 460" width="660" height="460"><rect width="660" height="460" fill="#0E0E0E"/>${path}</svg>`;
+}
+
+function handwritingSvg(lines) {
+  let s = 7;
+  const rnd = () => ((s = (s * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
+  const rows = lines
+    .map((text, i) => {
+      const y = 60 + i * 52;
+      // A wobbling baseline under each line, to read as handwriting.
+      const wob = Array.from({ length: 14 }, (_, k) => `${40 + k * 42},${(y + 14 + (rnd() - 0.5) * 5).toFixed(1)}`).join(" ");
+      return `<text x="40" y="${y}" font-family="Segoe Script, Bradley Hand, cursive" font-size="27" fill="#E8E2D8" opacity="0.9">${text}</text>
+      <polyline points="${wob}" fill="none" stroke="#FF5500" stroke-width="1" opacity="0.18"/>`;
+    })
+    .join("");
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 ${80 + lines.length * 52}" width="640" height="${80 + lines.length * 52}"><rect width="640" height="${80 + lines.length * 52}" fill="#12100E"/>${rows}</svg>`;
+}
+
+/** A short spoken-word-ish tone burst, so the voice card has real audio. */
+function wav(seconds = 3, rate = 8000) {
+  const n = seconds * rate;
+  const data = Buffer.alloc(n * 2);
+  for (let i = 0; i < n; i++) {
+    const t = i / rate;
+    // Two drifting formants with an envelope — reads as a voice note, not a beep.
+    const env = Math.min(1, t * 4) * Math.min(1, (seconds - t) * 2) * (0.6 + 0.4 * Math.sin(t * 5));
+    const v = Math.sin(2 * Math.PI * 150 * t) * 0.5 + Math.sin(2 * Math.PI * 340 * t) * 0.3;
+    data.writeInt16LE(Math.max(-32767, Math.min(32767, v * env * 9000)) | 0, i * 2);
+  }
+  const head = Buffer.alloc(44);
+  head.write("RIFF", 0);
+  head.writeUInt32LE(36 + data.length, 4);
+  head.write("WAVEfmt ", 8);
+  head.writeUInt32LE(16, 16);
+  head.writeUInt16LE(1, 20);
+  head.writeUInt16LE(1, 22);
+  head.writeUInt32LE(rate, 24);
+  head.writeUInt32LE(rate * 2, 28);
+  head.writeUInt16LE(2, 32);
+  head.writeUInt16LE(16, 34);
+  head.write("data", 36);
+  head.writeUInt32LE(data.length, 40);
+  return Buffer.concat([head, data]);
+}
+
+/**
+ * Each entry becomes a storage object plus the journal_entries row the gallery
+ * reads. The bucket has to match how GalleryCard resolves one from
+ * source + item_type, or the signed URL points at the wrong place.
+ */
+function galleryItems() {
+  return [
+    { days: 5, type: "sketch", source: "direct_upload", ext: "svg", mime: "image/svg+xml",
+      caption: "Mapping the argument before writing it",
+      body: () => Buffer.from(sketchSvg(11, 18)) },
+    { days: 12, type: "sketch", source: "forge", ext: "svg", mime: "image/svg+xml",
+      caption: "Forge session — problem framing, second pass",
+      body: () => Buffer.from(sketchSvg(29, 200)) },
+    { days: 8, type: "handwriting", source: "direct_upload", ext: "svg", mime: "image/svg+xml",
+      caption: "Longhand, no backspace",
+      body: () => Buffer.from(handwritingSvg([
+        "The prose is worse and the thinking",
+        "is better. I do not know yet what",
+        "to do with that trade.",
+      ])) },
+    { days: 3, type: "voice", source: "forge", ext: "wav", mime: "audio/wav",
+      caption: "Thinking out loud about the estimation bias",
+      body: () => wav(4) },
+    { days: 17, type: "document", source: "direct_upload", ext: "txt", mime: "text/plain",
+      caption: "Notes from forty pages, unaided",
+      body: () => Buffer.from(
+        "Retention notes — no summary, no assistant.\n\n" +
+        "What stayed: the argument about incentives, the three counter-examples,\n" +
+        "the shape of the objection I could not answer.\n\n" +
+        "What did not: every number, and the author's name.\n"
+      ) },
+  ];
+}
+
+function bucketFor(source, type) {
+  if (source === "forge") return type === "voice" ? "forge-audio" : "forge-files";
+  return "gallery";
+}
+
+async function seedGallery(userId) {
+  // These three arrive with migration 008. They are declared in 001, but
+  // CREATE TABLE IF NOT EXISTS never altered databases that already had the
+  // table, so older projects are missing them.
+  const probe = await db.from("journal_entries").select("item_type").limit(1);
+  if (probe.error && /item_type.*does not exist/i.test(probe.error.message)) {
+    console.log(
+      "  gallery items          skipped — run migration 008_journal_gallery_columns.sql"
+    );
+    return;
+  }
+
+  const items = galleryItems();
+  const rows = [];
+
+  for (const it of items) {
+    const bucket = bucketFor(it.source, it.type);
+    const folder = it.source === "forge" ? "forge" : "gallery";
+    const path = `${userId}/${folder}/demo-${it.type}-${it.days}.${it.ext}`;
+
+    const { error } = await db.storage
+      .from(bucket)
+      .upload(path, it.body(), { contentType: it.mime, upsert: true });
+    if (error) throw new Error(`storage ${bucket}/${path}: ${error.message}`);
+
+    rows.push({
+      user_id: userId,
+      title: it.caption,
+      // The gallery prefers response_file_url but still reads this marker on
+      // rows written before that column was populated, so write both.
+      content: `${it.caption}\n\n[Attached File: ${path}]`,
+      word_count: 0,
+      is_forge_entry: it.source === "forge",
+      has_ai_assistance: false,
+      drift_signals: {},
+      response_file_url: path,
+      item_type: it.type,
+      source: it.source,
+      created_at: daysAgo(it.days),
+    });
+  }
+
+  await insert("journal_entries", rows, "gallery items");
+}
+
+/** Storage is not covered by the row wipe, so clear prior demo objects too. */
+async function wipeStorage(userId) {
+  for (const bucket of ["gallery", "forge-files", "forge-audio"]) {
+    for (const folder of ["gallery", "forge"]) {
+      const { data } = await db.storage.from(bucket).list(`${userId}/${folder}`);
+      const stale = (data ?? []).filter((f) => f.name.startsWith("demo-"));
+      if (stale.length) {
+        await db.storage.from(bucket).remove(stale.map((f) => `${userId}/${folder}/${f.name}`));
+      }
+    }
+  }
+}
+
 // ── 4. Seed ─────────────────────────────────────────────────────────────────
 
 /**
@@ -209,6 +363,7 @@ function computeImprintScore() {
 async function seed() {
   const userId = await findOrCreateUser();
   await wipe(userId);
+  await wipeStorage(userId);
 
   // The handle_new_user trigger creates the profile row; upsert so this works
   // whether or not that trigger is installed.
@@ -361,6 +516,8 @@ async function seed() {
       created_at: daysAgo(days),
     }))
   );
+
+  await seedGallery(userId);
 
   await insert(
     "mirror_sessions",

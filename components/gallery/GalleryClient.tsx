@@ -113,9 +113,13 @@ export default function GalleryClient({ items: initial, userId }: GalleryClientP
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.06 }}
           className="flex items-center gap-2 mb-8 text-sm" style={{ color: "rgba(255,255,255,0.40)" }}>
           {[
-            { n: countOf("sketch") + countOf("handwriting"), label: "sketches" },
-            { n: countOf("voice"), label: "voice notes" },
+            // One entry per filter tab. "sketches" previously folded in
+            // handwriting, so the header claimed a count the Sketches filter
+            // never matched.
+            { n: countOf("sketch"), label: "sketches" },
+            { n: countOf("handwriting"), label: "handwriting" },
             { n: countOf("photo"), label: "photos" },
+            { n: countOf("voice"), label: "voice notes" },
             { n: countOf("document"), label: "documents" },
           ].map(({ n, label }, i) => (
             <span key={label} className="flex items-center gap-2">

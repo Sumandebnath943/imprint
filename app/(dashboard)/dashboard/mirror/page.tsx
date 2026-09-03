@@ -1,5 +1,5 @@
 import MirrorClient from "@/components/mirror/MirrorClient";
-import type { MirrorUserData } from "@/lib/mirror/types";
+import { describeWritingStyle, type MirrorUserData } from "@/lib/mirror/types";
 
 async function getMirrorData(): Promise<MirrorUserData> {
   const empty: MirrorUserData = {
@@ -29,7 +29,7 @@ async function getMirrorData(): Promise<MirrorUserData> {
     const [profileRes, baselineRes, pastRes] = await Promise.all([
       supabase.from("profiles").select("profession_cluster").eq("id", user.id).single(),
       supabase.from("baseline_imprints")
-        .select("word_count,vocabulary_richness,avg_sentence_length,writing_style")
+        .select("word_count,vocabulary_richness,avg_sentence_length")
         .eq("user_id", user.id).limit(20),
       supabase.from("mirror_sessions")
         .select("id,created_at,topics,ai_question_count,user_message_count,dependency_flags,session_duration_seconds")
@@ -48,8 +48,8 @@ async function getMirrorData(): Promise<MirrorUserData> {
     const avgSentenceLength = baselines.length > 0
       ? baselines.reduce((s, b) => s + (b.avg_sentence_length ?? 15), 0) / baselines.length
       : 15;
-    const writingStyle = baselines.length > 0 && baselines[0].writing_style
-      ? baselines[0].writing_style
+    const writingStyle = baselines.length > 0
+      ? describeWritingStyle(avgSentenceLength, avgVocabRichness)
       : "thoughtful and considered";
 
     return {
@@ -60,7 +60,7 @@ async function getMirrorData(): Promise<MirrorUserData> {
         vocabularyRichness: parseFloat(avgVocabRichness.toFixed(3)),
         avgSentenceLength: parseFloat(avgSentenceLength.toFixed(1)),
         commonPhrases: [],
-        writingStyle: writingStyle as string,
+        writingStyle,
       },
       pastSessions: (pastRes.data ?? []).map((s) => ({
         id: s.id,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { z } from "zod";
 import { rateLimit } from "@/lib/api/rate-limit";
+import { describeWritingStyle } from "@/lib/mirror/types";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -170,12 +171,20 @@ export async function POST(req: NextRequest) {
         : fallback;
 
     const userCluster = profile?.profession_cluster ?? "life_personal";
+    const vocabularyRichness = Number(avg((r) => r.vocabulary_richness, 0.6).toFixed(3));
+    const avgSentenceLength = Number(avg((r) => r.avg_sentence_length, 15).toFixed(1));
+
     const baselineSummary = {
       avgWordCount: Math.round(avg((r) => r.word_count, 300)),
-      vocabularyRichness: Number(avg((r) => r.vocabulary_richness, 0.6).toFixed(3)),
-      avgSentenceLength: Number(avg((r) => r.avg_sentence_length, 15).toFixed(1)),
+      vocabularyRichness,
+      avgSentenceLength,
       commonPhrases: [] as string[],
-      writingStyle: "thoughtful",
+      // Derived from the user's own metrics rather than the constant that
+      // stood in here, so the prompt describes this person and not everyone.
+      writingStyle:
+        rows.length > 0
+          ? describeWritingStyle(avgSentenceLength, vocabularyRichness)
+          : "thoughtful and considered",
     };
 
     // Session length cap — keeps a single reflection from running forever.

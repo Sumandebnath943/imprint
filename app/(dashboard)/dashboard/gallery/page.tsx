@@ -22,6 +22,7 @@ function deriveItemType(url: string): GalleryItem["item_type"] {
 function guessMimeType(url: string): string {
   const ext = extensionOf(url);
   if (AUDIO_EXT.includes(ext)) return `audio/${ext === "m4a" ? "mp4" : ext}`;
+  if (ext === "svg") return "image/svg+xml";
   if (IMAGE_EXT.includes(ext)) return `image/${ext === "jpg" ? "jpeg" : ext}`;
   if (ext === "pdf") return "application/pdf";
   return "application/octet-stream";
