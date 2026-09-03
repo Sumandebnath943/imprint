@@ -7,12 +7,12 @@ import { Flame } from "lucide-react";
 
 interface GreetingRowProps {
   profile: DashboardProfile | null;
+  streak: number;
 }
 
-export default function GreetingRow({ profile }: GreetingRowProps) {
+export default function GreetingRow({ profile, streak }: GreetingRowProps) {
   const now = new Date();
   const dateStr = now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
-  const streak = profile?.streak_days ?? 0;
 
   return (
     <motion.div

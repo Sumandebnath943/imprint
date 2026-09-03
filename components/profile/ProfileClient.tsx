@@ -28,6 +28,7 @@ interface ProfileClientProps {
   latestDriftScore: { score: number; status: string; date: string } | null;
   stats: {
     calibrations: number;
+    aiIndependence: number;
     streak: number;
     skillsTracked: number;
     vaultChallenges: number;
@@ -135,7 +136,7 @@ export default function ProfileClient({
   const vaultStrength = Math.min(250, stats.skillsTracked * 25);
   const calibrationRecord = Math.min(300, stats.calibrations * 50);
   const identityStreak = Math.min(250, stats.streak * 8);
-  const aiIndependence = 200; // Mocked for now
+  const aiIndependence = stats.aiIndependence;
 
   const handleSave = async () => {
     setSaving(true);

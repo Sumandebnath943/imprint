@@ -141,7 +141,7 @@ export default function ResetPasswordPage() {
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-3">
+              <form method="post" onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-3">
                 <div>
                   <AuthInput
                     {...register("password")}

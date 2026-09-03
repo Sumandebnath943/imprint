@@ -200,7 +200,7 @@ export default function SignUpPage() {
               <OrDivider />
 
               {/* Form */}
-              <form onSubmit={handleSubmit(onSubmit)} noValidate>
+              <form method="post" onSubmit={handleSubmit(onSubmit)} noValidate>
                 <motion.div
                   variants={fieldContainerVariants}
                   initial="hidden"

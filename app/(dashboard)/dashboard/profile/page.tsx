@@ -23,13 +23,15 @@ export default async function ProfilePage() {
     { data: skills },
     { data: challenges },
     { data: journalEntries },
+    { data: mirrorSessions },
   ] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).single(),
     supabase.from("drift_scores").select("score, score_label, created_at").eq("user_id", user.id).order("created_at", { ascending: false }),
     supabase.from("calibration_sessions").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("status", "completed"),
     supabase.from("skill_vault").select("id, strength_level, times_practiced").eq("user_id", user.id),
     supabase.from("vault_challenges").select("id, status, completed_at").eq("user_id", user.id),
-    supabase.from("journal_entries").select("id, word_count, is_forge_entry, created_at").eq("user_id", user.id).order("created_at", { ascending: false }),
+    supabase.from("journal_entries").select("id, word_count, is_forge_entry, has_ai_assistance, created_at").eq("user_id", user.id).order("created_at", { ascending: false }),
+    supabase.from("mirror_sessions").select("dependency_flags").eq("user_id", user.id),
   ]);
 
   const latestDriftScore = driftScores && driftScores.length > 0
@@ -65,8 +67,27 @@ export default async function ProfilePage() {
     else break;
   }
 
+  // ── AI independence ─────────────────────────────────────────────────────
+  // Previously hardcoded to its maximum, so every profile showed a full bar.
+  // Earned the same way as the other three components: from activity, so a
+  // new account starts at zero. Independent work counts for it — Mirror
+  // sessions where you never asked it to decide, entries written unaided —
+  // and every dependency flag the Mirror raised counts against it.
+  const sessions = mirrorSessions ?? [];
+  const entries = journalEntries ?? [];
+
+  const independentSessions = sessions.filter((s) => (s.dependency_flags ?? 0) === 0).length;
+  const unaidedEntries = entries.filter((e) => !e.has_ai_assistance).length;
+  const totalDependencyFlags = sessions.reduce((sum, s) => sum + (s.dependency_flags ?? 0), 0);
+
+  const aiIndependence = Math.max(
+    0,
+    Math.min(200, (independentSessions + unaidedEntries) * 20 - totalDependencyFlags * 10)
+  );
+
   const stats = {
     calibrations: calibrationsCount ?? 0,
+    aiIndependence,
     streak,
     skillsTracked: (skills || []).length,
     vaultChallenges: completedChallenges.length,

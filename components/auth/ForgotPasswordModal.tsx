@@ -99,7 +99,7 @@ export default function ForgotPasswordModal({
                     Enter your email and we&apos;ll send a reset link.
                   </p>
 
-                  <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+                  <form method="post" onSubmit={handleSubmit} className="flex flex-col gap-3">
                     <AuthInput
                       type="email"
                       value={email}

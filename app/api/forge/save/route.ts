@@ -64,6 +64,11 @@ export async function POST(req: Request) {
         word_count_delta: avgBaselineWordCount > 0
           ? parseFloat(((word_count - avgBaselineWordCount) / avgBaselineWordCount * 100).toFixed(1))
           : 0,
+        // Writing pace. Derived here from values the client already sends,
+        // rather than trusting a number it computes for itself.
+        words_per_minute: time_spent_seconds > 0
+          ? Math.round((word_count / time_spent_seconds) * 60)
+          : 0,
       };
     } else if (tool || time_spent_seconds !== undefined) {
       drift_signals = {};

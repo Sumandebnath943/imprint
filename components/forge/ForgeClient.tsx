@@ -162,15 +162,9 @@ export default function ForgeClient({ userData }: ForgeClientProps) {
     const wc = countWords(content);
     if ((activeTool === "free-write" || activeTool === "timed-write" || activeTool === "memory-recall") && wc === 0) return;
 
-    const words = content.toLowerCase().split(/\s+/).filter(Boolean);
-    const vocabRichness = words.length > 0 ? new Set(words).size / words.length : 0;
-    const sentences = content.split(/[.!?]+/).filter((s) => s.trim());
-    const avgSentenceLen = sentences.length > 0 ? wc / sentences.length : 0;
-    const wpm = Math.round((wc / Math.max(1, elapsed)) * 60);
-    const vocabMatch = userData.baselineVocabRichness > 0
-      ? Math.min(1, vocabRichness / userData.baselineVocabRichness)
-      : 0;
-
+    // Text metrics and the deltas against baseline are computed server-side
+    // from content, word_count and time_spent_seconds — recomputing them here
+    // only produced values that were then discarded.
     await fetch("/api/forge/save", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

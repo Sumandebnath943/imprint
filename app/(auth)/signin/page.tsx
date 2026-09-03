@@ -163,7 +163,12 @@ export default function SignInPage() {
         <OrDivider />
 
         {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        {/* method="post" is deliberate. Submitting before React hydrates falls
+            back to a native submission, and a form's default method is GET —
+            which puts the password in the URL, and from there into browser
+            history, server logs and the Referer header. POST keeps it in the
+            request body. The handler below still takes over once hydrated. */}
+        <form method="post" onSubmit={handleSubmit(onSubmit)} noValidate>
           <motion.div
             variants={fieldContainerVariants}
             initial="hidden"

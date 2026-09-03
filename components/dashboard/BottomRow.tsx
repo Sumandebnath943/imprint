@@ -10,9 +10,10 @@ interface BottomRowProps {
   profile: DashboardProfile | null;
   calibration: DashboardCalibration | null;
   nextChallenge: DashboardChallenge | null;
+  streak: number;
 }
 
-export default function BottomRow({ profile, calibration, nextChallenge }: BottomRowProps) {
+export default function BottomRow({ profile, calibration, nextChallenge, streak }: BottomRowProps) {
   const imprintScore = profile?.imprint_score ?? 0;
   const scoreLabel = getImprintScoreLabel(imprintScore);
   const scoreFraction = imprintScore / 1000;
@@ -89,7 +90,7 @@ export default function BottomRow({ profile, calibration, nextChallenge }: Botto
           {[
             ["Vault Strength", `${profile?.imprint_score ? Math.round(imprintScore * 0.35) : 0} pts`],
             ["Baseline Sessions", "0 sessions"],
-            ["Streak", `${profile?.streak_days ?? 0} days`],
+            ["Streak", `${streak} days`],
             ["Calibrations", "0 completed"],
           ].map(([label, val]) => (
             <div key={label} className="flex justify-between text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>

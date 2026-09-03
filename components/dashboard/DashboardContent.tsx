@@ -16,7 +16,11 @@ export default function DashboardContent({ data }: DashboardContentProps) {
 
   return (
     <div style={{ fontFamily: "Space Grotesk, sans-serif" }}>
-      <GreetingRow profile={profile} />
+      {/* `streak` is computed in the page from journal entries. GreetingRow and
+          BottomRow used to read profile.streak_days, which is not a column on
+          profiles, so both always rendered 0 while ActivityRow on the same
+          screen showed the real number. */}
+      <GreetingRow profile={profile} streak={streak} />
       <HeroRow
         driftScore={driftScore}
         nextChallenge={nextChallenge}
@@ -28,6 +32,7 @@ export default function DashboardContent({ data }: DashboardContentProps) {
         profile={profile}
         calibration={calibration}
         nextChallenge={nextChallenge}
+        streak={streak}
       />
     </div>
   );

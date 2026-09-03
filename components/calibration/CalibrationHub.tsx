@@ -122,6 +122,24 @@ export default function CalibrationHub({ pageData, onBegin }: HubProps) {
                 style={{ borderLeft: "1px solid rgba(255,255,255,0.07)", borderRight: "1px solid rgba(255,255,255,0.07)" }}>
                 <p className="text-xs uppercase tracking-widest mb-4" style={{ color: "rgba(255,255,255,0.30)" }}>Last Score</p>
                 <DriftRing score={latestDriftScore} size={120} strokeWidth={8} showCenter />
+                {previousDriftScore !== null && (() => {
+                  // Drift measures distance from baseline, so a fall is an
+                  // improvement. previousDriftScore was already being fetched
+                  // for this and then never displayed.
+                  const delta = latestDriftScore - previousDriftScore;
+                  if (delta === 0) {
+                    return (
+                      <p className="text-xs mt-2" style={{ color: "rgba(255,255,255,0.35)" }}>
+                        No change since last session
+                      </p>
+                    );
+                  }
+                  return (
+                    <p className="text-xs mt-2 font-medium" style={{ color: delta < 0 ? "#00D97E" : "#FF2D2D" }}>
+                      {delta < 0 ? `↓ ${Math.abs(delta)} closer to baseline` : `↑ ${delta} further from baseline`}
+                    </p>
+                  );
+                })()}
                 <p className="mt-3 text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
                   Session {sessionCount} · {lastCompleted ? formatScoreDate(lastCompleted.completed_at!) : ""}
                 </p>

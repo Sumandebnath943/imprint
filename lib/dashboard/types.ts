@@ -8,7 +8,8 @@ export interface DashboardProfile {
   imprint_score: number;
   onboarding_completed: boolean;
   avatar_url: string | null;
-  streak_days: number;
+  // No streak_days here: profiles has no such column. The streak is derived
+  // from journal entry dates in the dashboard page and passed down explicitly.
 }
 
 export interface DashboardDriftScore {
