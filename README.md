@@ -196,6 +196,14 @@ Honest notes on where the MVP stops:
   rather than global. Adequate for the current scale, and the seam for a shared
   store is isolated in `lib/api/rate-limit.ts`.
 
+## Documentation
+
+| Document | For |
+| --- | --- |
+| [Project Bible](docs/PROJECT_BIBLE.md) | Canonical reference — domain model, algorithms, schema, conventions |
+| [Developer Handoff](docs/HANDOFF.md) | Picking up the code: setup, traps, current state, what to do next |
+| [Portfolio Handoff](docs/PORTFOLIO_HANDOFF.md) | Presenting the project — the story and the numbers |
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
