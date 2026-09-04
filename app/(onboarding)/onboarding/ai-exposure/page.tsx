@@ -56,7 +56,7 @@ export default function AIExposurePage() {
         {/* Two questions plus an optional note is more than one screen can
             hold at this height, so this column scrolls on its own while the
             question and the nav stay fixed. */}
-        <div className="overflow-y-auto pr-1 -mr-1 lg:flex-1 lg:min-h-0" style={{ scrollbarWidth: "thin" }}>
+        <div className="scroll-pane pr-2 -mr-2 lg:flex-1 lg:min-h-0">
           {/* Exposure level */}
           <p
             className="uppercase tracking-widest text-[11px] font-medium mb-3"

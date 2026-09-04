@@ -156,8 +156,7 @@ export default function WhoAreYouPage() {
             try. It scrolls in its own pane with a floor of 260px, so there is
             always more than a sliver of it visible. */}
         <div
-          className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 overflow-y-auto content-start pr-1 -mr-1 min-h-[260px] lg:flex-1 lg:min-h-[260px]"
-          style={{ scrollbarWidth: "thin" }}
+          className="scroll-pane grid grid-cols-2 sm:grid-cols-3 gap-2.5 content-start pr-2 -mr-2 min-h-[260px] lg:flex-1 lg:min-h-[260px]"
         >
           {filteredProfessions.map((p) => {
             const selected = answers.profession === p.name;

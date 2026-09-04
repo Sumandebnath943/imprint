@@ -288,7 +288,7 @@ export default function BaselinePage() {
         >
           <div className="lg:flex lg:flex-row lg:gap-14 lg:flex-1 lg:min-h-0">
           {/* Left — module context and the prompt. Fixed, always readable. */}
-          <div className="lg:w-[40%] lg:shrink-0 lg:overflow-y-auto lg:pr-1">
+          <div className="lg:w-[40%] lg:shrink-0 lg:scroll-pane lg:pr-2">
           {/* Module label */}
           <div className="mb-8 md:mb-4">
             <p className="uppercase tracking-widest text-xs mb-3" style={{ color: "rgba(255,255,255,0.62)" }}>

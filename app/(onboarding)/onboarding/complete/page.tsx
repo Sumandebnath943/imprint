@@ -108,8 +108,10 @@ export default function CompletePage() {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 flex flex-col items-center text-center max-w-[600px] w-full md:flex-1 md:min-h-0 md:overflow-y-auto md:pr-2"
+        className="relative z-10 w-full max-w-[980px] flex flex-col items-center text-center lg:flex-row lg:items-center lg:text-left lg:gap-14 lg:flex-1 lg:min-h-0"
       >
+        {/* Left — the message and the way forward. */}
+        <div className="flex flex-col items-center lg:items-start lg:w-[46%] lg:shrink-0">
         {/* Sonar pulse icon */}
         <div className="relative w-20 h-20 flex items-center justify-center mb-10">
           {[1, 2, 3].map((ring) => (
@@ -141,7 +143,7 @@ export default function CompletePage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.35 }}
-          className="mb-10"
+          className="mb-10 lg:mb-4"
           style={{ fontSize: 18, color: "rgba(255,255,255,0.55)", lineHeight: 1.8, maxWidth: 480 }}
         >
           You&apos;ve created your Baseline Imprint. This is the fingerprint of your authentic mind — right now, today.
@@ -149,6 +151,29 @@ export default function CompletePage() {
           Every session, challenge, and reflection from here will be measured against this moment.
         </motion.p>
 
+        {/* CTA */}
+        <motion.button
+          onClick={handleEnter}
+          disabled={entering}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.65 }}
+          whileHover={{ scale: 1.02, boxShadow: "0 0 40px rgba(255,85,0,0.40)" }}
+          whileTap={{ scale: 0.97 }}
+          className="h-14 px-10 rounded-pill text-on-accent font-medium text-base mb-5"
+          style={{ background: "#FF5500", boxShadow: "0 0 24px rgba(255,85,0,0.25)" }}
+        >
+          Enter IMPRINT →
+        </motion.button>
+
+        <p className="text-sm" style={{ color: "rgba(255,255,255,0.58)" }}>
+          Your first Vault Challenge drops in 24 hours.
+        </p>
+
+        </div>
+
+        {/* Right — the numbers this step produced. */}
+        <div className="flex flex-col items-center lg:items-start w-full lg:flex-1 lg:min-w-0">
         {/* Stats row */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -199,24 +224,8 @@ export default function CompletePage() {
           <p className="text-sm font-medium mt-1" style={{ color: "#00D97E" }}>Anchored. Completely you.</p>
         </motion.div>
 
-        {/* CTA */}
-        <motion.button
-          onClick={handleEnter}
-          disabled={entering}
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.65 }}
-          whileHover={{ scale: 1.02, boxShadow: "0 0 40px rgba(255,85,0,0.40)" }}
-          whileTap={{ scale: 0.97 }}
-          className="h-14 px-10 rounded-pill text-on-accent font-medium text-base mb-5"
-          style={{ background: "#FF5500", boxShadow: "0 0 24px rgba(255,85,0,0.25)" }}
-        >
-          Enter IMPRINT →
-        </motion.button>
+        </div>
 
-        <p className="text-sm" style={{ color: "rgba(255,255,255,0.58)" }}>
-          Your first Vault Challenge drops in 24 hours.
-        </p>
       </motion.div>
     </div>
   );

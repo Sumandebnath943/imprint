@@ -139,3 +139,64 @@ body {
 .text-on-accent {
   color: #0a0a0a;
 }
+
+/* ── Contained scroll panes ────────────────────────────────────────────────
+   Where a list genuinely cannot fit (35 professions, the AI-use questions) it
+   scrolls in its own pane. A bare native scrollbar floating in open space
+   reads as a rendering fault, so the pane is given a surface and a soft top
+   and bottom fade instead, and the scrollbar itself is slimmed right down.  */
+.scroll-pane {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 12px,
+    #000 calc(100% - 16px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 12px,
+    #000 calc(100% - 16px),
+    transparent 100%
+  );
+}
+
+.scroll-pane::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scroll-pane::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroll-pane::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+}
+
+.scroll-pane::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+/* Prompt columns only need the contained treatment once side-by-side. */
+@media (min-width: 1024px) {
+  .lg\:scroll-pane {
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+    -webkit-mask-image: linear-gradient(
+      to bottom, transparent 0, #000 12px, #000 calc(100% - 16px), transparent 100%);
+    mask-image: linear-gradient(
+      to bottom, transparent 0, #000 12px, #000 calc(100% - 16px), transparent 100%);
+  }
+  .lg\:scroll-pane::-webkit-scrollbar { width: 6px; }
+  .lg\:scroll-pane::-webkit-scrollbar-track { background: transparent; }
+  .lg\:scroll-pane::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
+  }
+}
