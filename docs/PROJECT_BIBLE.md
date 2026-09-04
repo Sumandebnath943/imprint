@@ -5,7 +5,7 @@ works the way it does. If code and this document disagree, the code is right
 and this document needs fixing — but every number here was read out of the
 codebase, not remembered.
 
-**Last verified against commit `68c8bc4`.**
+**Last verified against commit `bc1d1c7`.**
 
 ---
 
