@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Space_Grotesk } from "next/font/google";
 import { Toaster } from "sonner";
 import { SITE_URL, SITE_NAME, SITE_TAGLINE, SITE_DESCRIPTION } from "@/lib/site";
+import Beacon from "@/components/beacon/Beacon";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -68,6 +69,7 @@ export default function RootLayout({
         className={`${spaceGrotesk.className} bg-imprint-black text-imprint-white antialiased`}
       >
         {children}
+        <Beacon />
         <Toaster
           theme="dark"
           position="bottom-right"
