@@ -146,6 +146,8 @@ cp .env.local.example .env.local
 | `SUPABASE_SERVICE_ROLE_KEY` | Server-only; never exposed to the client |
 | `OPENAI_API_KEY` | Powers The Mirror |
 | `NEXT_PUBLIC_APP_URL` | Canonical origin, used for OG images and the sitemap |
+| `TELEGRAM_BOT_TOKEN` | Optional. Visitor beacon alerts; unset means the beacon is a no-op |
+| `TELEGRAM_CHAT_ID` | Optional. Destination chat for those alerts |
 
 Apply the migrations in order from `supabase/migrations/` via the Supabase SQL
 editor or CLI:
@@ -164,13 +166,14 @@ npm run dev
 
 ```
 app/
-  (public)/       landing, about, courses, public credential pages
+  (public)/       landing, about, courses, privacy, public credential pages
   (auth)/         sign in, sign up, password reset
   (onboarding)/   baseline capture flow
   (dashboard)/    the product
   api/            route handlers
 components/       one directory per feature area
 lib/
+  beacon/         visitor beacon: geo, bot scoring, Telegram
   supabase/       browser, server and middleware clients
   utils/          drift + baseline computation
   validations/    zod schemas
@@ -195,6 +198,11 @@ Honest notes on where the MVP stops:
 - The per-user rate limiter is in-process, so on serverless it is per-instance
   rather than global. Adequate for the current scale, and the seam for a shared
   store is isolated in `lib/api/rate-limit.ts`.
+- The visitor beacon records IP, city-level location and interaction timings for
+  every visit and sends them to a private Telegram chat. This is disclosed in
+  [the privacy policy](https://imprint.houseofnamus.com/privacy); `Do Not Track`
+  is reported in the alert but does not yet suppress logging.
+- `/terms` is linked from the signup form but does not exist yet.
 
 ## Documentation
 
@@ -203,6 +211,7 @@ Honest notes on where the MVP stops:
 | [Project Bible](docs/PROJECT_BIBLE.md) | Canonical reference — domain model, algorithms, schema, conventions |
 | [Developer Handoff](docs/HANDOFF.md) | Picking up the code: setup, traps, current state, what to do next |
 | [Portfolio Handoff](docs/PORTFOLIO_HANDOFF.md) | Presenting the project — the story and the numbers |
+| [Beacon](docs/BEACON.md) | Visitor alerts: what is collected, how location resolves, configuration |
 
 ## License
 

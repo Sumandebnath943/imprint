@@ -90,11 +90,11 @@ a `public_profiles` view that exposes no email and no onboarding state.
 
 | | |
 | --- | --- |
-| Product pages | 18 dashboard routes, 7-step onboarding, 4 public |
-| API route handlers | 21 |
+| Product pages | 18 dashboard routes, 7-step onboarding, 5 public |
+| API route handlers | 22 |
 | Database tables | 19, all with RLS |
 | Migrations | 10, all idempotent |
-| Application code | ~26,700 lines across 188 TS/TSX files |
+| Application code | ~27,600 lines across 194 TS/TSX files |
 | SQL | 1,210 lines |
 | Storage buckets | 6, private by default, per-user path enforcement |
 
@@ -182,6 +182,13 @@ added for an unrelated fix was clipping them.
 - **Honest metric names.** Drift signals are stored under names describing what
   they measure, all increasing as things get worse, and inverted at the view
   layer. The previous naming is what caused the backwards-reading bug.
+- **Never interleave two data providers.** The visitor beacon resolves location
+  from Vercel's edge headers and the network operator from a separate IP lookup.
+  Merging them field-by-field produced an alert reading "Bengaluru … postal
+  600079" — a Chennai postcode — because the two use different databases and
+  disagree at the edges. Location now comes from one provider at a time; only
+  network facts merge. The same instinct as the drift signals: a number is only
+  worth having if you can say exactly where it came from.
 
 ---
 
@@ -219,6 +226,10 @@ Five minutes, in this order:
 
 Have `docs/PROJECT_BIBLE.md` open if anyone asks how the score is computed.
 
+A recorded 4:44 walkthrough of this path exists, built for the BPF 2026
+submission: every frame is a capture of the running production build against the
+seeded account, cut against measured sentence boundaries in the narration.
+
 ---
 
 ## 9. Honest current limitations
@@ -231,3 +242,7 @@ State these before anyone finds them.
 - Drift metrics are lexical proxies, not semantic measures.
 - Onboarding scrolls on mobile by design; seven steps of content cannot fit a
   phone screen, and internal scroll regions there would be worse.
+- The site logs visits — IP, city-level location, interaction timings — to a
+  private Telegram chat. Disclosed at `/privacy`; `Do Not Track` is reported but
+  not yet honoured as a suppression signal.
+- `/terms` is linked from signup and does not exist yet.

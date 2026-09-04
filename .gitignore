@@ -43,3 +43,9 @@ next-env.d.ts
 
 # local agent/editor tooling
 .claude/
+
+# local media working folders (voiceover, music, renders, submission bundles)
+/video-bgm/
+/video-vos/
+/video-out/
+/hackathon-files/

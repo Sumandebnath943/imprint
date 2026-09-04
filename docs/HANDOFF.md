@@ -3,7 +3,7 @@
 For whoever picks this up next. Read this first, then
 [`PROJECT_BIBLE.md`](./PROJECT_BIBLE.md) when you need the reference detail.
 
-**State as of commit `ef3b01c`.** Live at
+**State as of commit `68c8bc4`.** Live at
 [imprint.houseofnamus.com](https://imprint.houseofnamus.com), auto-deployed
 from `main` via Vercel.
 
@@ -33,6 +33,10 @@ npm run seed:demo
 That creates `demo@imprint.local` / `ImprintDemo!2026` with ten weeks of
 history, plus a peer account so the leaderboard and mentor directory are not
 empty. Re-running wipes and rebuilds it.
+
+`TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` are optional — without them the
+visitor beacon is a no-op. It does not run on `localhost` in any case unless
+you set `NEXT_PUBLIC_BEACON_DEBUG=1`, so local work will not alert anyone.
 
 ---
 
@@ -97,6 +101,23 @@ It overwrites `.next`, and the dev server then throws `Cannot find module
 They grow to fit content instead of scrolling. Any `overflow-x-auto` wrapper
 needs `min-w-0` (or `max-w-full`) or it will simply expand and get clipped.
 
+### 3.8 Never interleave fields from two geolocation providers
+
+The beacon reads location from Vercel's edge headers and the ISP from a
+third-party lookup. Taking the city from one and the postcode from the other
+produced an alert reading "Bengaluru … postal 600079" — a Chennai postcode.
+Two providers, two databases, and they disagree at the edges. Resolve location
+from **one** provider at a time; merge only network facts (ISP, ASN), which the
+other does not supply at all. See `lib/beacon/geo.ts`.
+
+### 3.9 Outbound calls need a budget for the cold connection
+
+The Telegram send was given 4s and dropped alerts silently. The round trip
+measured **5.6s** on a cold connection — 1.3s to connect, another 1.9s for TLS —
+and that is exactly the request carrying the first alert after a deploy. Budget
+for the handshake, retry transport failures (but never a rejected request), and
+raise `maxDuration` so the platform's 10s default cannot cut it short.
+
 ---
 
 ## 4. How to verify UI work here
@@ -142,7 +163,9 @@ Viewports that matter: **1365×660** (13" laptop — the tightest real case),
 the Mirror against real baselines; the Forge; Skill Vault with challenges;
 journal; gallery with real storage objects; drift and calibration; circles
 (create private → join by code → roster → check-in, with an anonymous client
-seeing nothing); leaderboard; mentor directory; public credential links.
+seeing nothing); leaderboard; mentor directory; public credential links;
+the visitor beacon (real alerts delivered, geolocation correct, silent on
+localhost); `/privacy`.
 
 **Migrations 006–010 are applied to production.**
 
@@ -171,6 +194,12 @@ Roughly in order of value.
 4. **A schema-drift check in CI.** Compare the live schema against the
    migrations. Four of the ten migrations exist purely because of drift.
 5. **Courses.** Currently a waitlist with no content.
+6. **`/terms`.** The signup form links to it and the route does not exist —
+   the same dead link `/privacy` was until this page shipped.
+7. **Honour Do Not Track in the beacon.** It is recorded in the alert but not
+   used to suppress logging. `docs/BEACON.md` states this plainly, and the
+   privacy policy tells visitors how to opt out by email; wiring it up properly
+   is a two-line change in `shouldRun()`.
 
 ---
 

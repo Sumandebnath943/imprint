@@ -60,6 +60,7 @@ const FOOTER_LINKS = {
     { label: "Testimonials", href: "#testimonials" },
     { label: "Sign In", href: "/signin" },
     { label: "Begin Your Imprint", href: "/signup" },
+    { label: "Privacy", href: "/privacy" },
   ],
 };
 

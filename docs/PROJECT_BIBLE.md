@@ -5,7 +5,7 @@ works the way it does. If code and this document disagree, the code is right
 and this document needs fixing — but every number here was read out of the
 codebase, not remembered.
 
-**Last verified against commit `ef3b01c`.**
+**Last verified against commit `68c8bc4`.**
 
 ---
 
@@ -167,17 +167,17 @@ sum to the stored `profiles.imprint_score`:
 | Motion / charts | framer-motion, recharts |
 | Hosting | Vercel — `main` auto-deploys to production |
 
-Roughly 26,700 lines across 188 TS/TSX files, plus 1,210 lines of SQL.
+Roughly 27,600 lines across 194 TS/TSX files, plus 1,210 lines of SQL.
 
 ### 4.2 Route groups
 
 ```
 app/
-  (public)/       landing, /about, /courses, /credential/[code]
+  (public)/       landing, /about, /courses, /privacy, /credential/[code]
   (auth)/         /signin, /signup, /reset-password
   (onboarding)/   7-step baseline capture
   (dashboard)/    18 product pages
-  api/            21 route handlers
+  api/            21 route handlers (+ /auth/callback = 22 total)
 ```
 
 Also: `error.tsx`, `global-error.tsx`, `not-found.tsx`, `opengraph-image.tsx`,
@@ -210,6 +210,30 @@ Used in exactly **two** places, and only one of them ships:
 **Do not reach for it elsewhere.** Circle creation used to, as a workaround for
 an RLS recursion bug; that was removed in `30cc9f5` once the policies were
 fixed properly.
+
+### 4.6 Visitor beacon
+
+`components/beacon/Beacon.tsx` (mounted in the root layout) collects what a
+visit looked like and posts it to `app/api/beacon/route.ts`, which enriches it
+with network facts and sends an alert to Telegram. Two messages per visit: an
+**arrival** ~1.2s after first paint, and a **summary** when the tab is hidden or
+closed. Full detail in [`BEACON.md`](./BEACON.md).
+
+Three rules it exists under:
+
+- **Location is never interleaved across providers.** Vercel's edge headers are
+  authoritative for city/region/country; `ipwho.is` supplies the ISP and ASN
+  that Vercel does not carry. Taking the city from one and the postcode from
+  the other produced "Bengaluru … postal 600079" — a Chennai postcode. Fields
+  now come from one provider at a time; only network facts merge.
+- **The route always answers 204.** It is fire-and-forget: a missing credential,
+  a rejected payload or a Telegram outage must never surface to a visitor.
+- **The payload is untrusted.** Bounded on every axis by
+  `lib/validations/beacon.schema.ts`. IP, geolocation and user agent are read
+  server-side from request headers, never from the body.
+
+Without `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` the whole thing is a no-op.
+It does not run on `localhost` unless `NEXT_PUBLIC_BEACON_DEBUG=1`.
 
 ---
 
@@ -416,6 +440,9 @@ Honest scope boundaries, not bugs.
 | `SUPABASE_SERVICE_ROLE_KEY` | Server-only. Account deletion + seed script only |
 | `OPENAI_API_KEY` | The Mirror |
 | `NEXT_PUBLIC_APP_URL` | Canonical origin — OG images, sitemap, robots |
+| `TELEGRAM_BOT_TOKEN` | Visitor beacon alerts. Unset ⇒ beacon is a no-op |
+| `TELEGRAM_CHAT_ID` | Destination chat for those alerts |
+| `NEXT_PUBLIC_BEACON_DEBUG` | Optional, local only. `1` runs the beacon on localhost. **Never set on Vercel** |
 
 `lib/site.ts` resolves the origin: explicit `NEXT_PUBLIC_APP_URL`, then
 `NEXT_PUBLIC_VERCEL_URL`, then localhost.
