@@ -22,6 +22,10 @@ import {
 } from "@/lib/mirror/types";
 import { createClient } from "@/lib/supabase/client";
 
+/** Shown once per flagged message — by the client on send, or by the server. */
+const DEPENDENCY_NOTICE =
+  "The Mirror noticed you asked for a recommendation. It will only reflect your thinking back.";
+
 type SessionState = "idle" | "active" | "complete";
 const LS_KEY = (uid: string) => `imprint_mirror_session_${uid}`;
 const MAX_CHARS = 1500;
@@ -112,7 +116,13 @@ export default function MirrorClient({ userData }: MirrorClientProps) {
   }, [inputVal]);
 
   // ── Send message to API ────────────────────────────────────────────────
-  const sendToMirror = useCallback(async (userMsg: string, history: MirrorMessage[]) => {
+  /**
+   * `alreadyFlagged` means the client detected the dependency itself and has
+   * already shown the notice. The API checks the same trigger list, so without
+   * this both fired and the notice rendered twice for every flagged message.
+   * The count still comes from the server, which is the authority.
+   */
+  const sendToMirror = useCallback(async (userMsg: string, history: MirrorMessage[], alreadyFlagged = false) => {
     setIsTyping(true);
 
     // Minimum 1.2s typing delay
@@ -152,7 +162,9 @@ export default function MirrorClient({ userData }: MirrorClientProps) {
 
     if (data.dependencyFlagged) {
       setDependencyFlags((p) => p + 1);
-      setMessages((p) => [...p, { id: nanoid(), role: "system", content: "The Mirror noticed you asked for a recommendation. It will only reflect your thinking back.", timestamp: Date.now() }]);
+      if (!alreadyFlagged) {
+        setMessages((p) => [...p, { id: nanoid(), role: "system", content: DEPENDENCY_NOTICE, timestamp: Date.now() }]);
+      }
     }
 
     setMessages((p) => [...p, { id: nanoid(), role: "mirror", content: data.response, timestamp: Date.now() }]);
@@ -209,12 +221,14 @@ export default function MirrorClient({ userData }: MirrorClientProps) {
     setMessages(updated);
     setInputVal("");
 
-    // Detect dependency in user message
-    if (detectDependency(text)) {
-      setMessages((p) => [...p, { id: nanoid(), role: "system", content: "The Mirror noticed you asked for a recommendation. It will only reflect your thinking back.", timestamp: Date.now() + 1 }]);
+    // Surfaced immediately rather than waiting on the round trip. The server
+    // re-checks and owns the count; it is told not to repeat the notice.
+    const flagged = detectDependency(text);
+    if (flagged) {
+      setMessages((p) => [...p, { id: nanoid(), role: "system", content: DEPENDENCY_NOTICE, timestamp: Date.now() + 1 }]);
     }
 
-    await sendToMirror(text, updated);
+    await sendToMirror(text, updated, flagged);
   }, [inputVal, isTyping, messages, sendToMirror]);
 
   // ── Keyboard: Enter to send, Shift+Enter = newline ────────────────────

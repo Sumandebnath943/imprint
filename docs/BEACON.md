@@ -5,14 +5,18 @@ whether they behaved like a person or a script.
 
 ## What arrives
 
-Two messages per visit, at most.
+An arrival alert, an end-of-visit summary, and a milestone alert whenever the
+visitor signs in, creates an account, finishes onboarding, or first opens the
+dashboard.
 
 **On arrival** (~1.2s after the first page renders) — so the alert is live:
 
 ```
 🟢 New visit — IMPRINT
 
-📍 Bengaluru, KA, India 🇮🇳
+👤 Not signed in — anonymous visitor
+
+📍 Bengaluru, Karnataka, India 🇮🇳
    12.972, 77.594 · Asia/Kolkata
 🛰 49.207.180.22 · Atria Convergence Technologies Pvt. Ltd. · AS24309
    open in maps
@@ -27,14 +31,36 @@ Two messages per visit, at most.
 🕒 05 Sept, 00:42 local (Asia/Kolkata) · Fri, 04 Sep 2026 19:12:04 UTC
 ```
 
+**On a milestone** — sign-in, account creation, onboarding finished, first
+dashboard visit:
+
+```
+✨ New account created — IMPRINT
+
+👤 Ada Kessler · ada@example.com
+   🆕 new account · onboarding step 1/7
+
+📄 /onboarding/welcome
+
+📍 Pune, Maharashtra, India 🇮🇳
+   18.520, 73.857 · Asia/Kolkata
+🛰 103.149.196.11 · NIXI · AS140158
+   open in maps
+```
+
 **On exit** (tab hidden or closed) — the behaviour:
 
 ```
 ⚪️ Visit ended — IMPRINT
 
-⏱ 4m 12s on site · 3m 5s active
-🧭 2 pages
-   / (1m 36s)  →  /about (2m 36s)
+👤 Ada Kessler · ada@example.com
+   account 2mo 14d old · onboarding complete · drift 22 · imprint 708
+
+⏱ 6m 42s on site · 5m 15s active
+🧭 5 pages
+   /signin (9s)  →  /dashboard (2m)  →  /dashboard/drift (1m 36s)  →  …
+📊 dashboard explored (4)
+   overview · drift · vault · journal
 📜 scroll 87% (5820px) · hit 25/50/75 · 64 events
 🖱 3 actions
       8s · click · Begin Your Imprint
@@ -59,6 +85,21 @@ deploy can never break a page load.
 
 **Env changes only apply to new deployments.** Redeploy after adding them.
 
+## Who is visiting
+
+Identity is resolved **server-side from the session cookie**, never from the
+payload — a browser can claim anything, but it cannot forge a session. Every
+alert therefore states whether the visitor is signed in and, if so, the account,
+how old it is, whether onboarding is finished, and their current drift and
+IMPRINT scores.
+
+Milestones are detected from the route rather than from an auth listener: the
+app only reaches `/onboarding` or `/dashboard` with a session. That keeps
+Supabase out of every page's bundle. A sign-in on an account less than fifteen
+minutes old is reported as **New account created**.
+
+The summary lists every dashboard page opened during the visit, in order.
+
 ## Location
 
 Two sources, deliberately not interleaved:
@@ -77,6 +118,14 @@ otherwise Vercel's location is used whole and only network facts are merged.
 
 Accuracy is **city-level**, which is what IP geolocation gives. Street-level
 would need the browser Geolocation API, which always shows a permission prompt.
+
+**Precision is reported, never invented.** When no city can be resolved, a
+provider will happily return the country's centroid — for India that lands near
+Nagpur, roughly 700km from anyone in Pune. Rendering that as a map pin made the
+alert actively misleading. Coordinates and the map link are now emitted **only**
+when a city or region was genuinely resolved; a country-level result says
+"country only — no map pin shown". Mobile-carrier addresses are flagged too,
+because those routinely resolve to a regional gateway rather than the handset.
 
 Verify it in production by opening `https://imprint.houseofnamus.com/api/beacon`
 in a browser — it returns exactly what the server resolved for you, and whether
@@ -101,8 +150,12 @@ The exit summary carries the real judgement.
 
 ## Silencing your own visits
 
-The beacon is off on `localhost` in production builds. To silence a specific
-browser you are testing from, run once in its console:
+**Do Not Track is honoured** — if the browser sends it, nothing is collected and
+nothing is sent. The server refuses those payloads too, in case a stale bundle
+is still running somewhere.
+
+The beacon is also off on `localhost` in production builds. To silence a
+specific browser you are testing from, run once in its console:
 
 ```js
 localStorage.setItem("imprint_beacon_off", "1")
@@ -110,24 +163,24 @@ localStorage.setItem("imprint_beacon_off", "1")
 
 ## Rate limits
 
-12 messages per address per 10 minutes, and 150 per instance per 10 minutes, via
+20 messages per address per 10 minutes, and 150 per instance per 10 minutes, via
 the existing `lib/api/rate-limit.ts`. In-process, so per-instance on serverless —
 enough to stop one crawl flooding the chat.
 
 ## Privacy
 
 This records IP address, city-level location, ISP, pages, and interaction
-timings for every visitor, and forwards them to a private Telegram chat. That is
-personal data under GDPR/UK GDPR, and the deck targets the US, UK and India.
-Before public launch, disclose it in a privacy policy. `Do Not Track` is
-reported in the alert but not currently honoured as a suppression signal.
+timings for every visitor, and forwards them to a private Telegram chat, along with the
+account identity when the visitor is signed in. That is personal data under
+GDPR/UK GDPR. It is disclosed at `/privacy`, and `Do Not Track` is honoured.
 
 ## Files
 
 ```
 app/api/beacon/route.ts            endpoint (POST alert, GET health check)
 components/beacon/Beacon.tsx       client collector, mounted in app/layout.tsx
-lib/beacon/geo.ts                  IP → location + network
+lib/beacon/geo.ts                  IP → location + network, with precision
+lib/beacon/identity.ts             session → who is visiting
 lib/beacon/bot.ts                  human/bot scoring
 lib/beacon/telegram.ts             message formatting + send
 lib/validations/beacon.schema.ts   zod schema for the untrusted payload

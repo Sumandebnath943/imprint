@@ -32,7 +32,12 @@ export const BeaconSchema = z.object({
   v: z.literal(1),
   /** Random per-tab id, used only to group an arrival with its summary. */
   sid: z.string().min(6).max(40),
-  kind: z.enum(["arrival", "summary"]),
+  kind: z.enum(["arrival", "summary", "event"]),
+  /** Set when kind is "event". The server re-checks the session before
+   *  reporting anything about identity, so this is only a hint. */
+  event: z
+    .enum(["signed_in", "signed_out", "entered_dashboard", "onboarding_complete"])
+    .optional(),
 
   path: z.string().max(300),
   title: short.optional(),

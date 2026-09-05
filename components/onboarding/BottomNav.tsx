@@ -50,7 +50,9 @@ export default function BottomNav({
 
       {/* Step indicator */}
       <p className="text-xs whitespace-nowrap" style={{ color: "rgba(255,255,255,0.62)" }}>
-        <span className="hidden sm:inline">Step </span>{step}<span className="hidden sm:inline"> of</span><span className="sm:hidden">/</span>{total}
+        {/* The "/" carries the gap on mobile; on desktop it is hidden, so " of "
+            needs its own trailing space or the total collides: "Step 5 of7". */}
+        <span className="hidden sm:inline">Step </span>{step}<span className="hidden sm:inline"> of </span><span className="sm:hidden">/</span>{total}
       </p>
 
       {/* Continue */}

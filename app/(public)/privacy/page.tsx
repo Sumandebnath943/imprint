@@ -169,15 +169,27 @@ export default function PrivacyPage() {
               what="Automated-traffic score"
               why="A score indicating whether the visit looks like a person or a crawler, so that bot traffic can be separated from real interest."
             />
+            <Row
+              what="Account, if signed in"
+              why="When you are signed in, the alert identifies the account — your name, email, how long ago it was created, whether onboarding is finished, and your current scores. It also notes when you sign in, create an account, finish onboarding, and which dashboard pages you opened. Signed out, the visit is not linked to any account."
+            />
           </div>
           <p className="pt-2">
-            This is retained only as messages in a private operator chat and is
-            not written to the product database or linked to your account.
+            This is retained only as messages in a private operator chat. It is
+            not written to the product database and is not used to build a
+            profile of you beyond what the product already holds.
           </p>
           <p>
-            Your browser&rsquo;s &ldquo;Do Not Track&rdquo; setting is recorded
-            in that alert but is not currently used to suppress logging. If you
-            would like your visits excluded, write to us at the address below.
+            <strong className="text-white">
+              We honour &ldquo;Do Not Track&rdquo;.
+            </strong>{" "}
+            If your browser sends that signal, nothing on this page is collected
+            and no alert is sent. You can also switch logging off for one browser
+            by running{" "}
+            <code style={{ color: "rgba(255,255,255,0.9)" }}>
+              localStorage.setItem(&quot;imprint_beacon_off&quot;, &quot;1&quot;)
+            </code>{" "}
+            in its console, or write to us and we will exclude you.
           </p>
         </Section>
 

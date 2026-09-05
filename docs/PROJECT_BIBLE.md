@@ -215,11 +215,12 @@ fixed properly.
 
 `components/beacon/Beacon.tsx` (mounted in the root layout) collects what a
 visit looked like and posts it to `app/api/beacon/route.ts`, which enriches it
-with network facts and sends an alert to Telegram. Two messages per visit: an
-**arrival** ~1.2s after first paint, and a **summary** when the tab is hidden or
-closed. Full detail in [`BEACON.md`](./BEACON.md).
+with network facts and identity and sends an alert to Telegram: an **arrival**
+~1.2s after first paint, a **summary** when the tab is hidden or closed, and a
+**milestone** on sign-in, account creation, finished onboarding, or first
+dashboard visit. Full detail in [`BEACON.md`](./BEACON.md).
 
-Three rules it exists under:
+Four rules it exists under:
 
 - **Location is never interleaved across providers.** Vercel's edge headers are
   authoritative for city/region/country; `ipwho.is` supplies the ISP and ASN
@@ -228,9 +229,16 @@ Three rules it exists under:
   now come from one provider at a time; only network facts merge.
 - **The route always answers 204.** It is fire-and-forget: a missing credential,
   a rejected payload or a Telegram outage must never surface to a visitor.
+- **Precision is never invented.** When no city resolves, a provider returns the
+  country's centroid; for India that lands near Nagpur, ~700km from a visitor in
+  Pune. `Geo.precision` records what was actually resolved, and coordinates and
+  the map link are emitted only for `city` or `region`.
 - **The payload is untrusted.** Bounded on every axis by
   `lib/validations/beacon.schema.ts`. IP, geolocation and user agent are read
-  server-side from request headers, never from the body.
+  server-side from request headers, never from the body. Identity comes from the
+  session cookie via `lib/beacon/identity.ts` — a browser cannot forge one.
+
+Do Not Track is honoured, on the client and again at the route.
 
 Without `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` the whole thing is a no-op.
 It does not run on `localhost` unless `NEXT_PUBLIC_BEACON_DEBUG=1`.

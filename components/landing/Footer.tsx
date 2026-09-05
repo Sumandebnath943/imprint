@@ -61,6 +61,7 @@ const FOOTER_LINKS = {
     { label: "Sign In", href: "/signin" },
     { label: "Begin Your Imprint", href: "/signup" },
     { label: "Privacy", href: "/privacy" },
+    { label: "Terms", href: "/terms" },
   ],
 };
 

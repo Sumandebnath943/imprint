@@ -198,11 +198,13 @@ Honest notes on where the MVP stops:
 - The per-user rate limiter is in-process, so on serverless it is per-instance
   rather than global. Adequate for the current scale, and the seam for a shared
   store is isolated in `lib/api/rate-limit.ts`.
-- The visitor beacon records IP, city-level location and interaction timings for
-  every visit and sends them to a private Telegram chat. This is disclosed in
-  [the privacy policy](https://imprint.houseofnamus.com/privacy); `Do Not Track`
-  is reported in the alert but does not yet suppress logging.
-- `/terms` is linked from the signup form but does not exist yet.
+- The visitor beacon records IP, city-level location, interaction timings and —
+  when signed in — the account, and sends them to a private Telegram chat. This
+  is disclosed in [the privacy policy](https://imprint.houseofnamus.com/privacy),
+  and `Do Not Track` is honoured.
+- Landing-page quotes in the friends-and-family section are placeholders. They
+  are labelled as pre-launch impressions and carry no invented metrics, but they
+  need replacing with real attributed words before launch.
 
 ## Documentation
 

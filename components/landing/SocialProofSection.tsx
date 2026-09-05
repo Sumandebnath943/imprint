@@ -2,6 +2,18 @@
 
 import { motion } from "framer-motion";
 
+/**
+ * Pre-launch feedback from friends, family and peers who tried early builds.
+ *
+ * These are NOT customers, and the section says so on the page. IMPRINT has not
+ * launched and has no users; presenting informal impressions as customer proof
+ * would be a claim we cannot support.
+ *
+ * The quotes below are placeholders written to match the shape of the feedback
+ * received in person. **Replace them with real, attributed words before public
+ * launch, or delete the section.** Nothing here asserts a measured outcome —
+ * no drift scores, no percentages — because no such result has been recorded.
+ */
 interface Testimonial {
   quote: string;
   name: string;
@@ -11,22 +23,22 @@ interface Testimonial {
 
 const TESTIMONIALS: Testimonial[] = [
   {
-    quote: "I used IMPRINT for 6 weeks. I wrote my first solo report in 14 months without touching AI once. I didn't realize how dependent I'd become.",
-    name: "Priya S.",
-    role: "Product Manager, Mumbai",
-    badge: "Drift Score dropped from 67 → 21",
+    quote: "The part that stayed with me was being asked what I actually thought, and having nothing autocomplete itself in front of me. It was uncomfortable in a way I did not expect.",
+    name: "Priya",
+    role: "Friend · product manager",
+    badge: "Tried an early build",
   },
   {
-    quote: "The Forge is brutal and I love it. Timed prompts with no autocorrect — I remembered I actually have a voice.",
-    name: "Marcus T.",
-    role: "Senior Writer, London",
-    badge: "Baseline Consistency: 94%",
+    quote: "The Forge is brutal and I love it. Timed prompts, no autocorrect — I remembered I actually have a voice.",
+    name: "Marcus",
+    role: "Peer · writer",
+    badge: "Tried an early build",
   },
   {
-    quote: "As a data scientist I thought this wasn't for me. Then I failed my own Fermi estimation challenge. That was the wake-up call.",
-    name: "Anya K.",
-    role: "Data Scientist, Berlin",
-    badge: "Vault Strength: 82%",
+    quote: "I thought this was not for me. Then I failed my own estimation challenge and had to sit with that for a while.",
+    name: "Anya",
+    role: "Peer · data scientist",
+    badge: "Tried an early build",
   },
 ];
 
@@ -41,7 +53,7 @@ export default function SocialProofSection() {
             viewport={{ once: true }} transition={{ duration: 0.5 }}
             className="text-xs uppercase tracking-widest font-medium mb-4" style={{ color: "#FF5500" }}
           >
-            /05 — Early Users
+            /05 — Friends, Family &amp; Peers
           </motion.p>
           <motion.h2
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
@@ -50,6 +62,19 @@ export default function SocialProofSection() {
           >
             What happens when you stop letting AI think for you.
           </motion.h2>
+
+          {/* Said plainly, because the alternative is implying a customer base
+              that does not exist. IMPRINT is pre-launch. */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.2 }}
+            className="mt-5"
+            style={{ color: "rgba(255,255,255,0.62)", fontSize: 15, lineHeight: 1.65, maxWidth: 560 }}
+          >
+            IMPRINT has not launched yet. These are first impressions from
+            friends, family and peers who tried early builds &mdash; not
+            customers, and not measured results.
+          </motion.p>
         </div>
 
         {/* Cards */}
@@ -113,8 +138,10 @@ export default function SocialProofSection() {
 
               {/* Bottom Glowing Button / Verified Tag */}
               <div className="mt-8 relative z-10">
-                <div className="w-full py-3.5 rounded-full text-center text-sm font-bold text-white transition-all cursor-pointer hover:brightness-110" style={{ background: "linear-gradient(180deg, rgba(255,85,0,0.3) 0%, rgba(255,85,0,0.1) 100%)", border: "1px solid rgba(255,85,0,0.3)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.1), 0 10px 20px -5px rgba(255,69,0,0.2)" }}>
-                  Verified Human
+                {/* Was "Verified Human", which asserted a verification that
+                    never happened. It is a pre-launch impression; say that. */}
+                <div className="w-full py-3.5 rounded-full text-center text-sm font-bold text-white" style={{ background: "linear-gradient(180deg, rgba(255,85,0,0.3) 0%, rgba(255,85,0,0.1) 100%)", border: "1px solid rgba(255,85,0,0.3)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.1), 0 10px 20px -5px rgba(255,69,0,0.2)" }}>
+                  Pre-launch impression
                 </div>
               </div>
 

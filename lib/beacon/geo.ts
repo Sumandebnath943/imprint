@@ -1,20 +1,28 @@
 /**
- * Where the visitor is, and who their network belongs to.
+ * Where the visitor is, how confident we are, and who their network belongs to.
  *
- * Two sources, deliberately combined rather than picked between:
+ * Sources, in order of authority for *location*:
  *
- *  1. Vercel's edge headers (`x-vercel-ip-*`). Present on every request served
- *     through Vercel, resolved at the edge before the function runs, so they
- *     cost nothing and never fail. This is the authoritative source for
- *     city/region/country.
- *  2. A free IP lookup (ipwho.is, HTTPS, no key). Adds the ISP/ASN, which the
- *     Vercel headers do not carry and which is the single best signal for
- *     "this came from a datacenter, not a living room". Also covers local
- *     development, where the Vercel headers do not exist at all.
+ *  1. Vercel's edge headers (`x-vercel-ip-*`). Resolved at the edge before the
+ *     function runs, so they cost nothing and never fail. Accurate at city
+ *     level — verified against a known address, which resolved correctly.
+ *  2. A free IP lookup (ipwho.is, then ipapi.co). Only consulted for location
+ *     when Vercel gave no city; otherwise it supplies the ISP and ASN, which
+ *     Vercel does not carry.
  *
- * The lookup is cached per IP and time-boxed, so a slow third party can never
- * hold up the response.
+ * Two rules, both learned the hard way:
+ *
+ *  - **Never interleave the two.** Taking the city from one and the postcode
+ *    from the other produced "Bengaluru … postal 600079" — a Chennai postcode.
+ *  - **Never invent precision.** When no city resolves, a provider will happily
+ *    return the country's centroid. Reported as coordinates that reads as a
+ *    real position: for India it lands near Nagpur, which is roughly 700km from
+ *    anyone in Pune. Coordinates are dropped unless a city or region was
+ *    actually resolved, and the alert says what precision it had.
  */
+
+/** How specific the location actually is. Drives whether a map pin is shown. */
+export type Precision = "city" | "region" | "country" | "unknown";
 
 export interface Geo {
   ip: string;
@@ -31,10 +39,15 @@ export interface Geo {
   asn?: string;
   /** Network looks like a hosting provider rather than a consumer ISP. */
   datacenter: boolean;
-  source: "vercel+lookup" | "vercel" | "lookup" | "unknown";
+  /** Mobile carrier — IP geolocation is materially less accurate on these. */
+  mobile: boolean;
+  precision: Precision;
+  /** Which source the location came from. */
+  source: "vercel" | "lookup" | "none";
+  /** Set when the two sources named different cities — worth knowing. */
+  disagreement?: string;
 }
 
-/** Substrings that mark an ASN/org as cloud or hosting infrastructure. */
 const HOSTING = [
   "amazon", "aws", "google", "microsoft", "azure", "digitalocean", "linode",
   "vultr", "hetzner", "ovh", "scaleway", "contabo", "oracle", "alibaba",
@@ -44,10 +57,19 @@ const HOSTING = [
   "m247", "cogent", "level 3", "zenlayer", "packet", "upcloud",
 ];
 
-function looksLikeHosting(text: string | undefined): boolean {
+/** Consumer mobile carriers, where the address often resolves to a regional
+ *  gateway hundreds of kilometres from the handset. */
+const MOBILE = [
+  "jio", "airtel", "vodafone", "idea", "bsnl", "vi india",
+  "t-mobile", "verizon wireless", "at&t mobility", "sprint",
+  "orange", "telefonica", "movistar", "o2", "ee limited", "three",
+  "telstra", "optus", "rogers", "bell mobility", "telus mobility",
+];
+
+function matches(list: string[], text: string | undefined): boolean {
   if (!text) return false;
   const t = text.toLowerCase();
-  return HOSTING.some((h) => t.includes(h));
+  return list.some((h) => t.includes(h));
 }
 
 /** ISO 3166-1 alpha-2 -> regional indicator pair, e.g. "IN" -> 🇮🇳 */
@@ -60,23 +82,26 @@ export function flagFor(code: string | undefined): string | undefined {
   );
 }
 
+/** "IN" -> "India", without needing a lookup provider to have answered. */
+export function countryName(code: string | undefined): string | undefined {
+  if (!code) return undefined;
+  try {
+    return new Intl.DisplayNames(["en"], { type: "region" }).of(code.toUpperCase()) ?? code;
+  } catch {
+    return code;
+  }
+}
+
 /**
- * The client's address.
- *
- * `x-forwarded-for` is a comma-separated chain; the left-most entry is the
- * original client and everything after it is a proxy that appended itself.
- * Vercel's own `x-real-ip` is already resolved, so it wins when present.
+ * The client's address. `x-forwarded-for` is a chain; the left-most entry is
+ * the original client. Vercel's `x-real-ip` is already resolved, so it wins.
  */
 export function clientIp(headers: Headers): string {
   const real = headers.get("x-real-ip");
   if (real) return real.trim();
-
   const fwd = headers.get("x-vercel-forwarded-for") ?? headers.get("x-forwarded-for");
-  if (fwd) {
-    const first = fwd.split(",")[0]?.trim();
-    if (first) return first;
-  }
-  return "unknown";
+  const first = fwd?.split(",")[0]?.trim();
+  return first || "unknown";
 }
 
 function isPrivate(ip: string): boolean {
@@ -91,8 +116,24 @@ function isPrivate(ip: string): boolean {
   );
 }
 
-function fromVercel(headers: Headers) {
-  // Vercel percent-encodes city and region, so "New Delhi" arrives as "New%20Delhi".
+interface Place {
+  city?: string;
+  region?: string;
+  country?: string;
+  countryCode?: string;
+  postal?: string;
+  latitude?: string;
+  longitude?: string;
+  timezone?: string;
+}
+
+interface Lookup extends Place {
+  isp?: string;
+  asn?: string;
+}
+
+function fromVercel(headers: Headers): Place {
+  // Vercel percent-encodes city and region: "New Delhi" arrives "New%20Delhi".
   const dec = (v: string | null) => {
     if (!v) return undefined;
     try {
@@ -112,63 +153,68 @@ function fromVercel(headers: Headers) {
   };
 }
 
-interface Lookup {
-  city?: string;
-  region?: string;
-  country?: string;
-  countryCode?: string;
-  postal?: string;
-  latitude?: string;
-  longitude?: string;
-  timezone?: string;
-  isp?: string;
-  asn?: string;
-}
-
-// One lookup per address per hour is plenty; repeat visitors cost nothing.
 const cache = new Map<string, { at: number; value: Lookup | null }>();
 const CACHE_TTL_MS = 60 * 60_000;
-// Kept short deliberately: this runs before the Telegram send, and the two
-// together have to finish inside the route's duration limit.
 const LOOKUP_TIMEOUT_MS = 2_000;
+
+async function getJson(url: string): Promise<Record<string, unknown> | null> {
+  try {
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), LOOKUP_TIMEOUT_MS);
+    const res = await fetch(url, { signal: ctl.signal, cache: "no-store" });
+    clearTimeout(timer);
+    if (!res.ok) return null;
+    return (await res.json()) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+const str = (v: unknown) => (typeof v === "string" && v ? v : undefined);
+const num = (v: unknown) => (typeof v === "number" ? String(v) : undefined);
 
 async function lookup(ip: string): Promise<Lookup | null> {
   const hit = cache.get(ip);
   if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.value;
 
   let value: Lookup | null = null;
-  try {
-    const ctl = new AbortController();
-    const timer = setTimeout(() => ctl.abort(), LOOKUP_TIMEOUT_MS);
-    const res = await fetch(`https://ipwho.is/${encodeURIComponent(ip)}`, {
-      signal: ctl.signal,
-      cache: "no-store",
-    });
-    clearTimeout(timer);
 
-    if (res.ok) {
-      const d = (await res.json()) as Record<string, unknown>;
-      if (d.success !== false) {
-        const conn = (d.connection ?? {}) as Record<string, unknown>;
-        const tz = (d.timezone ?? {}) as Record<string, unknown>;
-        value = {
-          city: typeof d.city === "string" ? d.city : undefined,
-          region: typeof d.region === "string" ? d.region : undefined,
-          country: typeof d.country === "string" ? d.country : undefined,
-          countryCode: typeof d.country_code === "string" ? d.country_code : undefined,
-          postal: typeof d.postal === "string" ? d.postal : undefined,
-          latitude: typeof d.latitude === "number" ? String(d.latitude) : undefined,
-          longitude: typeof d.longitude === "number" ? String(d.longitude) : undefined,
-          timezone: typeof tz.id === "string" ? tz.id : undefined,
-          isp: typeof conn.isp === "string" ? conn.isp : (typeof conn.org === "string" ? conn.org : undefined),
-          asn: conn.asn ? `AS${String(conn.asn)}` : undefined,
-        };
-      }
+  const a = await getJson(`https://ipwho.is/${encodeURIComponent(ip)}`);
+  if (a && a.success !== false) {
+    const conn = (a.connection ?? {}) as Record<string, unknown>;
+    const tz = (a.timezone ?? {}) as Record<string, unknown>;
+    value = {
+      city: str(a.city),
+      region: str(a.region),
+      country: str(a.country),
+      countryCode: str(a.country_code),
+      postal: str(a.postal),
+      latitude: num(a.latitude),
+      longitude: num(a.longitude),
+      timezone: str(tz.id),
+      isp: str(conn.isp) ?? str(conn.org),
+      asn: conn.asn ? `AS${String(conn.asn)}` : undefined,
+    };
+  }
+
+  // Second opinion only when the first could not name a city — that is the
+  // case where we would otherwise fall back to country-level and lose the pin.
+  if (!value?.city) {
+    const b = await getJson(`https://ipapi.co/${encodeURIComponent(ip)}/json/`);
+    if (b && !b.error && str(b.city)) {
+      value = {
+        city: str(b.city),
+        region: str(b.region),
+        country: str(b.country_name),
+        countryCode: str(b.country_code),
+        postal: str(b.postal),
+        latitude: num(b.latitude),
+        longitude: num(b.longitude),
+        timezone: str(b.timezone),
+        isp: str(b.org) ?? value?.isp,
+        asn: str(b.asn) ?? value?.asn,
+      };
     }
-  } catch {
-    // Timeout, network error, or a rate-limited free tier. The Vercel headers
-    // still carry the location; only the ISP detail is lost.
-    value = null;
   }
 
   cache.set(ip, { at: Date.now(), value });
@@ -178,95 +224,76 @@ async function lookup(ip: string): Promise<Lookup | null> {
 export async function resolveGeo(headers: Headers): Promise<Geo> {
   const ip = clientIp(headers);
   const v = fromVercel(headers);
-  const hasVercel = Boolean(v.countryCode ?? v.city);
-
   const l = isPrivate(ip) ? null : await lookup(ip);
 
-  const isp = l?.isp;
   const network = {
-    isp,
+    isp: l?.isp,
     asn: l?.asn,
-    datacenter: looksLikeHosting(isp) || looksLikeHosting(l?.asn),
+    datacenter: matches(HOSTING, l?.isp) || matches(HOSTING, l?.asn),
+    mobile: matches(MOBILE, l?.isp) || matches(MOBILE, l?.asn),
   };
 
-  // The two providers use different databases, so their fields must not be
-  // interleaved: taking the city from one and the postcode from the other
-  // produced "Bengaluru ... postal 600079", which is a Chennai postcode.
-  // Location is therefore resolved from a single provider at a time.
-  const agree =
-    Boolean(v.city && l?.city) &&
-    v.city!.toLowerCase() === l!.city!.toLowerCase();
+  const disagreement =
+    v.city && l?.city && v.city.toLowerCase() !== l.city.toLowerCase()
+      ? `lookup says ${l.city}`
+      : undefined;
 
-  if (hasVercel && !agree) {
-    // Vercel resolves at the edge and is the more reliable of the two.
+  // Location comes from exactly one provider, chosen here and not merged.
+  const place: Place | null = v.city ? v : l?.city ? l : null;
+  const source: Geo["source"] = v.city ? "vercel" : l?.city ? "lookup" : "none";
+
+  if (place) {
+    const countryCode = place.countryCode ?? v.countryCode;
+    // Vercel's region is an ISO subdivision code ("MH"); the lookup carries the
+    // full name ("Maharashtra"). Borrowing just that label is safe *only* when
+    // both providers agree on the city — it is the same place, better spelled,
+    // not a field merged in from a different result.
+    const region =
+      source === "vercel" && l?.city && !disagreement && l.region
+        ? l.region
+        : place.region;
     return {
       ip,
-      city: v.city,
-      region: v.region,
-      country: undefined,
-      countryCode: v.countryCode,
-      flag: flagFor(v.countryCode),
-      postal: v.postal,
-      latitude: v.latitude,
-      longitude: v.longitude,
-      timezone: v.timezone,
+      city: place.city,
+      region,
+      country: place.country ?? countryName(countryCode),
+      countryCode,
+      flag: flagFor(countryCode),
+      postal: place.postal,
+      latitude: place.latitude,
+      longitude: place.longitude,
+      timezone: place.timezone ?? v.timezone,
       ...network,
-      source: l ? "vercel+lookup" : "vercel",
+      precision: "city",
+      source,
+      disagreement,
     };
   }
 
-  if (l) {
-    // Either the two agree — in which case the lookup's fuller names are nicer
-    // ("Karnataka" rather than "KA") — or Vercel gave us nothing at all.
+  // No city anywhere. Report the country honestly and drop the coordinates —
+  // a provider's country centroid is not a position, and rendering it as one
+  // is how a Pune visitor ended up pinned outside Nagpur.
+  const countryCode = v.countryCode ?? l?.countryCode;
+  if (countryCode) {
     return {
       ip,
-      city: l.city,
-      region: l.region,
-      country: l.country,
-      countryCode: l.countryCode ?? v.countryCode,
-      flag: flagFor(l.countryCode ?? v.countryCode),
-      postal: l.postal,
-      latitude: l.latitude,
-      longitude: l.longitude,
-      timezone: l.timezone ?? v.timezone,
+      country: l?.country ?? countryName(countryCode),
+      countryCode,
+      flag: flagFor(countryCode),
+      timezone: v.timezone ?? l?.timezone,
       ...network,
-      source: hasVercel ? "vercel+lookup" : "lookup",
+      precision: "country",
+      source: "none",
     };
   }
 
-  return {
-    ip,
-    city: v.city,
-    region: v.region,
-    countryCode: v.countryCode,
-    flag: flagFor(v.countryCode),
-    postal: v.postal,
-    latitude: v.latitude,
-    longitude: v.longitude,
-    timezone: v.timezone,
-    ...network,
-    source: hasVercel ? "vercel" : "unknown",
-  };
-}
-
-/** "IN" -> "India", without needing the lookup provider to have answered. */
-export function countryName(code: string | undefined): string | undefined {
-  if (!code) return undefined;
-  try {
-    return new Intl.DisplayNames(["en"], { type: "region" }).of(code.toUpperCase()) ?? code;
-  } catch {
-    return code;
-  }
+  return { ip, ...network, precision: "unknown", source: "none" };
 }
 
 /** "Bengaluru, Karnataka, India" — whatever parts we actually have. */
 export function describePlace(geo: Geo): string {
-  const parts = [
-    geo.city,
-    geo.region,
-    geo.country ?? countryName(geo.countryCode),
-  ].filter((p): p is string => Boolean(p));
-  // Region often repeats the city on city-states; drop the duplicate.
+  const parts = [geo.city, geo.region, geo.country ?? countryName(geo.countryCode)]
+    .filter((p): p is string => Boolean(p));
   const seen = new Set<string>();
   const unique = parts.filter((p) => {
     const k = p.toLowerCase();
@@ -277,7 +304,9 @@ export function describePlace(geo: Geo): string {
   return unique.length ? unique.join(", ") : "Unknown location";
 }
 
+/** Only ever a real position — never a country centroid. */
 export function mapLink(geo: Geo): string | undefined {
+  if (geo.precision !== "city" && geo.precision !== "region") return undefined;
   if (!geo.latitude || !geo.longitude) return undefined;
   return `https://www.google.com/maps?q=${geo.latitude},${geo.longitude}`;
 }

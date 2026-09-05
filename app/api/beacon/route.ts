@@ -3,10 +3,17 @@ import { rateLimit } from "@/lib/api/rate-limit";
 import { BeaconSchema } from "@/lib/validations/beacon.schema";
 import { judge } from "@/lib/beacon/bot";
 import { resolveGeo } from "@/lib/beacon/geo";
-import { formatArrival, formatSummary, sendTelegram, telegramConfigured } from "@/lib/beacon/telegram";
+import { resolveIdentity } from "@/lib/beacon/identity";
+import {
+  formatArrival,
+  formatEvent,
+  formatSummary,
+  sendTelegram,
+  telegramConfigured,
+} from "@/lib/beacon/telegram";
 
-// Geolocation comes from per-request edge headers, so this must never be
-// cached or statically evaluated.
+// Geolocation comes from per-request edge headers and identity from the
+// session cookie, so this must never be cached or statically evaluated.
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
@@ -14,39 +21,40 @@ export const runtime = "nodejs";
 // platform default of 10s leaves no margin for a cold start, so ask for more.
 export const maxDuration = 20;
 
-// Per visitor: enough for a long browse, not enough to flood the chat.
-const PER_IP_LIMIT = 12;
+// Per visitor: enough for a long browse plus milestones, not enough to flood.
+const PER_IP_LIMIT = 20;
 const PER_IP_WINDOW_MS = 10 * 60_000;
 
-// A crawl hitting many pages arrives from many addresses, so cap the endpoint
-// as a whole too. Per-instance on serverless, which is adequate here.
+// A crawl arrives from many addresses, so cap the endpoint as a whole too.
 const GLOBAL_LIMIT = 150;
 const GLOBAL_WINDOW_MS = 10 * 60_000;
 
 const MAX_BODY_BYTES = 24_000;
 
-/**
- * Health check: confirms the bot credentials are present on this deploy and
- * shows exactly what the server resolves for the caller's own address. Visiting
- * /api/beacon from a phone is the quickest way to prove geolocation works in
- * production. It reveals nothing but the caller's own network facts, and never
- * the bot token.
- */
 export async function GET(req: NextRequest) {
+  // Health check: proves the credentials are present on this deploy and shows
+  // exactly what the server resolved for the caller. Visiting /api/beacon from
+  // a phone is the quickest way to verify geolocation in production. It reveals
+  // only the caller's own network facts, and never the bot token.
   const geo = await resolveGeo(req.headers);
   if (!rateLimit(`beacon-check:${geo.ip}`, 20, 10 * 60_000).allowed) {
     return NextResponse.json({ error: "rate limited" }, { status: 429 });
   }
+  const identity = await resolveIdentity();
   return NextResponse.json(
-    { ok: true, telegramConfigured: telegramConfigured(), geo },
+    {
+      ok: true,
+      telegramConfigured: telegramConfigured(),
+      geo,
+      signedIn: identity.signedIn,
+    },
     { headers: { "cache-control": "no-store" } }
   );
 }
 
 export async function POST(req: NextRequest) {
-  // The beacon is fire-and-forget by design: the visitor's page must never see
-  // an error, and a failure here must never surface to them. Every path below
-  // returns 204.
+  // Fire-and-forget by design: the visitor's page must never see an error, and
+  // a failure here must never surface to them. Every path returns 204.
   try {
     if (!telegramConfigured()) return new NextResponse(null, { status: 204 });
 
@@ -64,6 +72,10 @@ export async function POST(req: NextRequest) {
     if (!parsed.success) return new NextResponse(null, { status: 204 });
     const payload = parsed.data;
 
+    // Honour Do Not Track: the browser asked not to be recorded, so stop before
+    // resolving anything about them.
+    if (payload.signals.doNotTrack) return new NextResponse(null, { status: 204 });
+
     const geo = await resolveGeo(req.headers);
 
     if (!rateLimit(`beacon:${geo.ip}`, PER_IP_LIMIT, PER_IP_WINDOW_MS).allowed) {
@@ -73,13 +85,26 @@ export async function POST(req: NextRequest) {
       return new NextResponse(null, { status: 204 });
     }
 
+    // Identity is read from the session, never from the payload — a browser can
+    // claim anything, but it cannot forge a session cookie.
+    const identity = await resolveIdentity();
     const ua = req.headers.get("user-agent") ?? "";
-    const verdict = judge(payload, geo, ua, req.headers.get("accept-language"));
 
-    const text =
-      payload.kind === "arrival"
-        ? formatArrival(payload, geo, verdict, ua)
-        : formatSummary(payload, geo, verdict, ua);
+    let text: string;
+    if (payload.kind === "event") {
+      if (!payload.event) return new NextResponse(null, { status: 204 });
+      // A sign-out event legitimately has no session left to read.
+      if (!identity.signedIn && payload.event !== "signed_out") {
+        return new NextResponse(null, { status: 204 });
+      }
+      text = formatEvent(payload, geo, ua, identity);
+    } else {
+      const verdict = judge(payload, geo, ua, req.headers.get("accept-language"));
+      text =
+        payload.kind === "arrival"
+          ? formatArrival(payload, geo, verdict, ua, identity)
+          : formatSummary(payload, geo, verdict, ua, identity);
+    }
 
     // Awaited rather than backgrounded: work started after the response is
     // returned is killed on serverless, so the message would silently vanish.

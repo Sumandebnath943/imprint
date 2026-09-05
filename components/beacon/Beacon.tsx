@@ -64,7 +64,11 @@ interface State {
   dirtySinceSummary: boolean;
   started: boolean;
   timer: ReturnType<typeof setInterval> | null;
+  /** Milestones already reported, so each fires at most once per tab. */
+  events: Set<EventName>;
 }
+
+type EventName = "signed_in" | "signed_out" | "entered_dashboard" | "onboarding_complete";
 
 let state: State | null = null;
 
@@ -127,7 +131,7 @@ function currentScrollPct(): number {
   return Math.max(0, Math.min(100, Math.round((seen / height) * 100)));
 }
 
-function build(kind: "arrival" | "summary") {
+function build(kind: "arrival" | "summary" | "event", event?: EventName) {
   if (!state) return null;
 
   // Close out the page currently being viewed so its dwell time is included.
@@ -139,6 +143,7 @@ function build(kind: "arrival" | "summary") {
     v: 1 as const,
     sid: state.sid,
     kind,
+    ...(event ? { event } : {}),
     path: location.pathname + location.search,
     title: document.title?.slice(0, 160),
     referrer: document.referrer || undefined,
@@ -177,8 +182,8 @@ function build(kind: "arrival" | "summary") {
   };
 }
 
-function send(kind: "arrival" | "summary", viaBeacon: boolean) {
-  const body = build(kind);
+function send(kind: "arrival" | "summary" | "event", viaBeacon: boolean, event?: EventName) {
+  const body = build(kind, event);
   if (!body) return;
   const json = JSON.stringify(body);
 
@@ -202,6 +207,22 @@ function send(kind: "arrival" | "summary", viaBeacon: boolean) {
   });
 }
 
+/**
+ * Report a milestone, once per tab.
+ *
+ * Milestones are detected from the route rather than from the auth client: the
+ * app only reaches /onboarding or /dashboard with a session, and the server
+ * reads who that session belongs to from the cookie. That keeps Supabase out of
+ * every page's bundle and makes the identity unforgeable — a browser can claim
+ * to be signed in, but it cannot produce a session it does not have.
+ */
+function sendEvent(name: EventName) {
+  if (!state || state.events.has(name)) return;
+  state.events.add(name);
+  state.dirtySinceSummary = true;
+  send("event", false, name);
+}
+
 function sendSummary() {
   if (!state) return;
   if (state.summariesSent >= MAX_SUMMARIES) return;
@@ -213,6 +234,14 @@ function sendSummary() {
 
 function shouldRun(): boolean {
   if (typeof window === "undefined") return false;
+
+  // Do Not Track is honoured: the browser asked not to be recorded, so nothing
+  // is collected and nothing is sent. The server refuses these too, in case a
+  // stale bundle is still running somewhere.
+  const nav = navigator as Navigator & { msDoNotTrack?: string };
+  const dnt = nav.doNotTrack ?? nav.msDoNotTrack ?? (window as { doNotTrack?: string }).doNotTrack;
+  if (dnt === "1" || dnt === "yes") return false;
+
   try {
     if (localStorage.getItem(OPT_OUT_KEY) === "1") return false;
   } catch {
@@ -251,6 +280,7 @@ export default function Beacon() {
       dirtySinceSummary: true,
       started: true,
       timer: null,
+      events: new Set<EventName>(),
     };
 
     const s = state;
@@ -352,6 +382,8 @@ export default function Beacon() {
 
     const path = location.pathname + location.search;
     const last = s.pages[s.pages.length - 1];
+    // Unchanged path means this is the initial render; the arrival alert
+    // already carries that page and its identity, so no milestone is sent.
     if (last?.path === path) return;
 
     if (last && last.ms === undefined) last.ms = Math.max(0, since() - last.t);
@@ -360,6 +392,13 @@ export default function Beacon() {
     }
     s.dirtySinceSummary = true;
     markActivity();
+
+    // These routes are only reachable with a session, so arriving at one is
+    // the signal. The server resolves who it actually is.
+    const p = location.pathname;
+    if (p.startsWith("/dashboard")) sendEvent("entered_dashboard");
+    else if (p === "/onboarding/complete") sendEvent("onboarding_complete");
+    else if (p.startsWith("/onboarding")) sendEvent("signed_in");
   }, [pathname]);
 
   return null;

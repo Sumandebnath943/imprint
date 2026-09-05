@@ -108,7 +108,12 @@ third-party lookup. Taking the city from one and the postcode from the other
 produced an alert reading "Bengaluru … postal 600079" — a Chennai postcode.
 Two providers, two databases, and they disagree at the edges. Resolve location
 from **one** provider at a time; merge only network facts (ISP, ASN), which the
-other does not supply at all. See `lib/beacon/geo.ts`.
+other does not supply at all.
+
+The same file carries the sharper version of this lesson: when *no* city
+resolves, a provider will return the country's centroid, and rendering that as a
+map pin put a Pune visitor outside Nagpur. Record what precision you actually
+have and refuse to draw a pin you have not earned. See `lib/beacon/geo.ts`.
 
 ### 3.9 Outbound calls need a budget for the cold connection
 
@@ -194,12 +199,10 @@ Roughly in order of value.
 4. **A schema-drift check in CI.** Compare the live schema against the
    migrations. Four of the ten migrations exist purely because of drift.
 5. **Courses.** Currently a waitlist with no content.
-6. **`/terms`.** The signup form links to it and the route does not exist —
-   the same dead link `/privacy` was until this page shipped.
-7. **Honour Do Not Track in the beacon.** It is recorded in the alert but not
-   used to suppress logging. `docs/BEACON.md` states this plainly, and the
-   privacy policy tells visitors how to opt out by email; wiring it up properly
-   is a two-line change in `shouldRun()`.
+6. **Real quotes on the landing page.** The friends-and-family section is now
+   labelled honestly and carries no invented metrics, but the quotes themselves
+   are still placeholders. Replace them with real attributed words, or delete
+   the section, before public launch.
 
 ---
 
