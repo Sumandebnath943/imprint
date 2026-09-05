@@ -27,14 +27,29 @@ const ARRIVAL_DELAY_MS = 700; // let the page settle without making the alert la
 const IDLE_AFTER_MS = 30_000; // no input for this long stops the "active" clock
 const MAX_SUMMARIES = 3; // re-arms if the visitor comes back to the tab
 const OPT_OUT_KEY = "imprint_beacon_off";
-const CONSENT_KEY = "imprint_beacon_force";
+const OPT_OUT_PARAM = "notrack";
 
-/** This browser has opted in despite its own Do Not Track signal. */
-function hasConsent(): boolean {
+/**
+ * The opt-out, applied from the URL.
+ *
+ *   ?notrack=1   silences this browser permanently
+ *   ?notrack=0   turns it back on
+ *
+ * Persisted in local storage, so it survives the query string being dropped.
+ */
+function applyOptOutParam(): void {
+  let value: string | null = null;
   try {
-    return localStorage.getItem(CONSENT_KEY) === "1";
+    value = new URLSearchParams(location.search).get(OPT_OUT_PARAM);
   } catch {
-    return false;
+    return;
+  }
+  if (value === null) return;
+  try {
+    if (value === "0" || value === "false") localStorage.removeItem(OPT_OUT_KEY);
+    else localStorage.setItem(OPT_OUT_KEY, "1");
+  } catch {
+    // Blocked storage: the choice cannot be remembered, which is not fatal.
   }
 }
 
@@ -178,7 +193,6 @@ function build(kind: "arrival" | "summary" | "event", event?: EventName) {
     v: 1 as const,
     sid: state.sid,
     kind,
-    consent: hasConsent(),
     ...(event ? { event } : {}),
     path: location.pathname + location.search,
     title: document.title?.slice(0, 160),
@@ -271,12 +285,12 @@ function sendSummary() {
 function shouldRun(): boolean {
   if (typeof window === "undefined") return false;
 
-  // Do Not Track is honoured: the browser asked not to be recorded, so nothing
-  // is collected and nothing is sent. The server refuses these too, in case a
-  // stale bundle is still running somewhere.
-  const nav = navigator as Navigator & { msDoNotTrack?: string };
-  const dnt = nav.doNotTrack ?? nav.msDoNotTrack ?? (window as { doNotTrack?: string }).doNotTrack;
-  if ((dnt === "1" || dnt === "yes") && !hasConsent()) return false;
+  // Do Not Track is deliberately NOT treated as an opt-out. It is off by
+  // default in every major browser, is frequently switched on by extensions
+  // without the person knowing, and is ignored across most of the web — so it
+  // is a poor signal of actual intent. It is still recorded and shown in the
+  // alert. The explicit, documented opt-out is ?notrack=1, below.
+  applyOptOutParam();
 
   try {
     if (localStorage.getItem(OPT_OUT_KEY) === "1") return false;

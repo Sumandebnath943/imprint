@@ -238,7 +238,12 @@ Four rules it exists under:
   server-side from request headers, never from the body. Identity comes from the
   session cookie via `lib/beacon/identity.ts` — a browser cannot forge one.
 
-Do Not Track is honoured, on the client and again at the route.
+Visibility is the default. The opt-out is `?notrack=1`, which writes
+`imprint_beacon_off` to local storage; the collector checks it before doing
+anything. Do Not Track is reported in the alert but does not suppress it — it is
+off by default everywhere, often set by extensions without the person knowing,
+and Safari dropped it after it became a fingerprinting signal. Both are
+explained to visitors on `/privacy`, which carries the opt-out as a button.
 
 Without `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` the whole thing is a no-op.
 It does not run on `localhost` unless `NEXT_PUBLIC_BEACON_DEBUG=1`.

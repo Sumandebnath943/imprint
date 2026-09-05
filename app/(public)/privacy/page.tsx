@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import TrackingOptOut from "@/components/legal/TrackingOptOut";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -180,16 +181,31 @@ export default function PrivacyPage() {
             profile of you beyond what the product already holds.
           </p>
           <p>
+            <strong className="text-white">How to switch this off.</strong>{" "}
+            Visit{" "}
+            <Link href="/?notrack=1" className="hover:underline" style={{ color: "#FF5500" }}>
+              imprint.houseofnamus.com/?notrack=1
+            </Link>{" "}
+            once, or use the control below. Either way this browser stops being
+            logged immediately &mdash; nothing is collected and nothing is sent
+            &mdash; and it stays that way until you reverse it. No account is
+            needed and you do not have to ask us.
+          </p>
+
+          <TrackingOptOut />
+
+          <p>
             <strong className="text-white">
-              We honour &ldquo;Do Not Track&rdquo;.
+              On &ldquo;Do Not Track&rdquo;.
             </strong>{" "}
-            If your browser sends that signal, nothing on this page is collected
-            and no alert is sent. You can also switch logging off for one browser
-            by running{" "}
-            <code style={{ color: "rgba(255,255,255,0.9)" }}>
-              localStorage.setItem(&quot;imprint_beacon_off&quot;, &quot;1&quot;)
-            </code>{" "}
-            in its console, or write to us and we will exclude you.
+            Some browsers can send a &ldquo;Do Not Track&rdquo; signal. We record
+            that it was sent, but it does not by itself switch off logging, and
+            we would rather say so than imply a protection we do not provide.
+            The signal is off by default everywhere, is frequently switched on by
+            extensions without the person knowing, and is ignored across most of
+            the web &mdash; so it is a poor indication of what someone actually
+            wants. The link above is our real opt-out: unambiguous, immediate,
+            and reversible.
           </p>
         </Section>
 

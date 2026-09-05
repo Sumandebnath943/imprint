@@ -181,25 +181,34 @@ producing alerts**. It reports what the server sees for that exact request:
 resolved location and precision, the user agent it read, and
 `wouldBeSuppressed`, which names the reason if there is one.
 
-The reasons a genuine visit produces nothing:
+The reason a genuine visit produces nothing is that the browser has opted out:
+`imprint_beacon_off` is set in its local storage, from `?notrack=1` or the
+control on `/privacy`. Undo with `?notrack=0`.
 
-1. **Do Not Track is on.** It is honoured, so the beacon collects nothing and
-   sends nothing. The diagnostic shows `doNotTrackHeader: "1"`. Note that a
-   privacy extension can send this header even when Chrome's own toggle is off,
-   and the header is checked server-side for exactly that reason.
-2. **`imprint_beacon_off` is set** in that browser's local storage.
+Do Not Track is **not** a reason — see below.
 
-### Seeing your own visits while keeping DNT on
+## Opt-out, and Do Not Track
 
-Run this once in the console of the browser you want to be visible. It opts that
-one browser in, and nothing else changes:
+Visibility is the default. The opt-out is explicit and visitor-controlled:
 
-```js
-localStorage.setItem("imprint_beacon_force", "1")
+```
+https://imprint.houseofnamus.com/?notrack=1     stop logging this browser
+https://imprint.houseofnamus.com/?notrack=0     start again
 ```
 
-The payload still reports the Do Not Track signal truthfully; the flag only says
-this browser has consented anyway. Undo with `removeItem`.
+It writes `imprint_beacon_off` to local storage and the collector checks it
+before doing anything, so an opted-out browser sends nothing at all. The same
+control is on `/privacy` as a button that shows the browser's current state,
+and both are documented there in plain language.
+
+**Do Not Track is recorded but does not suppress.** Every alert carries a
+`🔕 This visitor's browser sends Do Not Track` line when the signal is present,
+so the intent is visible. It is not treated as an opt-out because it is a poor
+signal of one: off by default in every major browser, frequently switched on by
+extensions without the person knowing, ignored across most of the web, and
+dropped entirely by Safari after it became useful for fingerprinting. The
+`?notrack=1` link is unambiguous, immediate and reversible, which a header that
+someone else may have set for you is not.
 
 ## Privacy
 

@@ -201,7 +201,8 @@ Honest notes on where the MVP stops:
 - The visitor beacon records IP, city-level location, interaction timings and —
   when signed in — the account, and sends them to a private Telegram chat. This
   is disclosed in [the privacy policy](https://imprint.houseofnamus.com/privacy),
-  and `Do Not Track` is honoured.
+  which carries a one-click opt-out (`?notrack=1`). `Do Not Track` is reported in
+  the alert but does not itself suppress logging.
 - Landing-page quotes in the friends-and-family section are placeholders. They
   are labelled as pre-launch impressions and carry no invented metrics, but they
   need replacing with real attributed words before launch.

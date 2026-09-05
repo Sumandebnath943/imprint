@@ -135,6 +135,13 @@ function identityBlock(id: Identity): string[] {
   return lines;
 }
 
+/** Not honoured as an opt-out, but always worth knowing it was asked for. */
+function dntLine(payload: BeaconPayload): string[] {
+  return payload.signals.doNotTrack
+    ? ["🔕 <i>This visitor's browser sends Do Not Track</i>"]
+    : [];
+}
+
 /** Dashboard routes seen this visit, in order, deduplicated. */
 function dashboardTrail(payload: BeaconPayload): string[] {
   const seen: string[] = [];
@@ -172,6 +179,7 @@ export function formatArrival(
     `${verdictIcon(verdict)} <b>${verdict.label}</b> ${verdict.score}/100 <i>(provisional)</i>` +
       (verdict.reasons.length ? ` — ${esc(verdict.reasons.join(", "))}` : "")
   );
+  lines.push(...dntLine(payload));
   lines.push("");
   lines.push(`🕒 ${localTime(payload.signals.timezone)}`);
   return lines.join("\n");
@@ -209,6 +217,7 @@ export function formatEvent(
   lines.push(...locationBlock(geo));
   lines.push("");
   lines.push(`💻 ${esc(describeClient(ua))}`);
+  lines.push(...dntLine(payload));
   lines.push(`🕒 ${localTime(payload.signals.timezone)}`);
   return lines.join("\n");
 }
@@ -274,6 +283,7 @@ export function formatSummary(
     `${verdictIcon(verdict)} <b>${verdict.label}</b> ${verdict.score}/100` +
       (verdict.reasons.length ? ` — ${esc(verdict.reasons.join(", "))}` : "")
   );
+  lines.push(...dntLine(payload));
   return lines.join("\n");
 }
 

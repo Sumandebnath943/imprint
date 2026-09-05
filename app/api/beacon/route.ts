@@ -60,10 +60,10 @@ export async function GET(req: NextRequest) {
         doNotTrackHeader: dnt,
       },
       // The reasons a real visit produces no alert at all.
-      wouldBeSuppressed:
-        dnt === "1"
-          ? "Do Not Track (run the imprint_beacon_force snippet in this browser to override)"
-          : null,
+      // Do Not Track no longer suppresses; the opt-out is ?notrack=1, which is
+      // enforced in the browser, so the server cannot see it from here.
+      doNotTrackSuppresses: false,
+      optOutUrl: "https://imprint.houseofnamus.com/?notrack=1",
     },
     { headers: { "cache-control": "no-store" } }
   );
@@ -89,14 +89,9 @@ export async function POST(req: NextRequest) {
     if (!parsed.success) return new NextResponse(null, { status: 204 });
     const payload = parsed.data;
 
-    // Honour Do Not Track, unless this browser has explicitly consented.
-    // The header is checked as well as the client's own reading of it: an
-    // extension can set `DNT: 1` without touching `navigator.doNotTrack`, and
-    // then the page has no idea it is being sent.
-    const dntHeader = req.headers.get("dnt") === "1";
-    if ((payload.signals.doNotTrack || dntHeader) && !payload.consent) {
-      return new NextResponse(null, { status: 204 });
-    }
+    // Do Not Track is reported in the alert but does not suppress it; the
+    // opt-out is ?notrack=1, which the client enforces before sending at all.
+    // See the note in components/beacon/Beacon.tsx for why.
 
     const geo = await resolveGeo(req.headers);
     const ua = req.headers.get("user-agent") ?? "";
