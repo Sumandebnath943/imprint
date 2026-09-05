@@ -93,6 +93,23 @@ baseline, not improvement or decline against anyone else.
 - **Mentors** — request or offer mentorship.
 - **Leaderboard** — ranked by imprint score.
 
+## The written layer
+
+Alongside the product, IMPRINT publishes what it is doing and why:
+
+| Page | What it holds |
+| --- | --- |
+| [`/methodology`](https://imprint.houseofnamus.com/methodology) | The complete Drift Score arithmetic — four weighted signals, the formula for each, fallback values, score bands, and a limitations section as long as the explanation |
+| [`/research`](https://imprint.houseofnamus.com/research) | The studies this rests on, each summarised with what it does *not* establish |
+| [`/glossary`](https://imprint.houseofnamus.com/glossary) | 15 defined terms — seven from the literature, eight IMPRINT defines |
+| [`/faq`](https://imprint.houseofnamus.com/faq) | 30 answered questions, including the hostile ones |
+| [`/drift-score`](https://imprint.houseofnamus.com/drift-score) | What the number means and how to get one |
+| [`/notes`](https://imprint.houseofnamus.com/notes) | Long-form articles, authored as MDX under `content/notes/` |
+
+The scoring page exists because a score you cannot inspect asks for trust it has
+not earned. If the algorithm in `app/api/calibration/complete/route.ts` changes,
+`/methodology` is wrong and must be updated with it.
+
 ## Tech stack
 
 | Layer | Choice |
@@ -105,6 +122,7 @@ baseline, not improvement or decline against anyone else.
 | Client state | Zustand |
 | Forms / validation | react-hook-form + zod |
 | Motion / charts | framer-motion, recharts |
+| Content | MDX via `next-mdx-remote`, frontmatter via `gray-matter` |
 | Hosting | Vercel |
 
 ### Architecture notes
@@ -148,6 +166,8 @@ cp .env.local.example .env.local
 | `NEXT_PUBLIC_APP_URL` | Canonical origin, used for OG images and the sitemap |
 | `TELEGRAM_BOT_TOKEN` | Optional. Visitor beacon alerts; unset means the beacon is a no-op |
 | `TELEGRAM_CHAT_ID` | Optional. Destination chat for those alerts |
+| `GOOGLE_SITE_VERIFICATION` | Optional. Search Console HTML-tag token; the meta tag is omitted when unset |
+| `BING_SITE_VERIFICATION` | Optional. Bing Webmaster meta-tag token |
 
 Apply the migrations in order from `supabase/migrations/` via the Supabase SQL
 editor or CLI:
@@ -161,6 +181,20 @@ Then:
 ```bash
 npm run dev
 ```
+
+Other scripts:
+
+```bash
+npm run build          # production build
+npm run lint
+npm run seed:demo      # local demo data
+npm run indexnow       # push the sitemap to Bing, Yandex, Naver, Seznam, Yep
+```
+
+`indexnow` is for after publishing, not for a timer — resubmitting unchanged
+URLs is what the protocol's 429 response exists to punish. Google does not
+participate in IndexNow; discovery there runs through Search Console and the
+sitemap.
 
 ## Project structure
 
@@ -183,9 +217,11 @@ lib/
   seo/            entity constants, JSON-LD builders, route registry
   content/        glossary, FAQ, research index, cluster and note loaders
   supabase/       browser, server and middleware clients
-  utils/          drift + baseline computation
+  utils/          formatting, profession clusters and baseline modules
   validations/    zod schemas
   api/            shared route-handler helpers
+scripts/
+  indexnow.mjs    push the sitemap to IndexNow participants
 supabase/
   migrations/     schema and RLS policies, applied in order
 types/            shared domain types
@@ -211,9 +247,13 @@ Honest notes on where the MVP stops:
   is disclosed in [the privacy policy](https://imprint.houseofnamus.com/privacy),
   which carries a one-click opt-out (`?notrack=1`). `Do Not Track` is reported in
   the alert but does not itself suppress logging.
+- Open Graph card images render in a fallback font. No font is passed to the
+  image renderer, so every bold weight in `components/seo/OgCard.tsx` is
+  currently inert and the cards are not in the brand typeface.
 - Landing-page quotes in the friends-and-family section are placeholders. They
   are labelled as pre-launch impressions and carry no invented metrics, but they
-  need replacing with real attributed words before launch.
+  need replacing with real attributed words before launch. This also gates
+  `Review` structured data — none ships anywhere on the site while they stand.
 
 ## Documentation
 
