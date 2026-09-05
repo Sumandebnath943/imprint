@@ -166,14 +166,22 @@ npm run dev
 
 ```
 app/
-  (public)/       landing, about, courses, privacy, public credential pages
+  (public)/       landing, about, methodology, drift-score, research, faq,
+                  glossary, notes, for/[audience], courses, contact, legal,
+                  public credential pages
+  llms.txt/       generated agent-facing site map
+  llms-full.txt/  generated full-text corpus
   (auth)/         sign in, sign up, password reset
   (onboarding)/   baseline capture flow
   (dashboard)/    the product
   api/            route handlers
 components/       one directory per feature area
+content/
+  notes/          articles as MDX, read at build time
 lib/
-  beacon/         visitor beacon: geo, bot scoring, Telegram
+  beacon/         visitor beacon: geo, bot scoring, Telegram, AI crawler ids
+  seo/            entity constants, JSON-LD builders, route registry
+  content/        glossary, FAQ, research index, cluster and note loaders
   supabase/       browser, server and middleware clients
   utils/          drift + baseline computation
   validations/    zod schemas
@@ -192,7 +200,7 @@ Honest notes on where the MVP stops:
   reasoning depth rather than a direct measure of it. Semantic and embedding-
   based signals are the natural next step.
 - Courses are presented as upcoming with a waitlist; no course content ships in
-  this build.
+  this build. `/courses` says so on the page rather than only here.
 - A small number of credential statistics are placeholders pending the full
   relational rollup.
 - The per-user rate limiter is in-process, so on serverless it is per-instance
@@ -215,6 +223,12 @@ Honest notes on where the MVP stops:
 | [Developer Handoff](docs/HANDOFF.md) | Picking up the code: setup, traps, current state, what to do next |
 | [Portfolio Handoff](docs/PORTFOLIO_HANDOFF.md) | Presenting the project — the story and the numbers |
 | [Beacon](docs/BEACON.md) | Visitor alerts: what is collected, how location resolves, configuration |
+
+The scoring method is also published for readers rather than developers at
+[/methodology](https://imprint.houseofnamus.com/methodology), including a
+limitations section covering the length-sensitivity of type–token ratio, the
+directionless divergence measure, and the fact that three of the four signals
+measure engagement with IMPRINT itself.
 
 ## License
 
