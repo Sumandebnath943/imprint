@@ -24,7 +24,8 @@ export function generateMetadata({ params }: { params: { audience: string } }): 
     title: c.title,
     description: c.description,
     alternates: { canonical: `/for/${c.slug}` },
-    openGraph: { title: c.title, description: c.description },
+    // No `openGraph` block — it only restated the title and description, and
+    // declaring one replaces the parent's, which dropped the share image.
   };
 }
 

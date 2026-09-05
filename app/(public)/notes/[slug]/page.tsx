@@ -21,6 +21,11 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
     title: note.title,
     description: note.description,
     alternates: { canonical: `/notes/${note.slug}` },
+    // Articles keep an explicit openGraph block, unlike the glossary and
+    // audience pages, because `type: article` and the published/modified dates
+    // are real signals worth emitting. The cost is that declaring it replaces
+    // the parent's object — so `images` has to be restated here or the card
+    // ships blank. metadataBase makes the relative path absolute.
     openGraph: {
       type: "article",
       title: note.title,
@@ -28,6 +33,7 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
       publishedTime: note.published,
       modifiedTime: note.updated,
       authors: [note.author],
+      images: ["/opengraph-image"],
     },
   };
 }

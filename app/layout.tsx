@@ -42,9 +42,18 @@ export const metadata: Metadata = {
   authors: [{ name: PERSON_NAME, url: PERSON_URL }],
   creator: PERSON_NAME,
   publisher: ORG_NAME,
+  // Structural fields only — deliberately no title or description here.
+  //
+  // Next inherits a parent's `openGraph` object wholesale into any child that
+  // does not declare its own, so a title set here is not a default: it is the
+  // share title for every page on the site. Every one of them announced
+  // "IMPRINT — Remember Who You Are" on social and in link previews, including
+  // /methodology and /faq, which have perfectly good titles of their own.
+  //
+  // With the title absent, Next fills og:title and twitter:title from each
+  // page's own `title`, which is what a share card should say. The same applies
+  // to description. Anything added back here silently overrides all 40 pages.
   openGraph: {
-    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
-    description: SITE_DESCRIPTION,
     url: SITE_URL,
     siteName: SITE_NAME,
     type: "website",
@@ -52,8 +61,6 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
-    description: SITE_DESCRIPTION,
   },
   robots: {
     index: true,

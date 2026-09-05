@@ -24,7 +24,10 @@ export function generateMetadata({ params }: { params: { term: string } }): Meta
     // stand alone in 30–45 words, which is exactly what this field wants.
     description: t.definition,
     alternates: { canonical: `/glossary/${t.slug}` },
-    openGraph: { title: `${t.term} — IMPRINT glossary`, description: t.definition },
+    // No `openGraph` block. Declaring one replaces the parent's entirely,
+    // which dropped the inherited share image and left every term page with a
+    // blank card. Without it, Next fills og:title and og:description from the
+    // title and description above and the root image is inherited.
   };
 }
 
