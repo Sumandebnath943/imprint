@@ -161,7 +161,13 @@ export function formatArrival(
   id: Identity
 ): string {
   const lines: string[] = [];
-  lines.push("🟢 <b>New visit</b> — IMPRINT");
+  const vis = payload.visitor;
+  lines.push(
+    vis.returning
+      ? `🔁 <b>Returning visit</b> — visit #${vis.visitCount}` +
+          (vis.sinceLastMs !== null ? ` · last seen ${duration(vis.sinceLastMs)} ago` : "")
+      : "🟢 <b>New visit</b> — first time here"
+  );
   lines.push("");
   lines.push(...identityBlock(id));
   lines.push("");
@@ -190,6 +196,7 @@ const EVENT_TITLES: Record<string, string> = {
   signed_out: "🚪 <b>Signed out</b>",
   entered_dashboard: "📊 <b>Entered the dashboard</b>",
   onboarding_complete: "🎯 <b>Finished onboarding</b>",
+  cta_click: "🔥 <b>Clicked a primary call to action</b>",
 };
 
 export function formatEvent(
@@ -222,6 +229,36 @@ export function formatEvent(
   return lines.join("\n");
 }
 
+/** Short: the visit is over. The detail follows in the report. */
+export function formatEnded(
+  payload: BeaconPayload,
+  geo: Geo,
+  ua: string,
+  id: Identity
+): string {
+  const lines: string[] = [];
+  const vis = payload.visitor;
+  lines.push("⚪️ <b>Visit ended</b> — IMPRINT");
+  lines.push("");
+  lines.push(...identityBlock(id));
+  lines.push("");
+  lines.push(
+    `⏱ <b>${duration(payload.sessionMs)}</b> on site · <b>${duration(payload.activeMs)}</b> active`
+  );
+  lines.push(
+    `🧭 ${payload.pages.length} page${payload.pages.length === 1 ? "" : "s"}` +
+      ` · ${payload.actions.length} action${payload.actions.length === 1 ? "" : "s"}` +
+      ` · left from <b>${esc(clip(payload.path, 60))}</b>`
+  );
+  if (vis.returning) lines.push(`🔁 visit #${vis.visitCount} from this browser`);
+  lines.push("");
+  lines.push(...locationBlock(geo));
+  lines.push(...dntLine(payload));
+  lines.push("");
+  lines.push("<i>Full report follows.</i>");
+  return lines.join("\n");
+}
+
 export function formatSummary(
   payload: BeaconPayload,
   geo: Geo,
@@ -232,11 +269,15 @@ export function formatSummary(
   const lines: string[] = [];
   const s = payload.signals;
 
-  lines.push("⚪️ <b>Visit ended</b> — IMPRINT");
+  lines.push("📋 <b>Visit report</b> — IMPRINT");
   lines.push("");
   lines.push(...identityBlock(id));
   lines.push("");
   lines.push(`⏱ <b>${duration(payload.sessionMs)}</b> on site · <b>${duration(payload.activeMs)}</b> active`);
+  lines.push(
+    `🚪 entered on <b>${esc(clip(payload.pages[0]?.path ?? payload.path, 50))}</b>` +
+      ` · ${payload.visitor.pageLoads} page load${payload.visitor.pageLoads === 1 ? "" : "s"}`
+  );
 
   if (payload.pages.length) {
     const journey = payload.pages

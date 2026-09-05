@@ -215,10 +215,11 @@ fixed properly.
 
 `components/beacon/Beacon.tsx` (mounted in the root layout) collects what a
 visit looked like and posts it to `app/api/beacon/route.ts`, which enriches it
-with network facts and identity and sends an alert to Telegram: an **arrival**
-~1.2s after first paint, a **summary** when the tab is hidden or closed, and a
-**milestone** on sign-in, account creation, finished onboarding, or first
-dashboard visit. Full detail in [`BEACON.md`](./BEACON.md).
+with network facts and identity and sends alerts to Telegram. A visit is **one
+tab spanning page loads**, persisted in `sessionStorage` — the footer links are
+plain anchors, so without that every internal link ended the visit and started a
+new one. Four alerts: **arrival** (new or returning), **hot actions** as they
+happen, **ended**, and a full **report**. Detail in [`BEACON.md`](./BEACON.md).
 
 Four rules it exists under:
 

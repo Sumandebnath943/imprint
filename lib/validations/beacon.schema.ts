@@ -32,7 +32,13 @@ export const BeaconSchema = z.object({
   v: z.literal(1),
   /** Random per-tab id, used only to group an arrival with its summary. */
   sid: z.string().min(6).max(40),
-  kind: z.enum(["arrival", "summary", "event"]),
+  /**
+   * arrival — once per visit, when it starts
+   * ended   — the visit finished (short)
+   * report  — the full journey and actions for that visit
+   * event   — a notable action mid-visit
+   */
+  kind: z.enum(["arrival", "ended", "report", "event"]),
   /** Set when kind is "event". The server re-checks the session before
    *  reporting anything about identity, so this is only a hint. */
   event: z
@@ -42,6 +48,22 @@ export const BeaconSchema = z.object({
   path: z.string().max(300),
   title: short.optional(),
   referrer: z.string().max(400).optional(),
+
+  /**
+   * Whether this browser has been here before. Read from local storage, so it
+   * is a claim rather than proof — good enough for "new or returning", and
+   * never used for anything that matters.
+   */
+  visitor: z
+    .object({
+      returning: z.boolean().default(false),
+      visitCount: z.number().int().min(1).max(100_000).default(1),
+      /** Ms since the previous visit ended. */
+      sinceLastMs: z.number().int().min(0).max(31_536_000_000).nullable().default(null),
+      /** Page loads within this visit — a visit spans navigations. */
+      pageLoads: z.number().int().min(1).max(500).default(1),
+    })
+    .prefault({}),
 
   /** Wall-clock ms since the session started. */
   sessionMs: z.number().int().min(0).max(86_400_000).default(0),

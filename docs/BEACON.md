@@ -3,52 +3,40 @@
 Real-time alerts when someone visits IMPRINT: who, where, what they did, and
 whether they behaved like a person or a script.
 
+## What a visit is
+
+**One tab, spanning page loads.** That distinction matters: the footer links are
+plain anchors, so moving from `/` to `/courses` is a full document load. While
+the collector's state lived only in module scope it died with the document, and
+every internal link looked like the visitor leaving and a stranger arriving.
+
+State is persisted in `sessionStorage` — per tab, cleared when the tab closes,
+which is exactly the lifetime of a visit. A click on a same-origin link marks
+the next unload as "still here", so the visit continues instead of ending. A tab
+resumed more than 30 minutes later starts a new visit.
+
 ## What arrives
 
-An arrival alert, an end-of-visit summary, and a milestone alert whenever the
-visitor signs in, creates an account, finishes onboarding, or first opens the
-dashboard.
+Four alerts per visit.
 
-**On arrival** (~1.2s after the first page renders) — so the alert is live:
-
-```
-🟢 New visit — IMPRINT
-
-👤 Not signed in — anonymous visitor
-
-📍 Bengaluru, Karnataka, India 🇮🇳
-   12.972, 77.594 · Asia/Kolkata
-🛰 49.207.180.22 · Atria Convergence Technologies Pvt. Ltd. · AS24309
-   open in maps
-
-📄 /
-   IMPRINT — Remember Who You Are
-↩️ https://www.google.com/
-
-💻 Chrome 128 · Windows · 1920×947 · en-IN
-🧑 Human 83/100 (provisional)
-
-🕒 05 Sept, 00:42 local (Asia/Kolkata) · Fri, 04 Sep 2026 19:12:04 UTC
-```
-
-**On a milestone** — sign-in, account creation, onboarding finished, first
-dashboard visit:
+**1 — Arrival**, once, about 700ms in. New or returning is remembered in
+`localStorage`:
 
 ```
+🟢 New visit — first time here
+🔁 Returning visit — visit #4 · last seen 3d ago
+```
+
+**2 — Hot actions**, as they happen: signing in, a new account, finishing
+onboarding, entering the dashboard, or clicking a primary call to action.
+
+```
+🔥 Clicked a primary call to action — IMPRINT
 ✨ New account created — IMPRINT
-
-👤 Ada Kessler · ada@example.com
-   🆕 new account · onboarding step 1/7
-
-📄 /onboarding/welcome
-
-📍 Pune, Maharashtra, India 🇮🇳
-   18.520, 73.857 · Asia/Kolkata
-🛰 103.149.196.11 · NIXI · AS140158
-   open in maps
+📊 Entered the dashboard — IMPRINT
 ```
 
-**On exit** (tab hidden or closed) — the behaviour:
+**3 — Visit ended**, short, when the tab actually closes:
 
 ```
 ⚪️ Visit ended — IMPRINT
@@ -57,20 +45,35 @@ dashboard visit:
    account 2mo 14d old · onboarding complete · drift 22 · imprint 708
 
 ⏱ 6m 42s on site · 5m 15s active
-🧭 5 pages
-   /signin (9s)  →  /dashboard (2m)  →  /dashboard/drift (1m 36s)  →  …
-📊 dashboard explored (4)
-   overview · drift · vault · journal
-📜 scroll 87% (5820px) · hit 25/50/75 · 64 events
-🖱 3 actions
-      8s · click · Begin Your Imprint
-   1m 36s · click · About
-      4m · external · github.com/Sumandebnath943/imprint
-⌛ first 8s · last 4m
-🎛 940 moves · 3 clicks · 12 keys · 0 touches
-…location block…
-🧑 Human 100/100 — mouse movement, 3 clicks, typing, progressive scrolling
+🧭 4 pages · 4 actions · left from /about
+🔁 visit #4 from this browser
 ```
+
+**4 — Visit report**, immediately after, with the whole journey:
+
+```
+📋 Visit report — IMPRINT
+
+⏱ 6m 42s on site · 5m 15s active
+🚪 entered on / · 4 page loads
+🧭 4 pages
+   / (1m 36s)  →  /courses (2m)  →  /about (1m 30s)  →  /dashboard (1m 36s)
+📊 dashboard explored (1)
+   overview
+📜 scroll 87% (5820px) · hit 25/50/75 · 64 events
+🖱 4 actions
+      8s · click · Begin Your Imprint
+   1m 36s · click · Courses
+   3m 36s · click · About
+   6m 20s · external · github.com/Sumandebnath943/imprint
+⌛ first 8s · last 6m 20s
+🧑 Human 100/100 — mouse movement, 4 clicks, typing, progressive scrolling
+```
+
+A caveat worth knowing: the ended/report pair is sent on `pagehide`. If a mobile
+browser kills a backgrounded tab without firing it, that pair is lost — the
+arrival and any hot actions have already been sent, and returning to the same
+tab within 30 minutes resumes the visit.
 
 ## Configuration
 

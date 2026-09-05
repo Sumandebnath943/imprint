@@ -6,6 +6,7 @@ import { resolveGeo } from "@/lib/beacon/geo";
 import { resolveIdentity } from "@/lib/beacon/identity";
 import {
   formatArrival,
+  formatEnded,
   formatEvent,
   formatSummary,
   sendTelegram,
@@ -128,11 +129,12 @@ export async function POST(req: NextRequest) {
         return new NextResponse(null, { status: 204 });
       }
       text = formatEvent(payload, geo, ua, identity);
+    } else if (payload.kind === "arrival") {
+      text = formatArrival(payload, geo, verdict, ua, identity);
+    } else if (payload.kind === "ended") {
+      text = formatEnded(payload, geo, ua, identity);
     } else {
-      text =
-        payload.kind === "arrival"
-          ? formatArrival(payload, geo, verdict, ua, identity)
-          : formatSummary(payload, geo, verdict, ua, identity);
+      text = formatSummary(payload, geo, verdict, ua, identity);
     }
 
     // Awaited rather than backgrounded: work started after the response is

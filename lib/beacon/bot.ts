@@ -44,7 +44,7 @@ export function judge(
   // move a mouse or scroll. Judging it on absent behaviour marked every real
   // visitor "Uncertain", so behavioural penalties are held back for the
   // end-of-visit summary; the arrival is scored on environment and network.
-  const final = payload.kind === "summary";
+  const final = payload.kind === "report";
   let score = 52;
 
   const crawler = crawlerName(ua);
