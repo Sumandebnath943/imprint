@@ -1,0 +1,152 @@
+---
+title: "Why I built a tool to measure my own cognitive decline"
+description: "I could not tell which judgements in my own work were mine any more. This is the engineering account of what I built to find out, why the measurement is weaker than I would like, and why I published its flaws."
+published: 2026-10-17
+updated: 2026-10-17
+author: "Suman Debnath"
+cluster: "G"
+primaryKeyword: "who built IMPRINT"
+faqs:
+  - q: "Who built IMPRINT?"
+    a: "IMPRINT was built by Suman Debnath, a brand marketing manager and AI-native product builder, and is published by House of Namus, an AI-first creative and digital studio in India. The source is public and the scoring method is published in full."
+  - q: "Why does IMPRINT publish its own limitations?"
+    a: "Because a score you cannot inspect asks for trust it has not earned. Publishing the formulas lets you disagree with the weighting on specific grounds rather than general suspicion, and the author uses the tool on himself."
+  - q: "Is IMPRINT scientifically validated?"
+    a: "No. There is no comparison group, no validation study, and no evidence that a given Drift Score corresponds to any external measure of capability. The bands are labels, not diagnostic thresholds, and this is stated on the methodology page."
+---
+
+I noticed it in my own work first.
+
+I was producing more than I ever had. Pitches, product specs, code, campaign
+plans. By any measure I would have used a year earlier, I was doing well. And I
+could not have told you which of the judgements inside that work were mine.
+
+Not "I forgot". I mean the question had stopped being answerable. The output was
+assembled from a conversation with a machine, and somewhere in the assembly the
+part where I decided things had quietly gone missing. The work kept getting
+better. The thinking behind it had stopped being something I did.
+
+## Then I started seeing the shape elsewhere
+
+Once you notice it in yourself it is difficult to stop noticing it in other
+people. Everyone around me was faster. Everyone had more output. And when I
+asked why something had been done a particular way, the answers got vaguer than
+they used to be.
+
+What struck me was not that people were producing worse work. They were not.
+What struck me was that nobody could name what they had lost — because there was
+nothing to compare against. No record of what they had been able to do a year
+earlier. No before.
+
+That is the entire problem, and it is a measurement problem before it is
+anything else:
+
+> You cannot notice a change you have no earlier measurement of.
+
+Memory does not fill the gap, because memory of your own past capability is
+exactly what this erodes. You are asking a witness that has been tampered with.
+
+## So I built the instrument I wanted
+
+The design followed from that one sentence. If the problem is a missing
+comparison point, the product has to start by creating one.
+
+**Capture a baseline first.** Before any assessment, before any score. Prompts
+across several kinds of thinking — opinion, decision under pressure, memory,
+plus modules matched to what you actually do for a living. Answered without AI,
+because that is the entire point of the artefact.
+
+**Re-test against it, not against a norm.** There is no population to compare
+you to that would mean anything. The only useful comparison is you, earlier.
+
+**Report distance, not quality.** [The Drift Score](/drift-score) runs 0–100 and
+measures how far you have moved from your own baseline. Higher means further
+from yourself. It is deliberately directionless — it does not know whether the
+movement is good, and it should not pretend to.
+
+**Read the baseline server-side.** A measurement is worthless if the thing being
+measured against can be edited by the party being measured. That constraint
+sounds paranoid until you notice how much you would like to nudge the number
+when it goes the wrong way.
+
+## The part I am least comfortable with
+
+The measurements are lexical. Type-token ratio, average sentence length,
+composition latency, practice frequency. They are cheap, transparent, and
+computable in milliseconds.
+
+They are also a proxy for reasoning depth rather than a measure of it. You can
+write with a rich vocabulary and think shallowly. You can write plainly and
+think rigorously. I know this, and I built the thing anyway, because a
+transparent weak measurement you can inspect beats an opaque strong one you
+cannot — and because embedding-based semantic signals, which are the obvious
+improvement, are not something I could ship honestly at this scale yet.
+
+So [the methodology page](/methodology) lists what the measurement gets wrong at
+the same length as what it gets right. Type-token ratio falls mechanically with
+text length, so a longer calibration can register drift created purely by
+length. The divergence is absolute, so writing *better* than your baseline reads
+as drift. Three of the four signals measure engagement with IMPRINT itself, so a
+fortnight away raises your score whether or not anything changed in your head.
+
+I did not put those in a footnote. They are the same size as the explanation,
+because the alternative is asking you to trust a number I can already tell you
+is imperfect.
+
+## Why publish the flaws
+
+Two reasons, and only one of them is principled.
+
+The principled one: I use this on myself. A number I rely on is one whose
+weaknesses I need to know, and the version of this product that hides its
+limitations would be a worse product for me personally.
+
+The unprincipled one: I do not think the formula was ever the moat. Anyone
+sufficiently motivated could reconstruct the arithmetic from the behaviour in an
+afternoon. What is hard is caring enough to keep a baseline for a year. Guarding
+the easy part while asking for trust on the hard part would have been a bad
+trade.
+
+There is also a version of this that is just self-interest wearing a nicer coat.
+A measurement that overclaims gets found out, and a product about intellectual
+honesty that overclaims deserves to be.
+
+## Where it currently stops
+
+Honestly: the metrics are lexical, and semantic signals are the natural next
+step. Courses are announced with a waitlist and no content ships yet. Some
+credential statistics are placeholders. The rate limiter is per-instance rather
+than global, which is fine at this scale and will not be.
+
+None of that is hidden in a changelog. It is in the README of a public
+repository, because the alternative was writing marketing copy about a thing I
+had not finished.
+
+## What I actually want from it
+
+Not for you to have a good score. The score is not the point and comparing yours
+to anyone else's is meaningless by construction.
+
+What I want is for the change to be visible while it is still small. The MIT
+participants who
+[could not quote essays they had submitted minutes earlier](/notes/cognitive-debt-explained)
+were not stupid, and they were not careless. They had produced work without
+encoding it, and nothing in their experience reported the loss.
+
+That is the failure mode. Not dramatic decline — a slow narrowing that feels
+like efficiency the entire time it is happening.
+
+You do not need my product to protect against that. You need a fixed point you
+made before you needed it. A dated text file works.
+[The 300-word test](/notes/the-300-word-test) is the manual version and takes ten
+minutes.
+
+But you do need to make it now, because the moment you would benefit from having
+a baseline is always earlier than the moment you think to create one.
+
+---
+
+*IMPRINT is built by Suman Debnath and published by
+[House of Namus](https://houseofnamus.com). The scoring method is published at
+[/methodology](/methodology); the research it rests on is indexed at
+[/research](/research).*

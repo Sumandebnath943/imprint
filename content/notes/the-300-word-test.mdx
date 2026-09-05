@@ -1,0 +1,125 @@
+---
+title: "The 300-word test: measuring your own drift in ten minutes"
+description: "A free, self-administered check on whether AI delegation has changed how you think. No account needed. Four measurements you can compute yourself, and what each one does and does not tell you."
+published: 2026-10-10
+updated: 2026-10-10
+author: "Suman Debnath"
+cluster: "C"
+primaryKeyword: "AI dependency test"
+faqs:
+  - q: "Is there a test for AI dependency?"
+    a: "No validated clinical instrument exists. What you can do is self-administer a comparison: write 300 words unassisted, compute a few lexical measures, and repeat later against the same baseline. It measures change in your own output, not dependency as a condition."
+  - q: "How do I test if I rely too much on AI?"
+    a: "Write 300 words on something you know well, with no AI, notes or search, and time it. Note how difficult it felt. Repeat in three months against the same prompt. The comparison is informative; a single sitting is not."
+  - q: "What is a type-token ratio?"
+    a: "Type-token ratio is unique words divided by total words — a rough measure of vocabulary variety. It falls mechanically as text gets longer, so it is only comparable between samples of similar length."
+---
+
+There is no validated test for AI dependency. Anyone selling you one is
+guessing.
+
+What you *can* do is self-administer a comparison, and a comparison is most of
+what you actually want. This takes about ten minutes, needs no account, and the
+only equipment is a blank document and a timer.
+
+## The test
+
+**1.** Pick something you know well. Your field, a topic you have opinions about,
+a decision you made recently. Something you would be comfortable talking about
+for ten minutes.
+
+**2.** Set a timer. Do not set a limit — you are measuring how long it takes, not
+racing.
+
+**3.** Write 300 words on it. No AI, no notes, no search, no going back to fix
+earlier sentences. Straight through.
+
+**4.** Stop the timer and save the file with today's date.
+
+That is the whole test. The measurement comes next, and the actual result comes
+in three months.
+
+## What to record
+
+Four numbers, all computable by hand or in any editor.
+
+**Time taken.** Minutes from start to finish. This is your composition latency.
+
+**Word count.** Should be near 300; note the actual figure.
+
+**Average sentence length.** Total words divided by number of sentences. Count
+sentences by full stops, question marks and exclamation marks — crude, but
+consistently crude is what matters for comparison.
+
+**Type-token ratio.** Unique words divided by total words. Paste into any
+word-frequency tool, or do it in a spreadsheet. Around 0.45–0.6 is typical for
+300 words of considered prose, but **the absolute number is meaningless** — only
+your own change in it means anything.
+
+Then one thing that is not a number: **write down how it felt.** Two sentences.
+Whether you reached for the assistant, whether the blank page was harder than
+you expected, whether you knew what you thought before you started writing.
+
+## What each measure actually tells you
+
+Being straight about this, because these are weak instruments and treating them
+as strong ones is how people end up believing nonsense about themselves.
+
+**Time taken** is the most informative and the noisiest. Composition slowing
+substantially can indicate that generating from scratch has become unfamiliar. It
+can equally indicate that you were tired, interrupted, or picked a harder topic.
+
+**Type-token ratio** falls mechanically as text lengthens, because common words
+repeat. This is why the word count is fixed at 300 — comparing a 300-word sample
+against a 900-word one produces a difference created entirely by length. Even at
+matched lengths it is a rough proxy for vocabulary range, not for thinking.
+
+**Average sentence length** drifting toward uniformity is mildly interesting.
+Model output tends to converge on a middling sentence length, and prolonged
+exposure plausibly nudges people toward it. Plausibly. Nobody has shown this.
+
+**How it felt** is unscientific and probably the most useful line on the page.
+Difficulty is a signal your own metrics cannot capture, and you will not
+reconstruct it later from the numbers.
+
+## What this does not measure
+
+- **Not intelligence.** Nothing here touches reasoning ability.
+- **Not quality.** A rich vocabulary and shallow thinking coexist comfortably.
+- **Not dependency as a condition.** It measures change in your output. Whether that constitutes dependency is not a question these numbers can answer.
+- **Not much at all from one sitting.** A single sample is a baseline, not a result. It becomes informative when you repeat it.
+
+Anyone who tells you a lexical measure captures cognitive decline is overselling
+it. These are cheap, transparent proxies. Their virtue is that you can compute
+them yourself and see exactly what they are doing — not that they are accurate.
+
+## The part that matters
+
+Put a reminder in your calendar for three months from now. Same prompt, same
+conditions, same 300 words.
+
+Then compare. Not against a norm, not against anyone else — against your own
+file. That comparison is the only thing here with any real information in it, and
+it is the reason the test has to be done *before* you want the answer.
+
+Almost nobody does this, which is why the change is invisible. Not because it is
+hard, but because the moment you would benefit from having a baseline is always
+earlier than the moment you think to make one.
+
+## Doing it properly
+
+If the manual version appeals but the discipline does not survive contact with
+your calendar, that is essentially what IMPRINT automates: a structured baseline
+across several kinds of thinking rather than one prompt, recurring calibration
+instead of a reminder you will snooze, and
+[a Drift Score](/drift-score) computed from the comparison.
+
+It uses the same four measurements described here, with the same weaknesses, and
+[publishes the arithmetic](/methodology) alongside a limitations section as long
+as the explanation — including that type-token ratio problem, which affects the
+product exactly as much as it affects the manual version.
+
+It is free, and it takes about 25 minutes to set up a baseline.
+
+But the file-and-a-calendar-reminder version works too. The instrument matters
+much less than having any fixed point at all.

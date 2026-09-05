@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="IMPRINT">
+  <!--
+    The IMPRINT mark: the wordmark's stem and its accent dot, reduced to the
+    two elements that survive at 16 pixels.
+
+    Drawn on a 32-unit grid, so every edge lands on a whole pixel at 16px and
+    32px — the two sizes a browser tab actually uses. The stem is deliberately
+    heavy (6 units, 3px when halved); anything lighter greys out against dark
+    browser chrome. The dot keeps the position it has in the wordmark, sitting
+    off the baseline to the right.
+
+    The tile is painted rather than transparent: a transparent favicon inherits
+    whatever the browser puts behind it, and this mark is white-on-black.
+  -->
+  <rect width="32" height="32" rx="7" fill="#080808"/>
+  <rect x="11" y="8" width="6" height="16" rx="1" fill="#FFFFFF"/>
+  <circle cx="22" cy="21.5" r="3.2" fill="#FF5500"/>
+</svg>

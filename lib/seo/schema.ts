@@ -337,4 +337,76 @@ export function contactPageNode(url: string): Node {
   };
 }
 
+/**
+ * Article, for /notes/[slug].
+ *
+ * `Article` rather than `BlogPosting` — the distinction barely matters to
+ * consumers, and the more general type avoids implying a publishing cadence the
+ * site does not yet have. `wordCount` and `timeRequired` are included because
+ * they are two of the few signals that let a retrieval system judge depth
+ * without reading the whole thing.
+ */
+export function articleNode({
+  url,
+  headline,
+  description,
+  datePublished,
+  dateModified,
+  wordCount,
+  readingMinutes,
+  keywords,
+}: {
+  url: string;
+  headline: string;
+  description: string;
+  datePublished: string;
+  dateModified: string;
+  wordCount: number;
+  readingMinutes: number;
+  keywords?: string;
+}): Node {
+  return {
+    "@type": "Article",
+    "@id": `${url}#article`,
+    url,
+    headline,
+    description,
+    datePublished,
+    dateModified,
+    wordCount,
+    timeRequired: `PT${readingMinutes}M`,
+    inLanguage: "en",
+    isPartOf: { "@id": `${SITE_URL}/notes#blog` },
+    author: { "@id": PERSON_ID },
+    creator: { "@id": PERSON_ID },
+    publisher: { "@id": ORG_ID },
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    ...(keywords ? { keywords } : {}),
+  };
+}
+
+export function blogNode(url: string, posts: { slug: string; title: string; description: string; published: string }[]): Node {
+  return {
+    "@type": "Blog",
+    "@id": `${url}#blog`,
+    url,
+    name: "IMPRINT Notes",
+    description:
+      "Long-form writing on cognitive drift, AI delegation and what the research on cognitive offloading actually establishes.",
+    inLanguage: "en",
+    isPartOf: { "@id": WEBSITE_ID },
+    author: { "@id": PERSON_ID },
+    publisher: { "@id": ORG_ID },
+    blogPost: posts.map((p) => ({
+      "@type": "Article",
+      "@id": `${url}/${p.slug}#article`,
+      headline: p.title,
+      description: p.description,
+      datePublished: p.published,
+      url: `${url}/${p.slug}`,
+      author: { "@id": PERSON_ID },
+    })),
+  };
+}
+
 export { PERSON_ID, ORG_ID, PERSON_NAME, PERSON_ROLE_HERE, SITE_URL };

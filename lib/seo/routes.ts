@@ -29,19 +29,33 @@ export type IndexableRoute = {
 };
 
 import { GLOSSARY } from "@/lib/content/glossary";
+import { getNoteMeta } from "@/lib/content/notes";
 
 const STATIC_ROUTES: IndexableRoute[] = [
   { path: "/", lastModified: "2026-09-05" },
   { path: "/about", lastModified: "2026-09-05" },
   { path: "/methodology", lastModified: "2026-09-05" },
+  { path: "/drift-score", lastModified: "2026-09-05" },
+  { path: "/research", lastModified: "2026-09-05" },
   { path: "/faq", lastModified: "2026-09-05" },
   { path: "/glossary", lastModified: "2026-09-05" },
+  { path: "/notes", lastModified: "2026-09-05" },
   { path: "/contact", lastModified: "2026-09-05" },
   { path: "/courses", lastModified: "2026-09-03" },
   { path: "/signup", lastModified: "2026-09-03" },
   { path: "/privacy", lastModified: "2026-09-05" },
   { path: "/terms", lastModified: "2026-09-05" },
 ];
+
+/**
+ * Articles carry their own dates in frontmatter, so unlike everything above
+ * these are genuinely accurate rather than maintained by hand — `updated` is
+ * the field an author has to touch anyway when revising a piece.
+ */
+const NOTE_ROUTES: IndexableRoute[] = getNoteMeta().map((n) => ({
+  path: `/notes/${n.slug}`,
+  lastModified: n.updated,
+}));
 
 /**
  * Glossary terms are generated from the content file rather than listed by
@@ -53,7 +67,11 @@ const GLOSSARY_ROUTES: IndexableRoute[] = GLOSSARY.map((t) => ({
   lastModified: "2026-09-05",
 }));
 
-export const INDEXABLE_ROUTES: IndexableRoute[] = [...STATIC_ROUTES, ...GLOSSARY_ROUTES];
+export const INDEXABLE_ROUTES: IndexableRoute[] = [
+  ...STATIC_ROUTES,
+  ...NOTE_ROUTES,
+  ...GLOSSARY_ROUTES,
+];
 
 /**
  * Deliberately absent:

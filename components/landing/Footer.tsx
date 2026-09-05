@@ -92,7 +92,10 @@ const FOOTER_LINKS = {
   // discovered late and weighted lightly.
   Learn: [
     { label: "Methodology", href: "/methodology" },
+    { label: "Drift Score", href: "/drift-score" },
+    { label: "Research", href: "/research" },
     { label: "Glossary", href: "/glossary" },
+    { label: "Notes", href: "/notes" },
     { label: "FAQ", href: "/faq" },
     { label: "About", href: "/about" },
     { label: "Contact", href: "/contact" },
