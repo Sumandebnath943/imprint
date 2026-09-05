@@ -61,15 +61,23 @@ export default function HeroSection() {
         style={{ backgroundImage: "url('/hero-bg-mobile.webp')" }}
       />
 
-      {/* Desktop still (always painted).
+      {/* Desktop still.
 
-          The 34KB WebP that used to be only the video's `poster`. It is now a
-          layer in its own right, so the hero has its final appearance from the
-          first paint instead of waiting on a megabyte of video — the LCP
-          element resolves against this, and the video fades in over it. */}
+          The 34KB WebP that used to be only the video's `poster`, promoted to a
+          layer of its own so the hero has its final appearance from the first
+          paint instead of waiting on a megabyte of video.
+
+          It fades out once the video mounts, and that is not a nicety. Both
+          layers carry mix-blend-luminosity, and two luminosity blends stacked
+          over the same backdrop compound: the second blends against the result
+          of the first rather than against the orange gradient, which drains the
+          colour and leaves the hero looking greyscale. Only one of these may be
+          visible at a time. */}
       <div
         aria-hidden="true"
-        className="hidden md:block absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-90 mix-blend-luminosity scale-[1.15]"
+        className={`hidden md:block absolute inset-0 z-0 bg-cover bg-center bg-no-repeat mix-blend-luminosity scale-[1.15] transition-opacity duration-700 ${
+          showVideo ? "opacity-0" : "opacity-90"
+        }`}
         style={{ backgroundImage: "url('/hero-bg.webp')" }}
       />
 
@@ -108,13 +116,35 @@ export default function HeroSection() {
           but "IMPRINT". The real headline in the left column carries it now.
           aria-hidden keeps a screen reader from announcing the brand name a
           third time after the nav logo and the headline. */}
-      <div className="absolute bottom-[-4%] left-0 w-full text-center pointer-events-none z-0">
+      <div className="absolute bottom-0 left-0 w-full text-center pointer-events-none z-0 overflow-hidden">
         <motion.div
           aria-hidden="true"
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 1.5, ease: "easeOut" }}
-          className="text-[22vw] font-bold leading-none tracking-tighter text-white/10 select-none mix-blend-overlay"
+          /* Sits on the section's bottom edge.
+
+             The offset is in `em`, so it tracks the font size. It was -4%,
+             which resolves against the *container* height — on a tall screen
+             that pushed the word tens of pixels past the edge and the section's
+             overflow-hidden ate the letterforms. An em offset stays constant
+             relative to the type at every viewport size.
+
+             With leading-none the line box is exactly one em tall while the
+             capitals occupy roughly four fifths of it, so translating down by
+             the remainder closes the gap under the letters and lets them sit
+             flush on the edge. IMPRINT is all caps, so nothing descends into
+             the space being cropped.
+
+             Size is clamped rather than a bare 22vw: on a narrow phone the word
+             overflowed its own line box and got clipped at both ends.
+
+             The offset is a negative margin rather than a translate because
+             this element's transform belongs to framer-motion — it animates
+             `y`, and any transform set here would be overwritten the moment the
+             entrance animation runs. */
+          style={{ fontSize: "min(22vw, 20rem)", marginBottom: "-0.16em" }}
+          className="font-bold leading-none tracking-tighter text-white/10 select-none mix-blend-overlay whitespace-nowrap"
         >
           IMPRINT
         </motion.div>

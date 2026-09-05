@@ -49,3 +49,9 @@ next-env.d.ts
 /video-vos/
 /video-out/
 /hackathon-files/
+
+# Internal documentation. Project bible, developer and portfolio handoffs and
+# the beacon write-up are working material — planning, positioning and
+# operational detail that does not belong on a public repository page. The
+# README is the repo's public documentation; anything else here stays local.
+/docs/

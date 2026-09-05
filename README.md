@@ -217,18 +217,16 @@ Honest notes on where the MVP stops:
 
 ## Documentation
 
-| Document | For |
-| --- | --- |
-| [Project Bible](docs/PROJECT_BIBLE.md) | Canonical reference — domain model, algorithms, schema, conventions |
-| [Developer Handoff](docs/HANDOFF.md) | Picking up the code: setup, traps, current state, what to do next |
-| [Portfolio Handoff](docs/PORTFOLIO_HANDOFF.md) | Presenting the project — the story and the numbers |
-| [Beacon](docs/BEACON.md) | Visitor alerts: what is collected, how location resolves, configuration |
-
-The scoring method is also published for readers rather than developers at
+This README is the public documentation for the repository. The scoring method
+is published for readers rather than developers at
 [/methodology](https://imprint.houseofnamus.com/methodology), including a
 limitations section covering the length-sensitivity of type–token ratio, the
 directionless divergence measure, and the fact that three of the four signals
 measure engagement with IMPRINT itself.
+
+Internal working documents — the project bible, the developer and portfolio
+handoffs, and the beacon write-up — are kept out of this repository under
+`/docs/`, which is gitignored.
 
 ## License
 
