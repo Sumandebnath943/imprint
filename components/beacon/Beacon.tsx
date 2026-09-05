@@ -23,7 +23,7 @@ import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 
 const ENDPOINT = "/api/beacon";
-const ARRIVAL_DELAY_MS = 1_200; // let the page settle so the first paint is not skewed
+const ARRIVAL_DELAY_MS = 700; // let the page settle without making the alert late
 const IDLE_AFTER_MS = 30_000; // no input for this long stops the "active" clock
 const MAX_SUMMARIES = 3; // re-arms if the visitor comes back to the tab
 const OPT_OUT_KEY = "imprint_beacon_off";
@@ -71,6 +71,31 @@ interface State {
 type EventName = "signed_in" | "signed_out" | "entered_dashboard" | "onboarding_complete";
 
 let state: State | null = null;
+
+function createSession(): State {
+  return {
+    sid: newSid(),
+    startedAt: Date.now(),
+    lastActivity: Date.now(),
+    activeMs: 0,
+    pages: [{ path: location.pathname + location.search, title: document.title, t: 0 }],
+    actions: [],
+    scroll: { maxPx: 0, maxPct: currentScrollPct(), milestones: [], events: 0 },
+    pointerMoves: 0,
+    clicks: 0,
+    keys: 0,
+    touches: 0,
+    visibilityChanges: 0,
+    firstActionMs: null,
+    lastActionMs: null,
+    arrivalSent: false,
+    summariesSent: 0,
+    dirtySinceSummary: true,
+    started: true,
+    timer: null,
+    events: new Set<EventName>(),
+  };
+}
 
 function newSid(): string {
   const bytes = new Uint8Array(9);
@@ -256,32 +281,16 @@ function shouldRun(): boolean {
 export default function Beacon() {
   const pathname = usePathname();
 
-  // ── Start once per tab ────────────────────────────────────────────────────
+  // ── Collect ───────────────────────────────────────────────────────────────
   useEffect(() => {
-    if (!shouldRun() || state?.started) return;
+    if (!shouldRun()) return;
 
-    state = {
-      sid: newSid(),
-      startedAt: Date.now(),
-      lastActivity: Date.now(),
-      activeMs: 0,
-      pages: [{ path: location.pathname + location.search, title: document.title, t: 0 }],
-      actions: [],
-      scroll: { maxPx: 0, maxPct: currentScrollPct(), milestones: [], events: 0 },
-      pointerMoves: 0,
-      clicks: 0,
-      keys: 0,
-      touches: 0,
-      visibilityChanges: 0,
-      firstActionMs: null,
-      lastActionMs: null,
-      arrivalSent: false,
-      summariesSent: 0,
-      dirtySinceSummary: true,
-      started: true,
-      timer: null,
-      events: new Set<EventName>(),
-    };
+    // Session state is created once per tab, but listeners are attached on
+    // EVERY mount. Guarding both on the same flag was a real bug: the cleanup
+    // removed the listeners, and a remount then skipped re-adding them, so
+    // `pagehide` never fired again — no exit summary, and therefore no page
+    // journey, because the journey only ships inside the summary.
+    if (!state) state = createSession();
 
     const s = state;
     const passive = { passive: true } as const;
@@ -347,22 +356,30 @@ export default function Beacon() {
 
     // Active time: one tick per second, counted only while the tab is visible
     // and the visitor has done something recently.
-    s.timer = setInterval(() => {
-      if (document.visibilityState !== "visible") return;
-      if (Date.now() - s.lastActivity > IDLE_AFTER_MS) return;
-      s.activeMs += 1000;
-    }, 1000);
+    if (!s.timer) {
+      s.timer = setInterval(() => {
+        if (document.visibilityState !== "visible") return;
+        if (Date.now() - s.lastActivity > IDLE_AFTER_MS) return;
+        s.activeMs += 1000;
+      }, 1000);
+    }
 
-    const arrival = setTimeout(() => {
-      if (!s.arrivalSent) {
-        s.arrivalSent = true;
-        send("arrival", false);
-      }
-    }, ARRIVAL_DELAY_MS);
+    // Only on the first mount of the tab; a remount must not re-announce.
+    const arrival = s.arrivalSent
+      ? null
+      : setTimeout(() => {
+          if (!s.arrivalSent) {
+            s.arrivalSent = true;
+            send("arrival", false);
+          }
+        }, ARRIVAL_DELAY_MS);
 
     return () => {
-      clearTimeout(arrival);
-      if (s.timer) clearInterval(s.timer);
+      if (arrival) clearTimeout(arrival);
+      if (s.timer) {
+        clearInterval(s.timer);
+        s.timer = null;
+      }
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("click", onClick, true);

@@ -161,11 +161,31 @@ specific browser you are testing from, run once in its console:
 localStorage.setItem("imprint_beacon_off", "1")
 ```
 
-## Rate limits
+## Bots and rate limits
 
-20 messages per address per 10 minutes, and 150 per instance per 10 minutes, via
-the existing `lib/api/rate-limit.ts`. In-process, so per-instance on serverless —
-enough to stop one crawl flooding the chat.
+**Declared crawlers never alert.** Googlebot, GPTBot, TelegramBot and the rest
+are dropped before anything else, as is anything scoring under 20 from a
+datacenter network. They were producing alerts that read like a visitor — a US
+datacenter, Linux, "bot" — while a real visit from a Windows laptop cannot
+produce a Linux user agent. Set `BEACON_ALERT_BOTS=1` to see them anyway.
+
+Rate limits run in **separate buckets for human and suspect traffic**
+(20 per address and 150 per instance, per 10 minutes, via
+`lib/api/rate-limit.ts`). A single shared counter meant a crawl could exhaust
+the budget and silence the visits you actually wanted.
+
+## When no alert arrives
+
+Open `https://imprint.houseofnamus.com/api/beacon` **in the browser that is not
+producing alerts**. It reports what the server sees for that exact request:
+resolved location and precision, the user agent it read, and
+`wouldBeSuppressed`, which names the reason if there is one.
+
+The two reasons a genuine visit produces nothing:
+
+1. **Do Not Track is on.** It is honoured, so the beacon collects nothing and
+   sends nothing. The diagnostic shows `doNotTrackHeader: "1"`.
+2. **`imprint_beacon_off` is set** in that browser's local storage.
 
 ## Privacy
 

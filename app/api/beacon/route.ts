@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimit } from "@/lib/api/rate-limit";
 import { BeaconSchema } from "@/lib/validations/beacon.schema";
-import { judge } from "@/lib/beacon/bot";
+import { describeClient, judge } from "@/lib/beacon/bot";
 import { resolveGeo } from "@/lib/beacon/geo";
 import { resolveIdentity } from "@/lib/beacon/identity";
 import {
@@ -41,12 +41,26 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "rate limited" }, { status: 429 });
   }
   const identity = await resolveIdentity();
+
+  // Everything the server sees about *this* request, so a wrong alert can be
+  // diagnosed by opening this URL in the browser that produced it rather than
+  // by guessing from the alert text.
+  const ua = req.headers.get("user-agent") ?? "";
+  const dnt = req.headers.get("dnt");
   return NextResponse.json(
     {
       ok: true,
       telegramConfigured: telegramConfigured(),
       geo,
       signedIn: identity.signedIn,
+      request: {
+        userAgent: ua,
+        client: describeClient(ua),
+        acceptLanguage: req.headers.get("accept-language"),
+        doNotTrackHeader: dnt,
+      },
+      // The two reasons a real visit produces no alert at all.
+      wouldBeSuppressed: dnt === "1" ? "Do Not Track" : null,
     },
     { headers: { "cache-control": "no-store" } }
   );
@@ -77,18 +91,31 @@ export async function POST(req: NextRequest) {
     if (payload.signals.doNotTrack) return new NextResponse(null, { status: 204 });
 
     const geo = await resolveGeo(req.headers);
+    const ua = req.headers.get("user-agent") ?? "";
+    const verdict = judge(payload, geo, ua, req.headers.get("accept-language"));
 
-    if (!rateLimit(`beacon:${geo.ip}`, PER_IP_LIMIT, PER_IP_WINDOW_MS).allowed) {
+    // Crawlers are dropped before anything else. They were both filling the
+    // chat with alerts that looked like a visitor — US datacenter, Linux, "bot"
+    // — and consuming the shared budget below, which then silenced the real
+    // visits. Set BEACON_ALERT_BOTS=1 to see them anyway.
+    if (process.env.BEACON_ALERT_BOTS !== "1") {
+      if (verdict.crawler) return new NextResponse(null, { status: 204 });
+      if (verdict.score < 20 && geo.datacenter) return new NextResponse(null, { status: 204 });
+    }
+
+    // Separate buckets, so automated traffic can never starve a real visitor of
+    // their alert — which is what a single shared counter allowed.
+    const bucket = verdict.score >= 40 ? "human" : "suspect";
+    if (!rateLimit(`beacon:${bucket}:${geo.ip}`, PER_IP_LIMIT, PER_IP_WINDOW_MS).allowed) {
       return new NextResponse(null, { status: 204 });
     }
-    if (!rateLimit("beacon:global", GLOBAL_LIMIT, GLOBAL_WINDOW_MS).allowed) {
+    if (!rateLimit(`beacon:global:${bucket}`, GLOBAL_LIMIT, GLOBAL_WINDOW_MS).allowed) {
       return new NextResponse(null, { status: 204 });
     }
 
     // Identity is read from the session, never from the payload — a browser can
     // claim anything, but it cannot forge a session cookie.
     const identity = await resolveIdentity();
-    const ua = req.headers.get("user-agent") ?? "";
 
     let text: string;
     if (payload.kind === "event") {
@@ -99,7 +126,6 @@ export async function POST(req: NextRequest) {
       }
       text = formatEvent(payload, geo, ua, identity);
     } else {
-      const verdict = judge(payload, geo, ua, req.headers.get("accept-language"));
       text =
         payload.kind === "arrival"
           ? formatArrival(payload, geo, verdict, ua, identity)

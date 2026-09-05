@@ -155,7 +155,9 @@ function fromVercel(headers: Headers): Place {
 
 const cache = new Map<string, { at: number; value: Lookup | null }>();
 const CACHE_TTL_MS = 60 * 60_000;
-const LOOKUP_TIMEOUT_MS = 2_000;
+// Losing the ISP is a cheap price for a faster alert: the location itself comes
+// from Vercel's headers, not from here, and this runs before the Telegram send.
+const LOOKUP_TIMEOUT_MS = 1_500;
 
 async function getJson(url: string): Promise<Record<string, unknown> | null> {
   try {
