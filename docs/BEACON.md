@@ -181,11 +181,25 @@ producing alerts**. It reports what the server sees for that exact request:
 resolved location and precision, the user agent it read, and
 `wouldBeSuppressed`, which names the reason if there is one.
 
-The two reasons a genuine visit produces nothing:
+The reasons a genuine visit produces nothing:
 
 1. **Do Not Track is on.** It is honoured, so the beacon collects nothing and
-   sends nothing. The diagnostic shows `doNotTrackHeader: "1"`.
+   sends nothing. The diagnostic shows `doNotTrackHeader: "1"`. Note that a
+   privacy extension can send this header even when Chrome's own toggle is off,
+   and the header is checked server-side for exactly that reason.
 2. **`imprint_beacon_off` is set** in that browser's local storage.
+
+### Seeing your own visits while keeping DNT on
+
+Run this once in the console of the browser you want to be visible. It opts that
+one browser in, and nothing else changes:
+
+```js
+localStorage.setItem("imprint_beacon_force", "1")
+```
+
+The payload still reports the Do Not Track signal truthfully; the flag only says
+this browser has consented anyway. Undo with `removeItem`.
 
 ## Privacy
 

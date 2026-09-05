@@ -39,6 +39,14 @@ export const BeaconSchema = z.object({
     .enum(["signed_in", "signed_out", "entered_dashboard", "onboarding_complete"])
     .optional(),
 
+  /**
+   * This browser has explicitly opted in, overriding its own Do Not Track
+   * signal. Set by the site owner on their own machine so they can see their
+   * own visits without disabling DNT globally. Not a security boundary — it
+   * only ever affects whether that browser's visit produces an alert.
+   */
+  consent: z.boolean().default(false),
+
   path: z.string().max(300),
   title: short.optional(),
   referrer: z.string().max(400).optional(),

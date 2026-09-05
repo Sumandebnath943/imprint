@@ -59,8 +59,11 @@ export async function GET(req: NextRequest) {
         acceptLanguage: req.headers.get("accept-language"),
         doNotTrackHeader: dnt,
       },
-      // The two reasons a real visit produces no alert at all.
-      wouldBeSuppressed: dnt === "1" ? "Do Not Track" : null,
+      // The reasons a real visit produces no alert at all.
+      wouldBeSuppressed:
+        dnt === "1"
+          ? "Do Not Track (run the imprint_beacon_force snippet in this browser to override)"
+          : null,
     },
     { headers: { "cache-control": "no-store" } }
   );
@@ -86,9 +89,14 @@ export async function POST(req: NextRequest) {
     if (!parsed.success) return new NextResponse(null, { status: 204 });
     const payload = parsed.data;
 
-    // Honour Do Not Track: the browser asked not to be recorded, so stop before
-    // resolving anything about them.
-    if (payload.signals.doNotTrack) return new NextResponse(null, { status: 204 });
+    // Honour Do Not Track, unless this browser has explicitly consented.
+    // The header is checked as well as the client's own reading of it: an
+    // extension can set `DNT: 1` without touching `navigator.doNotTrack`, and
+    // then the page has no idea it is being sent.
+    const dntHeader = req.headers.get("dnt") === "1";
+    if ((payload.signals.doNotTrack || dntHeader) && !payload.consent) {
+      return new NextResponse(null, { status: 204 });
+    }
 
     const geo = await resolveGeo(req.headers);
     const ua = req.headers.get("user-agent") ?? "";
