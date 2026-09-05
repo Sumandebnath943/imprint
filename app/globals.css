@@ -127,6 +127,21 @@ body {
     backdrop-filter: saturate(160%);
     background: rgba(8, 8, 8, 0.92);
   }
+
+  /* The scroll-reveal sections are server-rendered at opacity 0 and animated
+     to 1 once framer-motion sees them enter the viewport. That is a fade on
+     nearly every block of the landing page, which is a lot of movement for
+     someone who has asked for less of it — and if the observer never fires
+     (JS blocked or failed), the copy stays invisible with no way back.
+
+     Forcing the resting state here means reduced-motion visitors get the page
+     fully composed and immediately readable. The `!important` is needed to beat
+     framer-motion's own inline style, which is why this cannot be a class. */
+  [style*="opacity:0"],
+  [style*="opacity: 0"] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 
 /* ── Text on the brand orange ──────────────────────────────────────────────

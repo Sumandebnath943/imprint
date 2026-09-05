@@ -59,6 +59,17 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  // Read from the environment so the tokens can be set per-deployment without
+  // a commit. Next omits each tag entirely when its variable is unset, so an
+  // unconfigured environment emits nothing rather than an empty meta tag.
+  // These are public identifiers, not secrets — the env var is for
+  // convenience, not confidentiality.
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION,
+    other: process.env.BING_SITE_VERIFICATION
+      ? { "msvalidate.01": process.env.BING_SITE_VERIFICATION }
+      : undefined,
+  },
 };
 
 export const viewport: Viewport = {

@@ -1,9 +1,51 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
+/**
+ * Defers the hero video until the browser has nothing better to do.
+ *
+ * Returns false on the server and on the first client render, so the video is
+ * never part of the initial HTML — the still image carries the hero until this
+ * flips. Returns false permanently on phones and under reduced-motion.
+ */
+function useDeferredHeroVideo() {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    // Matches the `md:` breakpoint the video renders at. Checked in JS rather
+    // than left to CSS because `display:none` does not stop the fetch.
+    if (!window.matchMedia("(min-width: 768px)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const show = () => setReady(true);
+
+    // Idle callback where available, so the video never competes with hydration
+    // or the LCP paint. The timeout caps how long a busy main thread can delay
+    // it; Safari has no requestIdleCallback, hence the fallback.
+    // Captured rather than tested with `in`, which narrows `window` itself and
+    // leaves the fallback branch typed as `never`.
+    const idle =
+      typeof window.requestIdleCallback === "function"
+        ? window.requestIdleCallback
+        : null;
+
+    if (idle) {
+      const handle = idle(show, { timeout: 2500 });
+      return () => window.cancelIdleCallback(handle);
+    }
+    const handle = window.setTimeout(show, 1200);
+    return () => window.clearTimeout(handle);
+  }, []);
+
+  return ready;
+}
+
 export default function HeroSection() {
+  const showVideo = useDeferredHeroVideo();
+
   return (
     <section className="relative min-h-screen flex flex-col overflow-hidden text-white font-sans selection:bg-white/30"
       style={{
@@ -19,17 +61,40 @@ export default function HeroSection() {
         style={{ backgroundImage: "url('/hero-bg-mobile.webp')" }}
       />
 
-      {/* Desktop Background Media - Video with Image Fallback (Hidden on Mobile) */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        poster="/hero-bg.webp"
-        className="hidden md:block absolute inset-0 z-0 w-full h-full object-cover opacity-90 mix-blend-luminosity scale-[1.15]"
-      >
-        <source src="/hero-bg.mp4" type="video/mp4" />
-      </video>
+      {/* Desktop still (always painted).
+
+          The 34KB WebP that used to be only the video's `poster`. It is now a
+          layer in its own right, so the hero has its final appearance from the
+          first paint instead of waiting on a megabyte of video — the LCP
+          element resolves against this, and the video fades in over it. */}
+      <div
+        aria-hidden="true"
+        className="hidden md:block absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-90 mix-blend-luminosity scale-[1.15]"
+        style={{ backgroundImage: "url('/hero-bg.webp')" }}
+      />
+
+      {/* Desktop Background Media.
+
+          Mounted from an effect rather than rendered server-side. With
+          `hidden md:block` the element existed on phones too, and an autoplay
+          video is fetched regardless of `display:none` — so mobile paid for a
+          file it could never show. Now nothing requests it until the viewport
+          is confirmed desktop and the browser is idle.
+
+          Skipped entirely under prefers-reduced-motion: an 8-second loop behind
+          the headline is exactly the ambient motion that setting asks about. */}
+      {showVideo && (
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          poster="/hero-bg.webp"
+          className="hidden md:block absolute inset-0 z-0 w-full h-full object-cover opacity-90 mix-blend-luminosity scale-[1.15]"
+        >
+          <source src="/hero-bg.mp4" type="video/mp4" />
+        </video>
+      )}
 
       {/* Add an overlay to ensure text contrast if the image is too bright */}
       <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/10 via-transparent to-black/30 mix-blend-multiply pointer-events-none" />
@@ -76,10 +141,17 @@ export default function HeroSection() {
                 not type scale, and this is the sentence that says what IMPRINT
                 does. The <br> tags are line-break art direction; they do not
                 affect how the heading is read as text. */}
+            {/* The spaces before each <br /> are deliberate. Without them the
+                element's text content reads "Preserve yourhuman identitywith
+                our expertengine." — the line breaks are visual, but they are
+                not word boundaries, and anything reading textContent (search
+                snippets, screen readers, AI extractors) gets the words fused.
+                A trailing space before a break renders as nothing, so this is
+                invisible on screen. */}
             <h1 className="text-3xl md:text-4xl lg:text-[36px] xl:text-[42px] font-light leading-[1.1] tracking-tight mb-5 uppercase">
-              Preserve your<br />
-              human identity<br />
-              with <span className="font-semibold">our expert<br />engine.</span>
+              Preserve your <br />
+              human identity <br />
+              with <span className="font-semibold">our expert <br />engine.</span>
             </h1>
             <p className="text-sm md:text-base text-white/80 leading-relaxed max-w-[340px]">
               From cognitive baseline mapping to voice preservation, we provide the tools to anchor your identity before AI replaces it.

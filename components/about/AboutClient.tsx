@@ -34,9 +34,13 @@ export default function AboutClient() {
             style={{ background: "rgba(255,85,0,0.12)", border: "1px solid rgba(255,85,0,0.25)", color: "#FF5500", fontSize: 12 }}>
             The Philosophy
           </div>
+          {/* Trailing spaces inside the block spans, for the same reason as the
+              landing h1: block display breaks the line visually, but text
+              content has no separator between adjacent spans, so this would
+              read "We are losing ourselvesto the machineswe built." */}
           <h1 className="font-bold mb-6" style={{ fontSize: "clamp(48px, 6vw, 80px)", lineHeight: 0.95, maxWidth: 700 }}>
-            <span className="text-white block">We are losing ourselves</span>
-            <span className="text-white block">to the machines</span>
+            <span className="text-white block">We are losing ourselves </span>
+            <span className="text-white block">to the machines </span>
             <span style={{ color: "#FF5500" }}>we built.</span>
           </h1>
           <p className="text-[18px] md:text-[20px]" style={{ color: "rgba(255,255,255,0.55)", maxWidth: 560, lineHeight: 1.7 }}>

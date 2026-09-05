@@ -44,6 +44,19 @@ export async function generateMetadata(
       description,
       images: [`/api/credential/${params.code}/badge.png`],
     },
+    // Kept out of the index, deliberately.
+    //
+    // These pages are unique per holder, so this is not about thin content —
+    // it is that they are a member's name, profession and score, published on
+    // a page they meant to hand to specific people. An indexed credential
+    // turns "share this link" into "appear in search results for your own
+    // name", which is not what the share button implies.
+    //
+    // `follow` keeps the links out to the rest of the site live, and OG and
+    // Twitter cards are unaffected: a scraper resolving a pasted link reads
+    // the tags above regardless of whether the page is indexable. Sharing to
+    // LinkedIn or X still renders the badge exactly as before.
+    robots: { index: false, follow: true },
   };
 }
 
