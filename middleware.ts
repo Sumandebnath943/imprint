@@ -9,8 +9,19 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
   // This runs here, not in the visitor beacon, because the beacon is a client
   // component and none of these agents execute JavaScript — a detector added
   // there could never have fired.
-  const alert = aiCrawlerAlert(request);
-  if (alert) event.waitUntil(alert);
+  //
+  // Wrapped because this is the one code path that touches every single
+  // request to the site. Async failures are already handled inside, but a
+  // synchronous throw here — a malformed URL, an unexpected header — would
+  // take down every page rather than lose one telemetry event. Analytics is
+  // never worth a 500.
+  try {
+    const alert = aiCrawlerAlert(request);
+    if (alert) event.waitUntil(alert);
+  } catch {
+    // Deliberately silent: nothing useful to do, and logging on every request
+    // in a hot path is its own problem.
+  }
 
   return await updateSession(request);
 }
