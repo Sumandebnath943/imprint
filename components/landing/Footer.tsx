@@ -47,23 +47,56 @@ const SOCIAL_ICONS = { x: XIcon, instagram: InstagramIcon, linkedin: LinkedinIco
  */
 const SOCIAL_LINKS: { Icon: () => JSX.Element; href: string; label: string }[] = [];
 
+// Section anchors are written absolute (/#engine, not #engine) so they resolve
+// from any page. As bare fragments they silently did nothing on /about,
+// /courses, /privacy and /terms — the sections only exist on the landing page.
 const FOOTER_LINKS = {
   Product: [
-    { label: "How It Works", href: "#how-it-works" },
-    { label: "The Engine", href: "#engine" },
-    { label: "Drift Score", href: "#score" },
-    { label: "Built For", href: "#for-you" },
+    { label: "How It Works", href: "/#how-it-works" },
+    { label: "The Engine", href: "/#engine" },
+    { label: "Drift Score", href: "/#score" },
+    { label: "Built For", href: "/#for-you" },
     { label: "Courses", href: "/courses" },
   ],
   Company: [
     { label: "About", href: "/about" },
-    { label: "Testimonials", href: "#testimonials" },
+    { label: "Testimonials", href: "/#testimonials" },
     { label: "Sign In", href: "/signin" },
     { label: "Begin Your Imprint", href: "/signup" },
     { label: "Privacy", href: "/privacy" },
     { label: "Terms", href: "/terms" },
   ],
 };
+
+/**
+ * A footer link.
+ *
+ * Routes go through `next/link` so navigation is client-side — as plain
+ * anchors every internal link was a full document reload.
+ *
+ * Anchors into the landing page stay as `<a>`. `next/link` to a fragment on
+ * the route you are already on does not reliably scroll in the App Router,
+ * whereas the browser's own fragment handling always does; from another page
+ * the anchor navigates normally.
+ */
+function FooterLink({ href, label }: { href: string; label: string }) {
+  const className =
+    "text-white/60 hover:text-white transition-colors flex items-center gap-3 text-[14px]";
+  const dot = <span className="w-1 h-1 rounded-full bg-white/30" />;
+
+  if (href.includes("#")) {
+    return (
+      <a href={href} className={className}>
+        {dot} {label}
+      </a>
+    );
+  }
+  return (
+    <Link href={href} className={className}>
+      {dot} {label}
+    </Link>
+  );
+}
 
 export default function Footer() {
   return (
@@ -134,9 +167,7 @@ export default function Footer() {
                 <ul className="space-y-4">
                   {FOOTER_LINKS["Product"].map(link => (
                     <li key={link.label}>
-                      <a href={link.href} className="text-white/60 hover:text-white transition-colors flex items-center gap-3 text-[14px]">
-                        <span className="w-1 h-1 rounded-full bg-white/30" /> {link.label}
-                      </a>
+                      <FooterLink href={link.href} label={link.label} />
                     </li>
                   ))}
                 </ul>
@@ -148,9 +179,7 @@ export default function Footer() {
                 <ul className="space-y-4">
                   {FOOTER_LINKS["Company"].map(link => (
                     <li key={link.label}>
-                      <a href={link.href} className="text-white/60 hover:text-white transition-colors flex items-center gap-3 text-[14px]">
-                        <span className="w-1 h-1 rounded-full bg-white/30" /> {link.label}
-                      </a>
+                      <FooterLink href={link.href} label={link.label} />
                     </li>
                   ))}
                 </ul>
