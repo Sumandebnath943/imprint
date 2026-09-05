@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ORG_SOCIALS, ORG_NAME, ORG_URL } from "@/lib/seo/entity";
 
 
 function XIcon() {
@@ -15,6 +16,22 @@ function LinkedinIcon() {
   return (
     <svg width={14} height={14} viewBox="0 0 24 24" fill="currentColor">
       <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+    </svg>
+  );
+}
+
+function FacebookIcon() {
+  return (
+    <svg width={14} height={14} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+    </svg>
+  );
+}
+
+function YoutubeIcon() {
+  return (
+    <svg width={14} height={14} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
     </svg>
   );
 }
@@ -35,17 +52,28 @@ function InstagramIcon() {
 // them, even though /about has always existed. Anything without a
 // destination is left out rather than shipped dead; add entries back as the
 // pages get built.
-// Retained so the social row can be restored by filling SOCIAL_LINKS below.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const SOCIAL_ICONS = { x: XIcon, instagram: InstagramIcon, linkedin: LinkedinIcon };
+const SOCIAL_ICONS: Record<string, () => JSX.Element> = {
+  x: XIcon,
+  instagram: InstagramIcon,
+  linkedin: LinkedinIcon,
+  facebook: FacebookIcon,
+  youtube: YoutubeIcon,
+};
 
 /**
- * Social profiles. These were three href="#" icons that did nothing when
- * clicked; the row hides itself while this is empty, so nothing dead ships.
- * Add the real URLs and it returns exactly as designed:
- *   { Icon: SOCIAL_ICONS.x, href: "https://x.com/…", label: "X / Twitter" },
+ * Social profiles, derived from ORG_SOCIALS so these links and the
+ * Organization node's `sameAs` array are the same list by construction.
+ *
+ * These are House of Namus accounts, not IMPRINT ones — IMPRINT has no
+ * profiles of its own yet, and the footer speaks for the publisher. `rel="me"`
+ * marks them as identity claims rather than ordinary outbound links, which is
+ * what makes them corroborate the Organization rather than just leak authority.
  */
-const SOCIAL_LINKS: { Icon: () => JSX.Element; href: string; label: string }[] = [];
+const SOCIAL_LINKS = ORG_SOCIALS.map((s) => ({
+  Icon: SOCIAL_ICONS[s.platform],
+  href: s.href,
+  label: s.label,
+}));
 
 // Section anchors are written absolute (/#engine, not #engine) so they resolve
 // from any page. As bare fragments they silently did nothing on /about,
@@ -189,8 +217,30 @@ export default function Footer() {
 
           {/* Bottom Bar: Copyright & Socials */}
           <div className="flex flex-col md:flex-row justify-between items-center mt-auto pt-8">
+            {/* The publisher link is the visible half of the entity claim the
+                JSON-LD graph makes: IMPRINT is a House of Namus product, built
+                by a named person. Schema that asserts a relationship the page
+                never shows is schema that gets discounted. */}
             <p className="text-[13px] text-white/60 mb-6 md:mb-0">
-              © 2026 IMPRINT. All rights reserved.
+              © 2026 IMPRINT — a{" "}
+              <a
+                href={ORG_URL}
+                rel="me noopener"
+                target="_blank"
+                className="text-white/75 hover:text-white transition-colors underline underline-offset-2 decoration-white/25"
+              >
+                {ORG_NAME}
+              </a>{" "}
+              product, created by{" "}
+              <a
+                href="https://sumandebnath.houseofnamus.com"
+                rel="me noopener"
+                target="_blank"
+                className="text-white/75 hover:text-white transition-colors underline underline-offset-2 decoration-white/25"
+              >
+                Suman Debnath
+              </a>
+              .
             </p>
             {SOCIAL_LINKS.length > 0 && (
               <div className="flex items-center gap-5">
@@ -200,7 +250,7 @@ export default function Footer() {
                     href={href}
                     aria-label={label}
                     target="_blank"
-                    rel="noopener noreferrer"
+                    rel="me noopener noreferrer"
                     className="w-8 h-8 flex items-center justify-center transition-colors hover:text-white"
                     style={{ color: "rgba(255,255,255,0.58)" }}
                   >

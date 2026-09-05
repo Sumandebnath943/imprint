@@ -34,16 +34,25 @@ export default function HeroSection() {
       {/* Add an overlay to ensure text contrast if the image is too bright */}
       <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/10 via-transparent to-black/30 mix-blend-multiply pointer-events-none" />
 
-      {/* Giant Background Text */}
+      {/* Giant Background Text.
+
+          This is a `div`, not the `h1` it used to be. At 10% opacity behind a
+          blend mode, inside a pointer-events-none layer and marked select-none,
+          it is a texture — but as an `h1` it was the page's primary heading,
+          which meant the strongest structural signal on the site said nothing
+          but "IMPRINT". The real headline in the left column carries it now.
+          aria-hidden keeps a screen reader from announcing the brand name a
+          third time after the nav logo and the headline. */}
       <div className="absolute bottom-[-4%] left-0 w-full text-center pointer-events-none z-0">
-        <motion.h1
+        <motion.div
+          aria-hidden="true"
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 1.5, ease: "easeOut" }}
           className="text-[22vw] font-bold leading-none tracking-tighter text-white/10 select-none mix-blend-overlay"
         >
           IMPRINT
-        </motion.h1>
+        </motion.div>
       </div>
 
       {/* Main Content Container
@@ -62,11 +71,16 @@ export default function HeroSection() {
           className="w-full lg:w-auto lg:max-w-[420px] lg:shrink flex flex-col gap-10"
         >
           <div>
-            <h2 className="text-3xl md:text-4xl lg:text-[36px] xl:text-[42px] font-light leading-[1.1] tracking-tight mb-5 uppercase">
+            {/* The page's h1. Visually smaller than the right column's
+                heading, which is fine — heading level is document structure,
+                not type scale, and this is the sentence that says what IMPRINT
+                does. The <br> tags are line-break art direction; they do not
+                affect how the heading is read as text. */}
+            <h1 className="text-3xl md:text-4xl lg:text-[36px] xl:text-[42px] font-light leading-[1.1] tracking-tight mb-5 uppercase">
               Preserve your<br />
               human identity<br />
               with <span className="font-semibold">our expert<br />engine.</span>
-            </h2>
+            </h1>
             <p className="text-sm md:text-base text-white/80 leading-relaxed max-w-[340px]">
               From cognitive baseline mapping to voice preservation, we provide the tools to anchor your identity before AI replaces it.
             </p>
