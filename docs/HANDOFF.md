@@ -3,7 +3,7 @@
 For whoever picks this up next. Read this first, then
 [`PROJECT_BIBLE.md`](./PROJECT_BIBLE.md) when you need the reference detail.
 
-**State as of commit `bc1d1c7`.** Live at
+**State as of commit `5e2ea0e`.** Live at
 [imprint.houseofnamus.com](https://imprint.houseofnamus.com), auto-deployed
 from `main` via Vercel.
 
