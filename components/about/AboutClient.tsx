@@ -154,19 +154,54 @@ export default function AboutClient() {
         <div className="mb-40">
           <span className="text-[13px] font-bold uppercase tracking-widest mb-4 block text-center md:text-left" style={{ color: "#FF5500" }}>/04</span>
           <h2 className="font-bold mb-10 text-center md:text-left" style={{ fontSize: "clamp(36px, 4vw, 48px)", lineHeight: 1.1 }}>
-            <span style={{ color: "#FF5500" }}>Why we built this.</span>
+            <span style={{ color: "#FF5500" }}>Why I built this.</span>
           </h2>
-          
+
+          {/* First person, and named.
+              This section was written as "we" — a company voice for a project
+              with one author. An attributed account is also the only version
+              that can be quoted: a claim with a person behind it is citable,
+              an anonymous one is a slogan. This is deliberately about the
+              problem rather than the person; there is no founder page. */}
           <div className="max-w-[640px] mx-auto md:mx-0">
             <p className="text-[18px] mb-6" style={{ color: "rgba(255,255,255,0.60)", lineHeight: 1.8 }}>
-              IMPRINT started with a single observation: the most capable people we knew were becoming less capable — and they didn&apos;t notice, because their AI tools were making their output better even as their instincts atrophied.
+              I noticed it in my own work first. I was producing more than I ever had, and I could not have told you which of the judgements inside it were mine. The output kept getting better. The thinking behind it had quietly stopped being something I did.
+            </p>
+            <p className="text-[18px] mb-6" style={{ color: "rgba(255,255,255,0.60)", lineHeight: 1.8 }}>
+              Then I started seeing the same shape in the people around me. Everyone was faster. Nobody could name what they had lost, because there was nothing to compare against — no record of what they had been able to do a year earlier.
+            </p>
+            <p className="text-[18px] mb-6" style={{ color: "rgba(255,255,255,0.60)", lineHeight: 1.8 }}>
+              That is the entire problem in one sentence: you cannot notice a change you have no earlier measurement of. Memory is not a control group, and your memory of your own past capability is precisely what this erodes.
             </p>
             <p className="text-[18px]" style={{ color: "rgba(255,255,255,0.60)", lineHeight: 1.8 }}>
-              We built IMPRINT because we wanted a way to check. A way to say: set aside the tools for 20 minutes. Answer from your own mind. Compare it to who you were 3 months ago. See the truth.<br/><br/>It turns out the truth is worth seeing.
+              So I built the instrument I wanted. Capture how you write and decide now, while you still recognise it. Re-test on a schedule. Report the distance, and show the arithmetic that produced it.<br /><br />I use it on myself. That is why the methodology page lists what the measurement gets wrong at the same length as what it gets right — a number I rely on is one whose weaknesses I need to know.
             </p>
+
+            <p
+              className="mt-8 pt-6"
+              style={{
+                borderTop: "1px solid rgba(255,255,255,0.10)",
+                color: "rgba(255,255,255,0.45)",
+                fontSize: 14,
+              }}
+            >
+              —{" "}
+              <a
+                href="https://sumandebnath.houseofnamus.com"
+                rel="author me noopener"
+                target="_blank"
+                className="text-white hover:underline underline-offset-2"
+              >
+                Suman Debnath
+              </a>
+              , creator of IMPRINT
+            </p>
+
             <div className="flex flex-col sm:flex-row items-center gap-4 mt-12">
               <Link href="/signup" className="w-full sm:w-auto rounded-full px-8 py-3.5 font-medium text-on-accent text-center transition-all hover:opacity-90" style={{ background: "#FF5500" }}>Begin Your Imprint →</Link>
-              <button disabled className="w-full sm:w-auto rounded-full px-8 py-3.5 font-medium text-center transition-all opacity-50 cursor-not-allowed" style={{ border: "1px solid rgba(255,255,255,0.20)", color: "white" }}>Read the science →</button>
+              {/* Was a disabled button with no destination. /methodology now
+                  exists, so it is a real link. */}
+              <Link href="/methodology" className="w-full sm:w-auto rounded-full px-8 py-3.5 font-medium text-center transition-all hover:bg-white/5" style={{ border: "1px solid rgba(255,255,255,0.20)", color: "white" }}>Read the method →</Link>
             </div>
           </div>
         </div>

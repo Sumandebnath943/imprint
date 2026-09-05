@@ -85,12 +85,21 @@ const FOOTER_LINKS = {
     { label: "Drift Score", href: "/#score" },
     { label: "Built For", href: "/#for-you" },
     { label: "Courses", href: "/courses" },
+    { label: "Begin Your Imprint", href: "/signup" },
+  ],
+  // The written pages. Internal links are how a crawler finds them and how
+  // authority moves between them — pages reachable only from the sitemap are
+  // discovered late and weighted lightly.
+  Learn: [
+    { label: "Methodology", href: "/methodology" },
+    { label: "Glossary", href: "/glossary" },
+    { label: "FAQ", href: "/faq" },
+    { label: "About", href: "/about" },
+    { label: "Contact", href: "/contact" },
   ],
   Company: [
-    { label: "About", href: "/about" },
     { label: "Testimonials", href: "/#testimonials" },
     { label: "Sign In", href: "/signin" },
-    { label: "Begin Your Imprint", href: "/signup" },
     { label: "Privacy", href: "/privacy" },
     { label: "Terms", href: "/terms" },
   ],
@@ -188,8 +197,7 @@ export default function Footer() {
             </div>
 
             {/* Right Side: Links */}
-            <div className="flex flex-col sm:flex-row gap-16 md:gap-24 pr-0 lg:pr-10 pt-4">
-              {/* Product */}
+            <div className="flex flex-col sm:flex-row gap-12 md:gap-16 lg:gap-20 pr-0 lg:pr-10 pt-4">
               <div>
                 <h4 className="text-white font-bold mb-6 text-sm">Menu</h4>
                 <ul className="space-y-4">
@@ -200,8 +208,18 @@ export default function Footer() {
                   ))}
                 </ul>
               </div>
-              
-              {/* Company */}
+
+              <div>
+                <h4 className="text-white font-bold mb-6 text-sm">Learn</h4>
+                <ul className="space-y-4">
+                  {FOOTER_LINKS["Learn"].map(link => (
+                    <li key={link.label}>
+                      <FooterLink href={link.href} label={link.label} />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
               <div>
                 <h4 className="text-white font-bold mb-6 text-sm">Explore Imprint</h4>
                 <ul className="space-y-4">

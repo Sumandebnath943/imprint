@@ -7,7 +7,11 @@ import { X, Menu } from "lucide-react";
 
 const NAV_LINKS = [
   { label: "How It Works", href: "/#how-it-works" },
-  { label: "The Engine", href: "/#engine" },
+  // The two written pages worth a nav slot: the method is the substantive
+  // claim the product rests on, and the FAQ absorbs most first-visit doubt.
+  // The glossary and contact are reachable from the footer and from these.
+  { label: "Method", href: "/methodology" },
+  { label: "FAQ", href: "/faq" },
   { label: "About", href: "/about" },
   { label: "Courses", href: "/courses" },
 ];

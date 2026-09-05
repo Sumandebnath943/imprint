@@ -199,4 +199,142 @@ export function aboutPageNode(): Node {
   };
 }
 
-export { PERSON_ID, ORG_ID, PERSON_NAME, PERSON_ROLE_HERE };
+/**
+ * FAQPage.
+ *
+ * The one construct where the markup and the visible page must match exactly:
+ * Google's guidelines require every marked-up question and answer to be
+ * present and visible on the page, and answers here are generated from the
+ * same array that renders them, so they cannot drift.
+ *
+ * Answer text is plain — no markup. Schema consumers strip tags anyway, and
+ * an answer that reads correctly as bare text is one that survives being
+ * lifted into a snippet.
+ */
+export function faqPageNode(
+  url: string,
+  faqs: { id: string; question: string; answer: string }[]
+): Node {
+  return {
+    "@type": "FAQPage",
+    "@id": `${url}#faqpage`,
+    url,
+    isPartOf: { "@id": WEBSITE_ID },
+    author: { "@id": PERSON_ID },
+    publisher: { "@id": ORG_ID },
+    mainEntity: faqs.map((f) => ({
+      "@type": "Question",
+      "@id": `${url}#${f.id}`,
+      name: f.question,
+      acceptedAnswer: { "@type": "Answer", text: f.answer },
+    })),
+  };
+}
+
+/**
+ * TechArticle, for /methodology and /drift-score.
+ *
+ * `TechArticle` rather than `Article` because the content is a specification —
+ * formulas, weights, stated limits — and the more specific type is the one a
+ * retrieval system can act on. `dependencies` and `proficiencyLevel` are the
+ * fields that make it legible as documentation rather than a blog post.
+ */
+export function techArticleNode({
+  url,
+  headline,
+  description,
+  datePublished,
+  dateModified,
+  section,
+}: {
+  url: string;
+  headline: string;
+  description: string;
+  datePublished: string;
+  dateModified: string;
+  section?: string;
+}): Node {
+  return {
+    "@type": "TechArticle",
+    "@id": `${url}#article`,
+    url,
+    headline,
+    description,
+    datePublished,
+    dateModified,
+    inLanguage: "en",
+    isPartOf: { "@id": WEBSITE_ID },
+    about: { "@id": SOFTWARE_ID },
+    author: { "@id": PERSON_ID },
+    creator: { "@id": PERSON_ID },
+    publisher: { "@id": ORG_ID },
+    proficiencyLevel: "Beginner",
+    ...(section ? { articleSection: section } : {}),
+  };
+}
+
+/** The glossary as a whole. Individual terms declare `inDefinedTermSet`
+ *  pointing back at this id, which is what makes them a vocabulary rather
+ *  than fourteen unrelated pages. */
+export function definedTermSetNode(
+  url: string,
+  terms: { slug: string; term: string }[]
+): Node {
+  return {
+    "@type": "DefinedTermSet",
+    "@id": `${url}#termset`,
+    url,
+    name: "The IMPRINT Glossary",
+    description:
+      "Definitions for the vocabulary of cognitive drift — terms from the research literature on cognitive offloading and skill atrophy, alongside the measurements IMPRINT defines.",
+    inLanguage: "en",
+    isPartOf: { "@id": WEBSITE_ID },
+    author: { "@id": PERSON_ID },
+    publisher: { "@id": ORG_ID },
+    hasDefinedTerm: terms.map((t) => ({
+      "@type": "DefinedTerm",
+      "@id": `${url}/${t.slug}#term`,
+      name: t.term,
+      url: `${url}/${t.slug}`,
+    })),
+  };
+}
+
+export function definedTermNode({
+  url,
+  setUrl,
+  term,
+  definition,
+  alternateNames,
+}: {
+  url: string;
+  setUrl: string;
+  term: string;
+  definition: string;
+  alternateNames?: string[];
+}): Node {
+  return {
+    "@type": "DefinedTerm",
+    "@id": `${url}#term`,
+    url,
+    name: term,
+    description: definition,
+    inDefinedTermSet: { "@id": `${setUrl}#termset` },
+    inLanguage: "en",
+    ...(alternateNames?.length ? { alternateName: alternateNames } : {}),
+  };
+}
+
+export function contactPageNode(url: string): Node {
+  return {
+    "@type": "ContactPage",
+    "@id": `${url}#contactpage`,
+    url,
+    name: "Contact IMPRINT",
+    isPartOf: { "@id": WEBSITE_ID },
+    about: { "@id": SOFTWARE_ID },
+    publisher: { "@id": ORG_ID },
+  };
+}
+
+export { PERSON_ID, ORG_ID, PERSON_NAME, PERSON_ROLE_HERE, SITE_URL };

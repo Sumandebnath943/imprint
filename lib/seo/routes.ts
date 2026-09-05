@@ -28,14 +28,32 @@ export type IndexableRoute = {
   lastModified: string; // ISO date, YYYY-MM-DD
 };
 
-export const INDEXABLE_ROUTES: IndexableRoute[] = [
+import { GLOSSARY } from "@/lib/content/glossary";
+
+const STATIC_ROUTES: IndexableRoute[] = [
   { path: "/", lastModified: "2026-09-05" },
-  { path: "/about", lastModified: "2026-09-03" },
+  { path: "/about", lastModified: "2026-09-05" },
+  { path: "/methodology", lastModified: "2026-09-05" },
+  { path: "/faq", lastModified: "2026-09-05" },
+  { path: "/glossary", lastModified: "2026-09-05" },
+  { path: "/contact", lastModified: "2026-09-05" },
   { path: "/courses", lastModified: "2026-09-03" },
   { path: "/signup", lastModified: "2026-09-03" },
   { path: "/privacy", lastModified: "2026-09-05" },
   { path: "/terms", lastModified: "2026-09-05" },
 ];
+
+/**
+ * Glossary terms are generated from the content file rather than listed by
+ * hand, so adding a term cannot leave it out of the sitemap. Their date is the
+ * glossary's own — the pages ship and change together as one document.
+ */
+const GLOSSARY_ROUTES: IndexableRoute[] = GLOSSARY.map((t) => ({
+  path: `/glossary/${t.slug}`,
+  lastModified: "2026-09-05",
+}));
+
+export const INDEXABLE_ROUTES: IndexableRoute[] = [...STATIC_ROUTES, ...GLOSSARY_ROUTES];
 
 /**
  * Deliberately absent:
