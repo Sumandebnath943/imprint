@@ -100,6 +100,14 @@ const FOOTER_LINKS = {
     { label: "About", href: "/about" },
     { label: "Contact", href: "/contact" },
   ],
+  "Built for": [
+    { label: "Writers", href: "/for/writers" },
+    { label: "Developers", href: "/for/developers" },
+    { label: "Designers", href: "/for/designers" },
+    { label: "Educators & clinicians", href: "/for/educators" },
+    { label: "Founders & leaders", href: "/for/leaders" },
+    { label: "Students", href: "/for/students" },
+  ],
   Company: [
     { label: "Testimonials", href: "/#testimonials" },
     { label: "Sign In", href: "/signin" },
@@ -216,6 +224,17 @@ export default function Footer() {
                 <h4 className="text-white font-bold mb-6 text-sm">Learn</h4>
                 <ul className="space-y-4">
                   {FOOTER_LINKS["Learn"].map(link => (
+                    <li key={link.label}>
+                      <FooterLink href={link.href} label={link.label} />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="text-white font-bold mb-6 text-sm">Built for</h4>
+                <ul className="space-y-4">
+                  {FOOTER_LINKS["Built for"].map(link => (
                     <li key={link.label}>
                       <FooterLink href={link.href} label={link.label} />
                     </li>

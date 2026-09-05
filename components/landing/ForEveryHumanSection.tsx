@@ -88,6 +88,21 @@ function ProfCard({ card, index, isActive }: { card: ProfessionCard; index: numb
   );
 }
 
+/**
+ * The six profession clusters, each with a page describing what delegation
+ * erodes in that kind of work. Written literally rather than imported from
+ * lib/content/clusters, because this is a client component and pulling in the
+ * content module would ship its prose to every visitor's browser.
+ */
+const CLUSTER_LINKS = [
+  { href: "/for/writers", label: "Writers" },
+  { href: "/for/developers", label: "Developers" },
+  { href: "/for/designers", label: "Designers" },
+  { href: "/for/educators", label: "Educators & clinicians" },
+  { href: "/for/leaders", label: "Founders & leaders" },
+  { href: "/for/students", label: "Students" },
+];
+
 export default function ForEveryHumanSection() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(2);
@@ -163,14 +178,33 @@ export default function ForEveryHumanSection() {
         ))}
       </div>
 
-      {/* Footer label */}
+      {/* Footer label.
+
+          The cluster links replace a "+ See all professions" link that pointed
+          at /signup, which shows no professions — a control promising one thing
+          and doing another. Each cluster now has a page that genuinely lists
+          its professions and the baseline prompts it uses, which is also how a
+          crawler reaches them from the landing page rather than only from the
+          footer. */}
       <motion.div
         initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}
         viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.3 }}
         className="mt-10 text-center px-6"
       >
-        <p className="text-sm mb-2" style={{ color: "rgba(255,255,255,0.66)" }}>33 professions. 6 clusters. One engine built for all of them.</p>
-        <Link href="/signup" className="text-sm font-medium" style={{ color: "#FF5500" }}>+ See all professions</Link>
+        <p className="text-sm mb-5" style={{ color: "rgba(255,255,255,0.66)" }}>33 professions. 6 clusters. One engine built for all of them.</p>
+        <ul className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 list-none p-0 max-w-2xl mx-auto">
+          {CLUSTER_LINKS.map((c) => (
+            <li key={c.href}>
+              <Link
+                href={c.href}
+                className="inline-block rounded-full px-4 py-2 text-sm transition-colors hover:bg-white/5"
+                style={{ border: "1px solid rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.78)" }}
+              >
+                {c.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
       </motion.div>
     </section>
   );

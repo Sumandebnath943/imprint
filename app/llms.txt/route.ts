@@ -1,6 +1,7 @@
 import { SITE_URL, SITE_NAME, SITE_TAGLINE } from "@/lib/site";
 import { GLOSSARY } from "@/lib/content/glossary";
 import { getNoteMeta } from "@/lib/content/notes";
+import { CLUSTER_PAGES } from "@/lib/content/clusters";
 import { PERSON_NAME, ORG_NAME } from "@/lib/seo/entity";
 
 /**
@@ -20,6 +21,10 @@ export const dynamic = "force-static";
 export function GET() {
   const terms = GLOSSARY.map(
     (t) => `- [${t.term}](${SITE_URL}/glossary/${t.slug}): ${t.definition}`
+  ).join("\n");
+
+  const audiences = CLUSTER_PAGES.map(
+    (c) => `- [${c.title}](${SITE_URL}/for/${c.slug}): ${c.description}`
   ).join("\n");
 
   const notes = getNoteMeta()
@@ -55,6 +60,10 @@ than measure it. It is not a clinical or diagnostic instrument.
 - [FAQ](${SITE_URL}/faq): thirty answered questions covering the product, the research, the score, privacy and cost.
 - [Glossary](${SITE_URL}/glossary): fifteen defined terms, seven from the research literature and eight defined by ${SITE_NAME}.
 - [About](${SITE_URL}/about): why ${SITE_NAME} exists, in the words of the person who built it.
+
+## Built for
+
+${audiences}
 
 ## Writing
 

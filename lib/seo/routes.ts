@@ -30,6 +30,7 @@ export type IndexableRoute = {
 
 import { GLOSSARY } from "@/lib/content/glossary";
 import { getNoteMeta } from "@/lib/content/notes";
+import { CLUSTER_PAGES } from "@/lib/content/clusters";
 
 const STATIC_ROUTES: IndexableRoute[] = [
   { path: "/", lastModified: "2026-09-05" },
@@ -67,10 +68,17 @@ const GLOSSARY_ROUTES: IndexableRoute[] = GLOSSARY.map((t) => ({
   lastModified: "2026-09-05",
 }));
 
+/** Audience pages, generated so a new cluster cannot go unlisted. */
+const CLUSTER_ROUTES: IndexableRoute[] = CLUSTER_PAGES.map((c) => ({
+  path: `/for/${c.slug}`,
+  lastModified: "2026-09-05",
+}));
+
 export const INDEXABLE_ROUTES: IndexableRoute[] = [
   ...STATIC_ROUTES,
   ...NOTE_ROUTES,
   ...GLOSSARY_ROUTES,
+  ...CLUSTER_ROUTES,
 ];
 
 /**
