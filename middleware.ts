@@ -1,9 +1,9 @@
 import { updateSession } from "@/lib/supabase/middleware";
-import { aiCrawlerAlert } from "@/lib/beacon/ai-crawler-alert";
+import { crawlerAlert } from "@/lib/beacon/crawler-alert";
 import type { NextRequest, NextFetchEvent } from "next/server";
 
 export async function middleware(request: NextRequest, event: NextFetchEvent) {
-  // AI crawler telemetry. Handed to waitUntil rather than awaited, so the alert
+  // Crawler telemetry. Handed to waitUntil rather than awaited, so the alert
   // is sent after the response goes out and never adds latency to a page load.
   //
   // This runs here, not in the visitor beacon, because the beacon is a client
@@ -16,7 +16,7 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
   // take down every page rather than lose one telemetry event. Analytics is
   // never worth a 500.
   try {
-    const alert = aiCrawlerAlert(request);
+    const alert = crawlerAlert(request);
     if (alert) event.waitUntil(alert);
   } catch {
     // Deliberately silent: nothing useful to do, and logging on every request

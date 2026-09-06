@@ -213,7 +213,7 @@ components/       one directory per feature area
 content/
   notes/          articles as MDX, read at build time
 lib/
-  beacon/         visitor beacon: geo, bot scoring, Telegram, AI crawler ids
+  beacon/         visitor beacon: geo, bot scoring, Telegram, crawler + probe ids
   seo/            entity constants, JSON-LD builders, route registry
   content/        glossary, FAQ, research index, cluster and note loaders
   supabase/       browser, server and middleware clients
