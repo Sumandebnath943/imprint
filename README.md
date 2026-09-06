@@ -164,7 +164,7 @@ cp .env.local.example .env.local
 | `SUPABASE_SERVICE_ROLE_KEY` | Server-only; never exposed to the client |
 | `OPENAI_API_KEY` | Powers The Mirror |
 | `NEXT_PUBLIC_APP_URL` | Canonical origin, used for OG images and the sitemap |
-| `TELEGRAM_BOT_TOKEN` | Optional. Visitor beacon alerts; unset means the beacon is a no-op |
+| `TELEGRAM_BOT_TOKEN` | Optional. Visitor and crawler alerts; unset means both are a no-op |
 | `TELEGRAM_CHAT_ID` | Optional. Destination chat for those alerts |
 | `GOOGLE_SITE_VERIFICATION` | Optional. Search Console HTML-tag token; the meta tag is omitted when unset |
 | `BING_SITE_VERIFICATION` | Optional. Bing Webmaster meta-tag token |

@@ -40,6 +40,12 @@
  * an agent fetching those is the most interesting arrival this site can log,
  * because it means something is reading the AI context on purpose rather than
  * stumbling onto a page.
+ *
+ * ⚠ This must not be the first filter applied. Nearly every probe target ends
+ * in what looks like a file extension — `.env`, `wp-login.php`, `dump.sql` —
+ * so a caller that checks this before `classifyPath` throws away exactly the
+ * requests the probe list exists to catch. `crawler-alert.ts` checks for a
+ * probe first, and this second.
  */
 export function isReportablePath(pathname: string): boolean {
   if (pathname.startsWith("/_next/") || pathname.startsWith("/api/")) return false;

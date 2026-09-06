@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { identifyCrawler, type Crawler, type CrawlerKind } from "./crawlers";
-import { classifyPath, isReportablePath } from "./paths";
+import { classifyPath, isReportablePath, type PathVerdict } from "./paths";
 import { sendTelegram, telegramConfigured } from "./telegram";
 
 /**
@@ -48,6 +48,12 @@ function duplicate(key: string): boolean {
   return last !== undefined && now - last < DEDUPE_MS;
 }
 
+/** Shares `NEXT_PUBLIC_BEACON_DEBUG` with the visitor beacon on purpose: one
+ *  switch for "let local traffic alert me", not two to remember. */
+function localAlertsEnabled(): boolean {
+  return process.env.NEXT_PUBLIC_BEACON_DEBUG === "1";
+}
+
 function esc(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
@@ -79,9 +85,9 @@ function verb(kind: CrawlerKind): string {
     : "crawled a page";
 }
 
-function format(crawler: Crawler, req: NextRequest, pathname: string): string {
+function format(crawler: Crawler, req: NextRequest, pathname: string, verdict: PathVerdict): string {
   const h = req.headers;
-  const { known, probe } = classifyPath(pathname);
+  const { known, probe } = verdict;
   // Absent means "assume it was served". A route added to the site but not yet
   // to lib/beacon/paths.ts must never be reported as a 404 that never happened
   // — but an unknown path that is also a recognised probe target is the one
@@ -143,18 +149,31 @@ function format(crawler: Crawler, req: NextRequest, pathname: string): string {
 export function crawlerAlert(req: NextRequest): Promise<void> | null {
   if (!telegramConfigured()) return null;
 
+  const { pathname, hostname } = new URL(req.url);
+
+  // Local work must not alert anyone — the same promise the visitor beacon
+  // makes, and the same switch to override it. This matters more than it looks:
+  // `curl` and `python-requests` are recognised agents now, so without this a
+  // single `curl localhost:3000` during development sends a Telegram message.
+  if (!localAlertsEnabled() && /^(localhost|127\.0\.0\.1|\[::1\])$/.test(hostname)) return null;
+
   const crawler = identifyCrawler(req.headers.get("user-agent"));
   if (!crawler) return null;
   if (!ALERT_ON.includes(crawler.kind)) return null;
 
-  const { pathname } = new URL(req.url);
-  if (!isReportablePath(pathname)) return null;
+  // Order matters, and getting it wrong makes the probe list dead code. Every
+  // interesting probe target ends in something the asset rule reads as a file
+  // extension — `.env`, `wp-login.php`, `dump.sql`, `id_rsa.pem` — so filtering
+  // assets first silently discards exactly the requests worth seeing. A
+  // recognised probe is always reportable; everything else still has to earn it.
+  const verdict = classifyPath(pathname);
+  if (!verdict.probe && !isReportablePath(pathname)) return null;
 
   const ip =
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "";
   if (duplicate(`${crawler.name}|${ip}|${pathname}`)) return null;
 
-  return sendTelegram(format(crawler, req, pathname))
+  return sendTelegram(format(crawler, req, pathname, verdict))
     .then(() => undefined)
     .catch(() => undefined);
 }
