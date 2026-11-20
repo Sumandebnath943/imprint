@@ -7,7 +7,7 @@ export interface VaultSkill {
   cluster: string;
   strength_level: number; // 0–100 (DB value)
   decay_rate: number;     // strength lost per day (default 0.5)
-  last_exercised: string; // ISO timestamp
+  last_exercised: string | null; // ISO timestamp
   times_practiced: number;
   created_at: string;
   updated_at: string;
@@ -63,14 +63,8 @@ export function getStrengthLabel(strength: number): string {
 
 // ── Decay engine ──────────────────────────────────────────────────────────
 
-export function calcDecayedStrength(skill: VaultSkill): number {
-  const daysSince =
-    (Date.now() - new Date(skill.last_exercised).getTime()) / (1000 * 60 * 60 * 24);
-  const loss = daysSince * (skill.decay_rate ?? 0.5);
-  return Math.max(0, Math.round(skill.strength_level - loss));
-}
-
-export function getDaysSinceExercised(last: string): number {
+export function getDaysSinceExercised(last: string | null): number {
+  if (!last) return Infinity;
   return Math.floor(
     (Date.now() - new Date(last).getTime()) / (1000 * 60 * 60 * 24)
   );
@@ -84,18 +78,12 @@ export function getDecayStatus(days: number): { label: string; color: string } {
   return             { label: "🔴 Decaying fast",     color: "#FF2D2D" };
 }
 
-export function getRelativeTime(isoDate: string): string {
+export function getRelativeTime(isoDate: string | null): string {
+  if (!isoDate) return "No practice yet";
   const days = getDaysSinceExercised(isoDate);
   if (days === 0) return "Today";
   if (days === 1) return "Yesterday";
   return `${days} days ago`;
-}
-
-export function getChallengeGain(strength: number): number {
-  if (strength < 30)  return 15;
-  if (strength < 60)  return 10;
-  if (strength < 80)  return 7;
-  return 5;
 }
 
 // ── Challenge templates ───────────────────────────────────────────────────

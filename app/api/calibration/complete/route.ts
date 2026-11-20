@@ -1,283 +1,98 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
+import type { CalibrationPrompt, CalibrationResponse } from "@/lib/calibration/types";
+import { getTextMetrics } from "@/lib/forge/types";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
-// Helper: get ISO week number
-function getWeekNumber(d: Date): number {
-  const start = new Date(d.getFullYear(), 0, 1);
-  return Math.ceil((((d.getTime() - start.getTime()) / 86400000) + start.getDay() + 1) / 7);
-}
+const completionSchema = z.object({ sessionId: z.uuid() });
 
-/**
- * Score label from drift score (0 = anchored, 100 = crisis).
- *
- * These four values are the only ones drift_scores.score_label permits, and
- * the thresholds match getDriftLabel() in lib/dashboard/types.ts so the stored
- * label and the displayed one always agree.
- *
- * This previously returned "stable" for 21–45, which is not in the column's
- * CHECK constraint: any calibration landing in that band failed to insert and
- * the user got a 500 with their completed session discarded.
- */
-function getScoreLabel(score: number): string {
-  if (score < 40) return "anchored";
-  if (score < 60) return "drifting";
-  if (score < 80) return "critical";
-  return "crisis";
-}
-
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   try {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: "Sign in to finish calibration." }, { status: 401 });
+    const parsed = completionSchema.safeParse(await request.json().catch(() => null));
+    if (!parsed.success) return NextResponse.json({ error: "Invalid session." }, { status: 400 });
 
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { sessionId } = parsed.data;
+    const { data: session, error: sessionError } = await supabase.from("calibration_sessions")
+      .select("*").eq("id", sessionId).eq("user_id", user.id).maybeSingle();
+    if (sessionError || !session) return NextResponse.json({ error: "Calibration could not be found." }, { status: 404 });
+
+    const admin = createAdminClient();
+    if (session.status === "completed") {
+      const { data: saved, error } = await supabase.from("drift_scores").select("*")
+        .eq("user_id", user.id).eq("calibration_session_id", sessionId)
+        .order("created_at", { ascending: false }).limit(1).maybeSingle();
+      if (error) throw error;
+      if (saved) return NextResponse.json({
+        score: saved.score, scoreLabel: saved.score_label,
+        delta: session.comparison_vs_baseline?.delta ?? null,
+        signals: saved.contributing_signals, nextSessionDue: session.next_session_due,
+      });
     }
 
-    const body = await req.json();
-    const { sessionId } = body;
-
-    if (!sessionId) {
-      return NextResponse.json({ error: "Missing sessionId" }, { status: 400 });
+    const prompts = session.prompts as CalibrationPrompt[];
+    const responses = session.responses as CalibrationResponse[];
+    if (!prompts.length || prompts.some((prompt) => !responses.some((response) =>
+      response.promptId === prompt.id && getTextMetrics(response.content, 0).words >= (prompt.minWords ?? 1)))) {
+      return NextResponse.json({ error: "Save an answer to every calibration task first." }, { status: 409 });
     }
 
-    // 1. Fetch calibration session with responses
-    const { data: session, error: sessionError } = await supabase
-      .from("calibration_sessions")
-      .select("*")
-      .eq("id", sessionId)
-      .eq("user_id", user.id)
-      .single();
-
-    if (sessionError || !session) {
-      console.error("Session fetch error:", sessionError);
-      return NextResponse.json({ error: "Session not found" }, { status: 404 });
-    }
-
-    // ── 2. Fetch all 4 signal data in parallel ──────────────────────────────
-
-    const [baselineData, vaultData, journalData, mirrorData, prevDriftData, calData] =
-      await Promise.all([
-        // Baseline imprints (for text-similarity proxy)
-        supabase
-          .from("baseline_imprints")
-          .select("word_count, vocabulary_richness, avg_sentence_length")
-          .eq("user_id", user.id),
-        // Skill vault (vault activity)
-        supabase
-          .from("skill_vault")
-          .select("strength_level, last_exercised, times_practiced")
-          .eq("user_id", user.id),
-        // Journal (regularity signal)
-        supabase
-          .from("journal_entries")
-          .select("created_at")
-          .eq("user_id", user.id)
-          .gte("created_at", new Date(Date.now() - 14 * 86400000).toISOString()),
-        // Mirror sessions (AI independence — dependency flags)
-        supabase
-          .from("mirror_sessions")
-          .select("dependency_flags")
-          .eq("user_id", user.id)
-          .gte("created_at", new Date(Date.now() - 14 * 86400000).toISOString()),
-        // Previous drift score for delta
-        supabase
-          .from("drift_scores")
-          .select("score")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .single(),
-        // All completed calibrations for IMPRINT score
-        supabase
-          .from("calibration_sessions")
-          .select("id")
-          .eq("user_id", user.id)
-          .eq("status", "completed"),
-      ]);
-
-    // ── 3. Calculate each of the 4 signals (0–100 scale, higher = more drift) ──
-
-    // SIGNAL 1: Baseline divergence (40% weight)
-    // How far this calibration's language sits from the user's baseline.
-    const responses: { wordCount?: number; content?: string }[] = session.responses || [];
-    const calWords = responses.reduce((s: number, r: { wordCount?: number }) => s + (r.wordCount || 0), 0);
-    const calText = responses.map((r: { content?: string }) => r.content || "").join(" ");
-    const calVocabWords = calText.toLowerCase().split(/\s+/).filter(Boolean);
-    const calVocabRichness = calVocabWords.length > 0
-      ? new Set(calVocabWords).size / calVocabWords.length
-      : 0;
-    const calSentences = calText.split(/[.!?]+/).filter((s: string) => s.trim());
-    const calAvgSentLen = calSentences.length > 0 ? calWords / calSentences.length : 0;
-
-    const avgBaselineVocab = baselineData.data?.length
-      ? baselineData.data.reduce((s, b) => s + (b.vocabulary_richness || 0), 0) / baselineData.data.length
-      : 0.5;
-    const avgBaselineSentLen = baselineData.data?.length
-      ? baselineData.data.reduce((s, b) => s + (b.avg_sentence_length || 0), 0) / baselineData.data.length
-      : 15;
-
-    // Higher divergence = higher drift
-    const vocabDivergence = avgBaselineVocab > 0
-      ? Math.abs(calVocabRichness - avgBaselineVocab) / avgBaselineVocab
-      : 0;
-    const sentLenDivergence = avgBaselineSentLen > 0
-      ? Math.abs(calAvgSentLen - avgBaselineSentLen) / avgBaselineSentLen
-      : 0;
-    const baselineDivergence = Math.min(100, Math.round((vocabDivergence * 50 + sentLenDivergence * 50) * 100));
-
-    // SIGNAL 2: Vault inactivity (25% weight)
-    // Share of tracked skills NOT practised in the past 14 days.
-    const vaultSkills = vaultData.data || [];
-    const cutoff14 = Date.now() - 14 * 86400000;
-    const recentlyPracticed = vaultSkills.filter(
-      (s) => new Date(s.last_exercised).getTime() >= cutoff14
-    ).length;
-    const vaultInactivity = vaultSkills.length > 0
-      ? Math.round(100 - (recentlyPracticed / vaultSkills.length) * 100)
-      : 50; // Default 50 if no skills
-
-    // SIGNAL 3: AI dependence (20% weight)
-    // Dependency flags the Mirror raised in the past 14 days.
-    const totalFlags = (mirrorData.data || []).reduce(
-      (s, m) => s + (m.dependency_flags || 0), 0
-    );
-    const aiDependence = Math.min(100, totalFlags * 10); // each flag adds 10 drift points
-
-    // SIGNAL 4: Journal irregularity (15% weight)
-    // Share of the past 14 days with no entry.
-    const journalDays = new Set(
-      (journalData.data || []).map((j) => new Date(j.created_at).toDateString())
-    ).size;
-    const journalIrregularity = Math.round(Math.max(0, 100 - (journalDays / 14) * 100));
-
-    // ── 4. Weighted drift score ─────────────────────────────────────────────
-    const drift_score_produced = Math.round(
-      baselineDivergence  * 0.40 +
-      vaultInactivity     * 0.25 +
-      aiDependence        * 0.20 +
-      journalIrregularity * 0.15
-    );
-    const finalDriftScore = Math.max(0, Math.min(100, drift_score_produced));
-    const score_label = getScoreLabel(finalDriftScore);
-
-    // Named for what they actually measure. All four are drift *contributors*
-    // — higher is worse — but they were stored under the names of their
-    // opposites (baselineConsistency for divergence, aiIndependence for
-    // dependence), so every consumer read them backwards. They are snake_case
-    // now to match the key the dashboard reads; the camelCase keys never
-    // matched, so the dashboard fell back to hardcoded placeholder
-    // percentages for every user on every account.
-    const contributing_signals = {
-      baseline_divergence: baselineDivergence,
-      vault_inactivity: vaultInactivity,
-      ai_dependence: aiDependence,
-      journal_irregularity: journalIrregularity,
-    };
-
-    const comparison_vs_baseline = {
-      vocabulary_richness_delta: parseFloat((calVocabRichness - avgBaselineVocab).toFixed(3)),
-      avg_sentence_length_delta: parseFloat((calAvgSentLen - avgBaselineSentLen).toFixed(2)),
-      word_count: calWords,
-    };
-
-    // ── 5. Update calibration session ──────────────────────────────────────
-    const nextSessionDue = new Date();
-    nextSessionDue.setDate(nextSessionDue.getDate() + 14);
-
-    const { error: calError } = await supabase
-      .from("calibration_sessions")
-      .update({
-        status: "completed",
-        drift_score_produced: finalDriftScore,
-        comparison_vs_baseline,
-        completed_at: new Date().toISOString(),
-        next_session_due: nextSessionDue.toISOString(),
-      })
-      .eq("id", sessionId);
-
-    if (calError) {
-      console.error("Error updating calibration session:", calError);
-      return NextResponse.json({ error: "Failed to update calibration session" }, { status: 500 });
-    }
-
-    // ── 6. Insert drift_scores ──────────────────────────────────────────────
-    const deltaFromPrevious = prevDriftData.data
-      ? finalDriftScore - prevDriftData.data.score
-      : null;
-
-    const now = new Date();
-    const { error: driftError } = await supabase.from("drift_scores").insert({
-      user_id: user.id,
-      score: finalDriftScore,
-      score_label,
-      calibration_session_id: sessionId,
-      delta_from_previous: deltaFromPrevious,
-      contributing_signals,
-      week_number: getWeekNumber(now),
-      year: now.getFullYear(),
-    });
-
-    if (driftError) {
-      console.error("Error inserting drift score:", driftError);
-      return NextResponse.json({ error: "Failed to save drift score" }, { status: 500 });
-    }
-
-    // ── 7. Recalculate IMPRINT Score ────────────────────────────────────────
-    // Fetch extra data we need
-    const [allVaultData, allJournalData, allMirrorData] = await Promise.all([
-      supabase.from("skill_vault").select("strength_level").eq("user_id", user.id),
-      supabase.from("journal_entries").select("created_at").eq("user_id", user.id),
-      supabase.from("mirror_sessions").select("dependency_flags").eq("user_id", user.id),
+    const cutoff = new Date(Date.now() - 14 * 86400000).toISOString();
+    const [baseline, vault, journal, prior, profile] = await Promise.all([
+      supabase.from("baseline_imprints").select("module_id,response_text,created_at")
+        .eq("user_id", user.id).eq("response_type", "text").order("created_at", { ascending: false }),
+      supabase.from("skill_vault").select("last_exercised,times_practiced").eq("user_id", user.id),
+      supabase.from("journal_entries").select("created_at").eq("user_id", user.id).gte("created_at", cutoff),
+      supabase.from("calibration_sessions").select("id", { count: "exact", head: true })
+        .eq("user_id", user.id).eq("status", "completed"),
+      supabase.from("profiles").select("imprint_score").eq("id", user.id).single(),
     ]);
+    for (const result of [baseline, vault, journal, prior, profile]) if (result.error) throw result.error;
 
-    const avgSkillStrength =
-      allVaultData.data?.length
-        ? allVaultData.data.reduce((s, v) => s + v.strength_level, 0) / allVaultData.data.length
-        : 0;
-
-    const calibrationsCompleted = (calData.data?.length ?? 0) + 1; // +1 for current
-
-    const allJournalDays = new Set(
-      (allJournalData.data || []).map((j) => new Date(j.created_at).toDateString())
-    ).size;
-
-    const totalDependencyFlags = (allMirrorData.data || []).reduce(
-      (s, m) => s + (m.dependency_flags || 0), 0
-    );
-
-    const imprintScore = Math.max(
-      0,
-      Math.min(
-        1000,
-        Math.round(
-          avgSkillStrength * 2.5 +
-          Math.min(calibrationsCompleted * 50, 300) +
-          Math.min(allJournalDays * 8, 250) +
-          Math.max(200 - totalDependencyFlags * 5, 0)
-        )
-      )
-    );
-
-    const { error: profileError } = await supabase
-      .from("profiles")
-      .update({ imprint_score: imprintScore })
-      .eq("id", user.id);
-
-    if (profileError) {
-      console.error("Error updating imprint score:", profileError);
-      // Non-fatal — continue
+    const distances = prompts.flatMap((prompt) => {
+      const original = baseline.data?.find((row) => row.module_id === prompt.moduleId && row.response_text);
+      const response = responses.find((answer) => answer.promptId === prompt.id);
+      if (!original?.response_text || !response) return [];
+      const a = getTextMetrics(original.response_text, 0);
+      const b = getTextMetrics(response.content, 0);
+      if (!a.words || !b.words) return [];
+      return [Math.min(100, 50 * (Math.abs(b.vocabularyRichness - a.vocabularyRichness) / a.vocabularyRichness +
+        Math.abs(b.averageSentenceLength - a.averageSentenceLength) / a.averageSentenceLength))];
+    });
+    if (!distances.length) {
+      return NextResponse.json({ error: "There are no comparable legacy text responses for this session." }, { status: 422 });
     }
 
-    return NextResponse.json({
-      score: finalDriftScore,
-      scoreLabel: score_label,
-      delta: deltaFromPrevious,
-      signals: contributing_signals,
-      nextSessionDue: nextSessionDue.toISOString(),
+    const baselineDivergence = Math.round(distances.reduce((sum, value) => sum + value, 0) / distances.length);
+    const skills = vault.data ?? [];
+    const active = skills.filter((skill) => skill.times_practiced > 0 && skill.last_exercised >= cutoff).length;
+    const vaultInactivity = skills.length ? Math.round(100 * (1 - active / skills.length)) : 50;
+    const journalDays = new Set(journal.data?.map((entry) => entry.created_at.slice(0, 10))).size;
+    const journalIrregularity = Math.round(Math.max(0, 100 * (1 - journalDays / 14)));
+    const score = Math.round((baselineDivergence * 40 + vaultInactivity * 25 + journalIrregularity * 15) / 80);
+    const scoreLabel = score < 40 ? "anchored" : score < 60 ? "drifting" : score < 80 ? "critical" : "crisis";
+    const nextSessionDue = new Date(Date.now() + 14 * 86400000).toISOString();
+
+    const { data, error } = await admin.rpc("finish_imprint_calibration", {
+      p_user_id: user.id, p_session_id: sessionId, p_version: session.progress_version,
+      p_result: {
+        score, scoreLabel, nextSessionDue,
+        signals: {
+          baseline_divergence: baselineDivergence, vault_inactivity: vaultInactivity,
+          journal_irregularity: journalIrregularity, methodology: "legacy-text-v2",
+        },
+      },
+      p_comparison: { matched_modules: distances.length },
+      p_imprint: profile.data?.imprint_score ?? 0,
     });
+    if (error?.code === "P0001") return NextResponse.json({ error: error.message }, { status: 409 });
+    if (error) throw error;
+    return NextResponse.json(data);
   } catch (error) {
-    console.error("Calibration complete error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    console.error("Calibration completion failed", error);
+    return NextResponse.json({ error: "Your comparison could not be scored. Your responses are saved." }, { status: 500 });
   }
 }

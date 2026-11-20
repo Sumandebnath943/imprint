@@ -1,5 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { AUTH_RESUME_PATH } from "@/lib/auth/resume";
+import { ADULT_ONLY_MESSAGE, AGE_CONFIRMATION_PATH, hasConfirmedAdultAge } from "@/lib/auth/eligibility";
+
+const accountRightsPaths = new Set(["/api/account/export", "/api/account/delete"]);
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -42,6 +46,15 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const pathname = request.nextUrl.pathname;
+  function redirect(path: string, signInDestination?: string) {
+    const url = request.nextUrl.clone();
+    url.pathname = path;
+    url.search = "";
+    if (signInDestination) url.searchParams.set("redirectTo", signInDestination);
+    const response = NextResponse.redirect(url);
+    for (const cookie of supabaseResponse.cookies.getAll()) response.cookies.set(cookie);
+    return response;
+  }
 
   // Protected routes — require session.
   // /onboarding was previously unguarded: it rendered fine with no session,
@@ -54,16 +67,18 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith("/signin") || pathname.startsWith("/signup");
 
   if (isProtectedRoute && !user) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/signin";
-    url.searchParams.set("redirectTo", pathname);
-    return NextResponse.redirect(url);
+    return redirect("/signin", pathname);
+  }
+
+  if (user && !hasConfirmedAdultAge(user)) {
+    if (isProtectedRoute) return redirect(AGE_CONFIRMATION_PATH);
+    if (pathname.startsWith("/api/") && !accountRightsPaths.has(pathname)) {
+      return NextResponse.json({ error: ADULT_ONLY_MESSAGE }, { status: 403, headers: { "Cache-Control": "private, no-store" } });
+    }
   }
 
   if (isAuthRoute && user) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
-    return NextResponse.redirect(url);
+    return redirect(AUTH_RESUME_PATH);
   }
 
   return supabaseResponse;

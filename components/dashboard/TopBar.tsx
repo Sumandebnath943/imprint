@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Bell } from "lucide-react";
 import type { DashboardProfile, DashboardDriftScore } from "@/lib/dashboard/types";
-import { getDriftColor } from "@/lib/dashboard/types";
 import { createClient } from "@/lib/supabase/client";
 
 interface Notification {
@@ -21,7 +20,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/dashboard/mirror": "The Mirror",
   "/dashboard/vault": "Skill Vault",
   "/dashboard/journal": "Journal",
-  "/dashboard/drift": "Drift Score",
+  "/dashboard/drift": "Progress",
   "/dashboard/calibration": "Calibration",
   "/dashboard/time-capsule": "Time Capsule",
   "/dashboard/beliefs": "Beliefs",
@@ -57,7 +56,7 @@ interface TopBarProps {
   sidebarWidth: number;
 }
 
-export default function TopBar({ profile, driftScore, sidebarWidth }: TopBarProps) {
+export default function TopBar({ profile, sidebarWidth }: TopBarProps) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -75,7 +74,7 @@ export default function TopBar({ profile, driftScore, sidebarWidth }: TopBarProp
       const supabase = createClient();
       const today = new Date().toISOString().split("T")[0];
 
-      const [challenges, capsules, requests] = await Promise.all([
+      const [challenges, capsules, requests, tasks] = await Promise.all([
         supabase
           .from("vault_challenges")
           .select("id, challenge_title, due_date")
@@ -84,11 +83,10 @@ export default function TopBar({ profile, driftScore, sidebarWidth }: TopBarProp
           .lte("due_date", today)
           .limit(5),
         supabase
-          .from("time_capsules")
+          .from("time_capsule_metadata")
           .select("id, title, unlock_date")
-          .eq("user_id", profile.id)
-          .eq("is_unlocked", false)
-          .lte("unlock_date", today)
+          .eq("is_unlocked", true)
+          .order("unlock_date", { ascending: false })
           .limit(5),
         supabase
           .from("mentorship_requests")
@@ -96,9 +94,15 @@ export default function TopBar({ profile, driftScore, sidebarWidth }: TopBarProp
           .eq("mentor_id", profile.id)
           .eq("status", "pending")
           .limit(5),
+        supabase.from("imprint_tasks").select("id,kind,due_at").eq("user_id", profile.id).is("completed_at", null).order("due_at").limit(5),
       ]);
 
       const next: Notification[] = [
+        ...(tasks.data ?? []).map((task) => ({
+          id: task.id, label: Date.parse(task.due_at) < Date.now() ? "Imprint task overdue" : "Imprint task scheduled",
+          detail: (task.kind === "check-in" ? "AI-use check-in" : task.kind) + " · " + new Date(task.due_at).toLocaleDateString(),
+          href: "/dashboard/drift",
+        })),
         ...(challenges.data ?? []).map((c) => ({
           id: `challenge-${c.id}`,
           label: "Challenge due",
@@ -125,7 +129,7 @@ export default function TopBar({ profile, driftScore, sidebarWidth }: TopBarProp
     }
   }, [profile?.id]);
 
-  useEffect(() => { loadNotifications(); }, [loadNotifications]);
+  useEffect(() => { loadNotifications(); }, [loadNotifications, pathname]);
 
   // Close the panel on outside click.
   useEffect(() => {
@@ -140,8 +144,6 @@ export default function TopBar({ profile, driftScore, sidebarWidth }: TopBarProp
   }, [notifOpen]);
 
   const title = titleFor(pathname);
-  const score = driftScore?.score ?? 0;
-  const driftColor = getDriftColor(score);
 
   const initials = profile?.full_name
     ? profile.full_name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()
@@ -152,7 +154,7 @@ export default function TopBar({ profile, driftScore, sidebarWidth }: TopBarProp
     // globals.css), so the two fixed bars read as one material. Always on
     // here — unlike the landing nav there is no transparent-over-hero state.
     <div
-      className="fixed top-0 right-0 z-40 flex items-center px-8 gap-6 imprint-glass"
+      className="fixed top-0 right-0 z-40 flex items-center gap-2 px-3 md:gap-6 md:px-8 imprint-glass"
       data-glass="on"
       style={{
         left: sidebarWidth,
@@ -246,9 +248,8 @@ export default function TopBar({ profile, driftScore, sidebarWidth }: TopBarProp
             padding: "6px 14px",
           }}
         >
-          <span className="w-2 h-2 rounded-full shrink-0" style={{ background: driftColor }} />
           <span className="font-medium text-white" style={{ fontSize: 13, fontFamily: "Space Grotesk, sans-serif" }}>
-            Drift: {score}
+            Progress
           </span>
         </Link>
 

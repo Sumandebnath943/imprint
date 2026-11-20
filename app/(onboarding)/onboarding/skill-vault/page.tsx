@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { findRoleTrack } from "@/lib/assessment/catalog";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Plus } from "lucide-react";
@@ -20,7 +21,8 @@ export default function SkillVaultPage() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const cluster = answers.professionCluster;
-  const suggestions = CLUSTER_SKILLS[cluster] ?? CLUSTER_SKILLS["life_personal"];
+  const roleSkills = findRoleTrack(answers.profession)?.tasks.map((task) => task.skill) ?? [];
+  const suggestions = Array.from(new Set([...roleSkills, ...(CLUSTER_SKILLS[cluster] ?? CLUSTER_SKILLS.life_personal)]));
   const skills = answers.skills;
 
   const canContinue = skills.length >= MIN_SKILLS;
@@ -46,11 +48,11 @@ export default function SkillVaultPage() {
 
   const handleBack = () => {
     setStep(5);
-    router.push("/onboarding/baseline");
+    router.push("/onboarding/baseline-intro");
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col overflow-hidden px-6 pt-28 pb-28 md:pt-[72px] md:pb-[84px] md:h-full">
+    <div className="relative min-h-screen flex flex-col px-6 pt-28 pb-28 md:pt-[72px] md:pb-[96px] md:h-full md:min-h-0 md:overflow-y-auto">
       {/* Ghost word */}
       <div
         className="fixed select-none pointer-events-none"
@@ -156,7 +158,7 @@ export default function SkillVaultPage() {
                     {/* Strength slider */}
                     <div className="flex items-center gap-3">
                       <p className="text-xs flex-shrink-0" style={{ color: "rgba(255,255,255,0.62)" }}>
-                        Strength
+                        Self-rating
                       </p>
                       <input
                         type="range"
@@ -200,6 +202,7 @@ export default function SkillVaultPage() {
             value={customInput}
             onChange={(e) => setCustomInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") handleAddCustom(); }}
+            aria-label="Custom skill"
             placeholder="Add a skill not listed above..."
             className="flex-1 h-[52px] px-4 text-sm text-white outline-none transition-all duration-200"
             style={{

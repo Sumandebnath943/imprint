@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { BookOpen } from "lucide-react";
+import { toast } from "sonner";
 import CapsuleList, { type TimeCapsule } from "@/components/time-capsule/CapsuleList";
 import CapsuleCompose from "@/components/time-capsule/CapsuleCompose";
 import CapsuleRightPanel from "@/components/time-capsule/CapsuleRightPanel";
@@ -32,14 +33,14 @@ export default function TimeCapsuleClient({ capsules: initial, userId, userName,
     setMode("view");
   }, []);
 
-  const handleReply = useCallback((original: TimeCapsule) => {
-    // Pre-populate a new compose with "Reply to: [title]"
+  const handleReply = useCallback(() => {
     setSelected(null);
     setMode("compose");
   }, []);
 
   const handleDelete = useCallback(async (id: string) => {
-    await supabase.from("time_capsules").delete().eq("id", id).eq("user_id", userId);
+    const { error } = await supabase.from("time_capsules").delete().eq("id", id).eq("user_id", userId);
+    if (error) { toast.error("Could not delete the capsule. Try again."); return; }
     setCapsules((p) => p.filter((c) => c.id !== id));
     setSelected(null);
     setMode("empty");
@@ -75,7 +76,7 @@ export default function TimeCapsuleClient({ capsules: initial, userId, userName,
             <motion.div key="compose" className="flex-1 flex h-full"
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <CapsuleCompose
-                userId={userId} userName={userName}
+                userName={userName}
                 currentDriftScore={currentDriftScore}
                 onSaved={handleSaved}
                 onCancel={() => setMode(selected ? "view" : "empty")}

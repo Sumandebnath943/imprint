@@ -5,12 +5,12 @@ import { motion } from "framer-motion";
 import { Lock, Unlock, Plus } from "lucide-react";
 
 export interface TimeCapsule {
-  id: string; user_id: string; title: string; content: string;
+  id: string; title: string;
   unlock_date: string; is_unlocked: boolean;
   drift_score_at_writing?: number; created_at: string;
 }
 
-export function capsuleIsUnlocked(c: TimeCapsule) { return new Date(c.unlock_date) <= new Date(); }
+export function capsuleIsUnlocked(c: TimeCapsule) { return c.is_unlocked; }
 export function daysRemaining(unlockDate: string) {
   return Math.max(0, Math.ceil((new Date(unlockDate).getTime() - Date.now()) / 86400000));
 }
@@ -20,7 +20,7 @@ export function progressPct(c: TimeCapsule) {
   return Math.min(100, Math.max(0, (elapsed / total) * 100));
 }
 export function fmtDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 }
 
 interface CapsuleListProps {

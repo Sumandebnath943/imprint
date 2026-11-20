@@ -6,6 +6,7 @@ import { Mic, Square, Play, Pause, RotateCcw } from "lucide-react";
 
 interface VoiceRecorderProps {
   onRecordingComplete: (blob: Blob, durationSeconds: number) => void;
+  onRecordingCleared?: () => void;
 }
 
 function formatTime(secs: number) {
@@ -14,7 +15,7 @@ function formatTime(secs: number) {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-export default function VoiceRecorder({ onRecordingComplete }: VoiceRecorderProps) {
+export default function VoiceRecorder({ onRecordingComplete, onRecordingCleared }: VoiceRecorderProps) {
   const [state, setState] = useState<"idle" | "recording" | "done">("idle");
   const [duration, setDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -24,22 +25,41 @@ export default function VoiceRecorder({ onRecordingComplete }: VoiceRecorderProp
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const recordingStartedAt = useRef(0);
+  const mounted = useRef(false);
+  const [error, setError] = useState("");
+  const [requesting, setRequesting] = useState(false);
 
   const startRecording = async () => {
+    if (requesting) return;
+    setRequesting(true);
+    setError("");
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mr = new MediaRecorder(stream, { mimeType: "audio/webm;codecs=opus" });
+      if (!mounted.current) {
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
+      streamRef.current = stream;
+      const mimeType = ["audio/webm;codecs=opus", "audio/mp4", "audio/webm"]
+        .find((type) => MediaRecorder.isTypeSupported(type));
+      const mr = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
       mediaRecorderRef.current = mr;
       chunksRef.current = [];
+      recordingStartedAt.current = Date.now();
 
       mr.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
       mr.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        const blob = new Blob(chunksRef.current, { type: mr.mimeType.split(";")[0] || "audio/webm" });
+        const seconds = Math.round((Date.now() - recordingStartedAt.current) / 1000);
+        setDuration(seconds);
         const url = URL.createObjectURL(blob);
         setAudioUrl(url);
-        onRecordingComplete(blob, duration);
+        onRecordingComplete(blob, seconds);
         setState("done");
         stream.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
       };
 
       mr.start();
@@ -47,7 +67,11 @@ export default function VoiceRecorder({ onRecordingComplete }: VoiceRecorderProp
       setDuration(0);
       timerRef.current = setInterval(() => setDuration((d) => d + 1), 1000);
     } catch {
-      alert("Microphone access is required for voice recording.");
+      streamRef.current?.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+      setError("Could not access the microphone. Use a recording or another input method if available.");
+    } finally {
+      if (mounted.current) setRequesting(false);
     }
   };
 
@@ -62,6 +86,7 @@ export default function VoiceRecorder({ onRecordingComplete }: VoiceRecorderProp
     setDuration(0);
     setIsPlaying(false);
     setState("idle");
+    onRecordingCleared?.();
   };
 
   const togglePlay = () => {
@@ -76,14 +101,24 @@ export default function VoiceRecorder({ onRecordingComplete }: VoiceRecorderProp
   };
 
   useEffect(() => {
+    mounted.current = true;
     return () => {
+      mounted.current = false;
       if (timerRef.current) clearInterval(timerRef.current);
-      if (audioUrl) URL.revokeObjectURL(audioUrl);
+      const recorder = mediaRecorderRef.current;
+      if (recorder && recorder.state !== "inactive") {
+        recorder.onstop = null;
+        recorder.stop();
+      }
+      streamRef.current?.getTracks().forEach((track) => track.stop());
     };
-  }, [audioUrl]);
+  }, []);
+
+  useEffect(() => () => { if (audioUrl) URL.revokeObjectURL(audioUrl); }, [audioUrl]);
 
   return (
     <div className="flex flex-col items-center gap-6 py-8">
+      {error && <p role="status" className="text-sm text-[#ffa487]">{error}</p>}
       {audioUrl && <audio ref={audioRef} src={audioUrl} onEnded={() => setIsPlaying(false)} className="hidden" />}
 
       {/* Record / Stop button */}
@@ -103,6 +138,9 @@ export default function VoiceRecorder({ onRecordingComplete }: VoiceRecorderProp
         )}
 
         <motion.button
+          type="button"
+          aria-label={state === "recording" ? "Stop recording" : "Record response"}
+          disabled={requesting}
           onClick={state === "idle" ? startRecording : state === "recording" ? stopRecording : undefined}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}

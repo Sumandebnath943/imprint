@@ -1,3 +1,4 @@
+import { findRoleTrack } from "@/lib/assessment/catalog";
 import ProfileClient from "@/components/profile/ProfileClient";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -23,20 +24,19 @@ export default async function ProfilePage() {
     { data: skills },
     { data: challenges },
     { data: journalEntries },
-    { data: mirrorSessions },
   ] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).single(),
-    supabase.from("drift_scores").select("score, score_label, created_at").eq("user_id", user.id).order("created_at", { ascending: false }),
+    supabase.from("drift_scores").select("score, score_label, created_at").eq("user_id", user.id).not("calibration_session_id", "is", null).order("created_at", { ascending: false }),
     supabase.from("calibration_sessions").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("status", "completed"),
     supabase.from("skill_vault").select("id, strength_level, times_practiced").eq("user_id", user.id),
     supabase.from("vault_challenges").select("id, status, completed_at").eq("user_id", user.id),
     supabase.from("journal_entries").select("id, word_count, is_forge_entry, has_ai_assistance, created_at").eq("user_id", user.id).order("created_at", { ascending: false }),
-    supabase.from("mirror_sessions").select("dependency_flags").eq("user_id", user.id),
   ]);
 
-  const latestDriftScore = driftScores && driftScores.length > 0
-    ? { score: driftScores[0].score, status: driftScores[0].score_label, date: driftScores[0].created_at }
-    : null;
+  const role = findRoleTrack(profile?.profession);
+  const assessed = role ? await supabase.from("role_assessments").select("score,scored_at")
+    .eq("user_id", user.id).eq("role_id", role.id).eq("rubric_version", role.version)
+    .eq("status", "scored").order("form", { ascending: false }).limit(1).maybeSingle() : null;
 
   // ── Real stats ──────────────────────────────────────────────────────────
   const completedChallenges = (challenges || []).filter(c => c.status === "completed");
@@ -67,29 +67,8 @@ export default async function ProfilePage() {
     else break;
   }
 
-  // ── IMPRINT score breakdown ─────────────────────────────────────────────
-  const sessions = mirrorSessions ?? [];
-  const totalDependencyFlags = sessions.reduce((sum, s) => sum + (s.dependency_flags ?? 0), 0);
-
-  // These four are the exact components /api/calibration/complete sums into
-  // profiles.imprint_score. The profile previously derived its own breakdown
-  // from different inputs — skill *count* rather than average strength, the
-  // journal streak rather than total active days — so the four bars could
-  // never add up to the score printed above them.
-  const avgSkillStrength = (skills ?? []).length
-    ? (skills ?? []).reduce((sum, s) => sum + (s.strength_level ?? 0), 0) / (skills ?? []).length
-    : 0;
-
-  const scoreComponents = {
-    vaultStrength: Math.min(250, Math.round(avgSkillStrength * 2.5)),
-    calibrationRecord: Math.min((calibrationsCount ?? 0) * 50, 300),
-    journalConsistency: Math.min(activeDays * 8, 250),
-    aiIndependence: Math.max(200 - totalDependencyFlags * 5, 0),
-  };
-
   const stats = {
     calibrations: calibrationsCount ?? 0,
-    scoreComponents,
     streak,
     skillsTracked: (skills || []).length,
     vaultChallenges: completedChallenges.length,
@@ -106,18 +85,11 @@ export default async function ProfilePage() {
       : null,
   };
 
-  const scoreHistory = driftScores ? driftScores.map(d => ({ score: d.score })).reverse() : [{ score: 0 }];
-
   return (
     <ProfileClient
       profile={profile || {}}
-      latestDriftScore={latestDriftScore}
+      proficiency={assessed?.data ?? null}
       stats={stats}
-      scoreHistory={scoreHistory}
-      timeline={[]}
-      skills={skills || []}
-      baseline={{}}
-      beliefs={[]}
     />
   );
 }

@@ -1,13 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {Lock, Unlock, Trash2} from "lucide-react";
 import { getZoneColor, getZoneShortLabel } from "@/lib/drift/types";
 import type { TimeCapsule } from "@/components/time-capsule/CapsuleList";
 import { daysRemaining, fmtDate, capsuleIsUnlocked, progressPct } from "@/components/time-capsule/CapsuleList";
-
-const REVEAL_KEY = (id: string) => `capsule_revealed_${id}`;
 
 // ── Small arc ring for locked countdown ───────────────────────────────────
 
@@ -92,18 +90,27 @@ interface UnlockedViewProps {
 }
 
 function UnlockedView({ capsule, currentDriftScore, onReply, onDelete }: UnlockedViewProps) {
-  const [revealed, setRevealed] = useState(false);
+  const [content, setContent] = useState<string | null>(null);
+  const [opening, setOpening] = useState(false);
+  const [openError, setOpenError] = useState("");
   const [showDelete, setShowDelete] = useState(false);
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setRevealed(!!localStorage.getItem(REVEAL_KEY(capsule.id)));
+  const handleReveal = async () => {
+    setOpening(true);
+    setOpenError("");
+    try {
+      const response = await fetch("/api/time-capsule/read", {
+        method: "POST", cache: "no-store", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: capsule.id }),
+      });
+      const data = await response.json();
+      if (!response.ok || typeof data.content !== "string") throw new Error();
+      setContent(data.content);
+    } catch {
+      setOpenError("Could not open the capsule. Try again.");
+    } finally {
+      setOpening(false);
     }
-  }, [capsule.id]);
-
-  const handleReveal = () => {
-    localStorage.setItem(REVEAL_KEY(capsule.id), "1");
-    setRevealed(true);
   };
 
   const daysSinceWriting = Math.floor((Date.now() - new Date(capsule.created_at).getTime()) / 86400000);
@@ -114,7 +121,7 @@ function UnlockedView({ capsule, currentDriftScore, onReply, onDelete }: Unlocke
     <div className="flex-1 flex flex-col h-full relative overflow-hidden" style={{ background: "#0A0A0A" }}>
       {/* First-open reveal overlay */}
       <AnimatePresence>
-        {!revealed && (
+        {content === null && (
           <motion.div className="absolute inset-0 z-50 flex flex-col items-center justify-center"
             style={{ background: "rgba(10,10,10,0.97)" }}
             initial={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.6 }}>
@@ -123,11 +130,12 @@ function UnlockedView({ capsule, currentDriftScore, onReply, onDelete }: Unlocke
             <p className="text-sm mb-8 text-center" style={{ color: "rgba(255,255,255,0.72)" }}>
               Written {daysSinceWriting} days ago, sealed until today.
             </p>
-            <button onClick={handleReveal}
+            <button onClick={handleReveal} disabled={opening}
               className="rounded-full font-medium text-on-accent"
               style={{ height: 48, padding: "0 32px", background: "#FF5500", fontSize: 15 }}>
-              Open it →
+              {opening ? "Opening…" : "Open it →"}
             </button>
+            <p role="status" className="mt-2 text-sm text-white/70">{openError}</p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -183,7 +191,7 @@ function UnlockedView({ capsule, currentDriftScore, onReply, onDelete }: Unlocke
           lineHeight: 1.9, color: "rgba(255,255,255,0.82)", whiteSpace: "pre-wrap",
           background: "rgba(255,85,0,0.02)", borderRadius: 16, padding: "32px",
         }}>
-          {capsule.content}
+          {content}
         </div>
       </div>
 

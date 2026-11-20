@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/privacy" },
 };
 
-const UPDATED = "5 September 2026";
+const UPDATED = "20 November 2026";
 const CONTACT = "defy@houseofnamus.com";
 
 function Section({
@@ -87,8 +87,8 @@ export default function PrivacyPage() {
           <strong className="text-white">In short.</strong> IMPRINT measures how
           your thinking changes over time, so most of what we hold is what you
           wrote and the numbers derived from it. We do not sell data, we do not
-          run advertising, and we do not use your writing to train anyone&rsquo;s
-          models. We do log visits to this site, including IP address and
+          run advertising, and Imprint does not use your writing to train models.
+          We do log visits to this site, including IP address and
           approximate city, as described in section&nbsp;3.
         </p>
       </div>
@@ -109,29 +109,29 @@ export default function PrivacyPage() {
               why="The text, voice recordings or files you submit during the seven-step baseline capture, and the metrics computed from them: word count, average sentence length, vocabulary richness and time taken to compose."
             />
             <Row
-              what="Calibration and drift"
-              why="Each recurring re-test, the resulting Drift Score, and the four contributing signals behind it."
+              what="Role assessments and progress"
+              why="Role tasks, submitted responses and attachments, rubric ratings and evidence, assessment history, legacy Drift results, and task and AI-use check-in records."
             />
+            <Row what="Earlier work and score reviews" why="Selected work, dated source references, your contribution and tool disclosures, and any evidence or explanation you choose to share with an authorized reviewer." />
+            <Row what="Optional onboarding reflection" why="If you leave a note about your AI use, Imprint saves it privately when you finish onboarding. It appears in your progress page 90 days later and is included in your export. Imprint keeps it out of AI inputs, public pages, notifications and visit logging." />
             <Row
               what="Your own records"
               why="Journal entries, beliefs, time capsules, tracked skills and their practice history, and anything you upload to the gallery or write in the Forge."
             />
             <Row
               what="The Mirror"
-              why="Your messages, the questions returned, the session duration, and the count of dependency flags raised."
+              why="Messages, questions returned, and the duration of reflections you save. The current Mirror does not assign dependency flags."
             />
             <Row
               what="Community activity"
-              why="Circles you create or join, check-ins, mentorship requests, and reviews — visible only to the people in those circles or to mentors you contact."
+              why="Public circles display their directory details to signed-in users. Circle members see their own private assignment responses and admins see completion totals. Mentor applications go to approved reviewers, and approved mentors may opt into the signed-in directory. Mentorship requests are visible to their participants."
             />
           </div>
         </Section>
 
         <Section id="how-we-use-it" title="2. How we use it">
           <p>
-            To operate the product: to compute your Drift Score against your own
-            baseline, to generate practice challenges, to run the Mirror, and to
-            show you your own history. To keep the service working and secure —
+            We use this data to establish and compare proficiency, assign practice and reassessment, operate Mirror, and show your history. To keep the service working and secure —
             rate limiting, abuse prevention and diagnosing faults.
           </p>
           <p>
@@ -214,7 +214,9 @@ export default function PrivacyPage() {
           <div className="mt-2">
             <Row what="Supabase" why="Database, authentication and file storage." />
             <Row what="Vercel" why="Hosting and content delivery. Supplies the approximate location associated with your IP address." />
-            <Row what="OpenAI" why="Powers the Mirror only. Your messages in that feature are sent to OpenAI to generate the next question. No other part of the product sends your data to a model." />
+            <Row what="Google Gemini" why="When AI features are enabled, processes recent Mirror dialogue for safety checks, questions and requested summaries. With your consent, processes selected assessment responses, media and earlier work for rubric scoring or transcription." />
+            <Row what="Groq" why="Handles the same processing if Gemini is temporarily unavailable. Provider retention depends on the endpoint and account configuration." />
+            <Row what="Resend" why="Delivers signup confirmation and password reset emails when configured as our authentication email sender. It also delivers opted-in task reminders. Reminder emails do not include assessment scores or submitted work." />
             <Row what="ipwho.is" why="Resolves an IP address to an approximate location and network operator for the visit logging described above." />
             <Row what="Telegram" why="Delivers visit alerts to the operator." />
           </div>
@@ -245,9 +247,7 @@ export default function PrivacyPage() {
             off unless you turn them on.
           </p>
           <p>
-            You can delete your account from Settings. Deletion is immediate and
-            cascades: your profile, baseline, drift history, journal, beliefs,
-            time capsules, vault, Mirror sessions and uploaded files are removed.
+            You can remove individual historical samples or delete your account from Settings. Account deletion removes application records and uploaded files. Provider processing records follow the provider’s applicable retention terms.
             It cannot be undone, and we do not keep a backup copy for you.
           </p>
           <p>
@@ -271,12 +271,12 @@ export default function PrivacyPage() {
           </p>
         </Section>
 
-        <Section id="children" title="8. Children">
+        <Section id="children" title="8. Age eligibility">
           <p>
-            IMPRINT is not directed at children under 13, and we do not knowingly
-            collect their data. Onboarding asks for an age group so the product
-            can adapt its prompts; if you believe a child has created an account,
-            contact us and we will remove it.
+            IMPRINT is for people aged 18 and older. We store your age confirmation
+            and the age range you choose during onboarding. If you believe
+            someone under 18 has created an account, please contact us so we can
+            review it and remove it where appropriate.
           </p>
         </Section>
 

@@ -9,6 +9,7 @@ import type { HumanCircle, CircleMember } from "@/components/circles/CirclesClie
 import { createClient } from "@/lib/supabase/client";
 import { getZoneColor, getZoneShortLabel } from "@/lib/drift/types";
 import { formatDate } from "@/lib/utils/format";
+import CircleChallenges from "@/components/circles/CircleChallenges";
 
 interface Checkin {
   id: string; user_id: string; checkin_type: string; content: string; drift_score_shared: number | null; created_at: string;
@@ -394,9 +395,7 @@ export default function CircleDetail({ circle, userId, onClose }: CircleDetailPr
           )}
 
           {activeTab === "Challenges" && (
-            <div className="text-center py-12">
-              <p className="text-sm" style={{ color: "rgba(255,255,255,0.66)" }}>No active challenges. Admins can assign circle challenges.</p>
-            </div>
+            <CircleChallenges circleId={circle.id} isAdmin={members.some((member) => member.user_id === userId && member.role === "admin")} />
           )}
         </div>
       </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useHydrated } from "@/hooks/useHydrated";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -50,6 +51,7 @@ const cardVariants: Variants = {
 };
 
 export default function ResetPasswordPage() {
+  const hydrated = useHydrated();
   const router = useRouter();
   const { updatePassword } = useAuth();
   const [success, setSuccess] = useState(false);
@@ -167,7 +169,7 @@ export default function ResetPasswordPage() {
 
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={!hydrated || isSubmitting}
                   className="w-full h-[52px] rounded-pill text-on-accent font-medium text-sm flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-60 mt-2"
                   style={{
                     background: "#FF5500",

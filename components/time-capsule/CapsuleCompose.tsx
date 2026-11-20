@@ -6,12 +6,13 @@ import { Lock } from "lucide-react";
 import { toast } from "sonner";
 import type { TimeCapsule } from "@/components/time-capsule/CapsuleList";
 import { fmtDate } from "@/components/time-capsule/CapsuleList";
+import { createClient } from "@/lib/supabase/client";
 
 type DatePreset = "1m" | "3m" | "6m" | "1y" | "2y" | "custom";
 
-function addDays(base: Date, days: number) { const d = new Date(base); d.setDate(d.getDate() + days); return d; }
-function addMonths(base: Date, months: number) { const d = new Date(base); d.setMonth(d.getMonth() + months); return d; }
-function addYears(base: Date, years: number) { const d = new Date(base); d.setFullYear(d.getFullYear() + years); return d; }
+function addDays(base: Date, days: number) { const d = new Date(base); d.setUTCDate(d.getUTCDate() + days); return d; }
+function addMonths(base: Date, months: number) { const d = new Date(base); d.setUTCMonth(d.getUTCMonth() + months); return d; }
+function addYears(base: Date, years: number) { const d = new Date(base); d.setUTCFullYear(d.getUTCFullYear() + years); return d; }
 
 function presetDate(p: DatePreset): Date {
   const now = new Date();
@@ -27,7 +28,6 @@ function countWords(s: string) { return s.trim() ? s.trim().split(/\s+/).length 
 function readMins(wc: number) { return Math.max(1, Math.round(wc / 200)); }
 
 interface ComposeProps {
-  userId: string;
   userName: string;
   currentDriftScore?: number | null;
   onSaved: (capsule: TimeCapsule) => void;
@@ -40,7 +40,7 @@ const PRESETS: { value: DatePreset; label: string }[] = [
   { value: "2y", label: "2 Years" }, { value: "custom", label: "Custom" },
 ];
 
-export default function CapsuleCompose({ userId, userName, currentDriftScore, onSaved, onCancel }: ComposeProps) {
+export default function CapsuleCompose({ userName, currentDriftScore, onSaved, onCancel }: ComposeProps) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [preset, setPreset] = useState<DatePreset>("6m");
@@ -51,21 +51,9 @@ export default function CapsuleCompose({ userId, userName, currentDriftScore, on
   const [showSealModal, setShowSealModal] = useState(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const [localUserId, setLocalUserId] = useState<string | null>(null);
-
-  useEffect(() => {
-    const getUser = async () => {
-      const { createClient } = await import("@/lib/supabase/client");
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      setLocalUserId(user?.id ?? null);
-    };
-    getUser();
-  }, []);
-
   const unlockDate = preset === "custom" && customDate
     ? new Date(customDate)
-    : presetDate(preset);
+    : new Date(presetDate(preset).toISOString().slice(0, 10));
 
   const daysFromNow = Math.ceil((unlockDate.getTime() - Date.now()) / 86400000);
   const wc = countWords(content);
@@ -79,36 +67,22 @@ export default function CapsuleCompose({ userId, userName, currentDriftScore, on
   }, [content, title]);
 
   const today = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
-  const unlockYear = unlockDate.getFullYear();
+  const unlockYear = unlockDate.getUTCFullYear();
 
   const handleSeal = async () => {
-    if (!localUserId) {
-      toast.error('Please sign in again.');
+    if (daysFromNow <= 0 || (preset === "custom" && !customDate)) {
+      toast.error("Choose a future unlock date in UTC.");
       return;
     }
 
     setSealing(true);
     try {
-      const { createClient } = await import("@/lib/supabase/client");
-      const supabase = createClient();
-      const { data, error } = await supabase.from("time_capsules").insert({
-        user_id: localUserId,
-        title: title || "Untitled Capsule",
-        content,
-        unlock_date: unlockDate.toISOString().split('T')[0],
-        is_unlocked: false,
-      }).select().single();
-
-      if (error) {
-        console.error("CAPSULE ERROR:", error.message, error.details, error.hint);
-        toast.error("Failed to seal: " + error.message);
-        setShowSealModal(false);
-        return;
-      }
-      
-      if (data) onSaved(data as TimeCapsule);
-    } catch (err: any) {
-      console.error("Capsule exception:", err);
+      const { data, error } = await createClient().rpc("seal_time_capsule", {
+        p_title: title, p_content: content, p_date: unlockDate.toISOString().slice(0, 10), p_attach_score: attachDrift,
+      }).single<TimeCapsule>();
+      if (error || !data) throw new Error();
+      onSaved(data);
+    } catch {
       toast.error("Failed to seal capsule. Please try again.");
       setShowSealModal(false);
     } finally {
@@ -121,7 +95,7 @@ export default function CapsuleCompose({ userId, userName, currentDriftScore, on
       {/* Top bar */}
       <div className="flex items-center justify-between px-10"
         style={{ height: 56, background: "rgba(10,10,10,0.95)", borderBottom: "1px solid rgba(255,255,255,0.06)", flexShrink: 0 }}>
-        <input value={title} onChange={(e) => setTitle(e.target.value)}
+        <input value={title} maxLength={200} onChange={(e) => setTitle(e.target.value)}
           placeholder="What is this capsule about?"
           className="bg-transparent outline-none font-semibold text-white w-full mr-8"
           style={{ fontSize: 18, border: "none" }} />
@@ -159,7 +133,7 @@ export default function CapsuleCompose({ userId, userName, currentDriftScore, on
             style={{ background: "#1A1A1A", border: "1px solid rgba(255,255,255,0.10)", color: "white" }} />
         )}
         <p className="text-sm italic" style={{ color: "rgba(255,255,255,0.66)" }}>
-          This capsule will unlock on {fmtDate(unlockDate.toISOString())} — {daysFromNow} days from today.
+          Opens at midnight UTC on {fmtDate(unlockDate.toISOString())} ({daysFromNow} days from today).
         </p>
       </div>
 
@@ -186,7 +160,7 @@ export default function CapsuleCompose({ userId, userName, currentDriftScore, on
       {/* Compose area */}
       <div className="flex-1 overflow-y-auto px-10 pb-32">
         <p className="text-xs mb-5" style={{ color: "rgba(255,255,255,0.54)" }}>Written {today}</p>
-        <textarea value={content} onChange={(e) => setContent(e.target.value)}
+        <textarea value={content} maxLength={100000} onChange={(e) => setContent(e.target.value)}
           placeholder={`Dear ${userName} of ${unlockYear},\n\nWrite whatever you need to say to yourself.\nWho you are right now. What you're working on.\nWhat you're afraid of. What you hope for.\n\nThis letter will be sealed until ${fmtDate(unlockDate.toISOString())}.\nWrite honestly. No one will read this before then.`}
           spellCheck className="w-full bg-transparent border-none outline-none resize-none"
           style={{ minHeight: 400, fontFamily: "Georgia, 'Times New Roman', serif", fontSize: 17, lineHeight: 1.9, color: "rgba(255,255,255,0.82)", caretColor: "rgba(255,85,0,0.70)" }} />

@@ -83,7 +83,7 @@ export default function LeaderboardClient({ userId, isOptedIn, rankings, userRan
             </div>
             <div className="text-right">
               <button onClick={handleOptIn} disabled={optingIn} className="rounded-full font-medium text-on-accent px-5 py-2.5 text-sm transition-all mb-2 disabled:opacity-50" style={{ background: "#FF5500" }}>{optingIn ? "Joining…" : "Join Leaderboard"}</button>
-              <p className="text-[12px] italic" style={{ color: "rgba(255,255,255,0.66)" }}>Only username & IMPRINT Score visible.</p>
+              <p className="text-[12px] italic" style={{ color: "rgba(255,255,255,0.66)" }}>Only username & legacy activity score visible.</p>
             </div>
           </motion.div>
         )}
@@ -163,7 +163,7 @@ export default function LeaderboardClient({ userId, isOptedIn, rankings, userRan
           <div className="grid grid-cols-6 p-4" style={{ background: "#0D0D0D", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
             <div className="text-[11px] uppercase tracking-wide col-span-1" style={{ color: "rgba(255,255,255,0.66)" }}>Rank</div>
             <div className="text-[11px] uppercase tracking-wide col-span-2" style={{ color: "rgba(255,255,255,0.66)" }}>User</div>
-            <div className="text-[11px] uppercase tracking-wide col-span-2 text-right" style={{ color: "rgba(255,255,255,0.66)" }}>IMPRINT Score</div>
+            <div className="text-[11px] uppercase tracking-wide col-span-2 text-right" style={{ color: "rgba(255,255,255,0.66)" }}>Legacy activity score</div>
             <div className="text-[11px] uppercase tracking-wide col-span-1 text-right" style={{ color: "rgba(255,255,255,0.66)" }}>Drift</div>
           </div>
           {rest.map((r, i) => {
@@ -208,7 +208,7 @@ export default function LeaderboardClient({ userId, isOptedIn, rankings, userRan
             </div>
             <div className="text-center">
               <p className="text-[20px] font-bold" style={{ color: "#FF5500" }}>{rankings.find(r => r.id === userId)?.imprint_score || 0}</p>
-              <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.66)" }}>IMPRINT Score</p>
+              <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.66)" }}>Legacy activity score</p>
             </div>
             <div className="flex items-center gap-4 text-right">
               <button

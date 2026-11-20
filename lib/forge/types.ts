@@ -44,14 +44,12 @@ export interface ForgeChallenge {
   description?: string;
   due_date?: string;
   skill_name?: string;
+  submissionMode?: "text" | "voice-note" | "sketch-upload";
 }
 
 export interface ForgeUserData {
   userId: string;
   professionCluster: string;
-  baselineWordCount: number;
-  baselineVocabRichness: number;
-  baselineSentenceLength: number;
   activeChallenge: ForgeChallenge | null;
   history: ForgeHistoryEntry[];
 }
@@ -114,6 +112,19 @@ export function formatTime(seconds: number): string {
 export function calcWPM(words: number, seconds: number): number {
   if (seconds < 1) return 0;
   return Math.round((words / seconds) * 60);
+}
+
+export function getTextMetrics(text: string, duration: number) {
+  const tokens = text.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const words = tokens.length;
+  const sentences = text.split(/[.!?]+/).filter((part) => part.trim()).length;
+  return {
+    words,
+    duration,
+    wordsPerMinute: calcWPM(words, duration),
+    vocabularyRichness: words ? Number((new Set(tokens).size / words).toFixed(3)) : 0,
+    averageSentenceLength: sentences ? Number((words / sentences).toFixed(2)) : 0,
+  };
 }
 
 export function getTimerColor(remaining: number): string {

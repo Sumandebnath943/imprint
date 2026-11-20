@@ -1,7 +1,10 @@
 import { ImageResponse } from "next/og";
 import { createClient } from "@/lib/supabase/server";
 
-export const runtime = "nodejs";
+// Next 14's Edge renderer bundles the font and WASM without a filesystem URL.
+export const runtime = "edge";
+export const dynamic = "force-dynamic";
+const headers = { "Cache-Control": "no-store" };
 
 const ORANGE = "#FF5500";
 
@@ -10,7 +13,7 @@ function scoreLabel(score: number) {
   if (score >= 600) return "Strong";
   if (score >= 400) return "Solid";
   if (score >= 200) return "Building";
-  return "Establishing";
+  return "No activity score yet";
 }
 
 function driftColor(score: number) {
@@ -44,7 +47,7 @@ export async function GET(
     .maybeSingle();
 
   if (!profile) {
-    return new Response("Credential not found", { status: 404 });
+    return new Response("Credential not found", { status: 404, headers });
   }
 
   const imprint = profile.imprint_score ?? 0;
@@ -93,7 +96,7 @@ export async function GET(
         <div style={{ display: "flex", alignItems: "flex-end", gap: 44 }}>
           <div style={{ display: "flex", flexDirection: "column" }}>
             <span style={{ color: "rgba(255,255,255,0.66)", fontSize: 14, letterSpacing: 2 }}>
-              IMPRINT SCORE
+              LEGACY ACTIVITY SCORE
             </span>
             <div style={{ display: "flex", alignItems: "flex-end", gap: 6 }}>
               <span style={{ color: "#fff", fontSize: 60, fontWeight: 700, lineHeight: 1 }}>
@@ -129,11 +132,7 @@ export async function GET(
     {
       width: 960,
       height: 400,
-      headers: {
-        // Short public cache: the badge should track score changes without
-        // hammering the database on every README render.
-        "Cache-Control": "public, max-age=300, s-maxage=300, stale-while-revalidate=86400",
-      },
+      headers,
     }
   );
 }

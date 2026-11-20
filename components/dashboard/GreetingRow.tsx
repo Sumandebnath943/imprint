@@ -5,6 +5,7 @@ import type { DashboardProfile } from "@/lib/dashboard/types";
 import { getGreeting, getFirstName } from "@/lib/dashboard/types";
 import { Flame } from "lucide-react";
 import { CLUSTER_LABELS } from "@/lib/onboarding/modules";
+import { useHydrated } from "@/hooks/useHydrated";
 
 interface GreetingRowProps {
   profile: DashboardProfile | null;
@@ -12,8 +13,8 @@ interface GreetingRowProps {
 }
 
 export default function GreetingRow({ profile, streak }: GreetingRowProps) {
-  const now = new Date();
-  const dateStr = now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+  const hydrated = useHydrated();
+  const dateStr = hydrated ? new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" }) : "";
 
   return (
     <motion.div
@@ -27,7 +28,7 @@ export default function GreetingRow({ profile, streak }: GreetingRowProps) {
       {/* Left */}
       <div>
         <p className="text-base mb-1" style={{ color: "rgba(255,255,255,0.72)", fontFamily: "Space Grotesk, sans-serif" }}>
-          {getGreeting()},
+          {hydrated ? getGreeting() : "Welcome"},
         </p>
         <h2
           className="font-bold text-white mb-3"

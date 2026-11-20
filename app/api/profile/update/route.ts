@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { ADULT_AGE_GROUPS } from "@/lib/auth/age-groups";
 
 // Every field optional: this endpoint takes partial updates. Only keys the
 // caller actually sent are written.
@@ -15,9 +16,7 @@ const ProfileUpdateSchema = z.object({
     .optional(),
   bio: z.string().trim().max(500).optional(),
   location: z.string().trim().max(100).optional(),
-  age_group: z.enum([
-    "child_8_12", "teen_13_15", "teen_16_18", "adult_19_64", "senior_65_plus",
-  ]).nullable().optional(),
+  age_group: z.enum(ADULT_AGE_GROUPS).nullable().optional(),
   profession: z.string().trim().max(100).nullable().optional(),
   profession_cluster: z.enum([
     "language_voice", "visual_creative", "technical_analytical",
@@ -25,7 +24,6 @@ const ProfileUpdateSchema = z.object({
   ]).nullable().optional(),
   credential_public: z.boolean().optional(),
   leaderboard_opt_in: z.boolean().optional(),
-  accepting_mentees: z.boolean().optional(),
   avatar_url: z.string().url().max(500).nullable().optional(),
 }).strict();
 
@@ -64,6 +62,9 @@ export async function PATCH(req: Request) {
       .eq("id", user.id);
 
     if (error) {
+      if (error.code === "P0001" && updates.credential_public === true) {
+        return NextResponse.json({ error: "Complete your overdue reassessment before publishing a credential." }, { status: 409 });
+      }
       // 23505 = unique_violation on username.
       if (error.code === "23505") {
         return NextResponse.json({ error: "That username is already taken." }, { status: 409 });

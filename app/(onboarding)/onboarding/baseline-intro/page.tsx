@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Timer, Lock, Brain } from "lucide-react";
 import { useOnboardingStore } from "@/lib/store/onboarding.store";
 import { buildModuleList, CLUSTER_LABELS } from "@/lib/onboarding/modules";
@@ -37,14 +38,20 @@ export default function BaselineIntroPage() {
 
   const clusterLabel = CLUSTER_LABELS[answers.professionCluster] ?? "Your Cluster";
 
-  const handleBegin = () => {
-    const modules = buildModuleList(answers.professionCluster);
-    setBaselineModules(modules);
-    setStep(5);
+  const handleBegin = async () => {
+    if (fading) return;
     setFading(true);
-    setTimeout(() => {
-      router.push("/onboarding/baseline");
-    }, 900);
+    try {
+      const response = await fetch(`/api/assessment?role=${encodeURIComponent(answers.profession)}`);
+      if (!response.ok) throw new Error("Could not check assessment availability.");
+      const data = await response.json();
+      if (!data.available) setBaselineModules(buildModuleList(answers.professionCluster));
+      setStep(5);
+      router.push(data.available ? "/onboarding/assessment" : "/onboarding/baseline");
+    } catch (error) {
+      setFading(false);
+      toast.error(error instanceof Error ? error.message : "Could not start onboarding.");
+    }
   };
 
   const handleBack = () => {

@@ -1,20 +1,16 @@
 "use client";
 
 import { motion } from "framer-motion";
-import type { IndicatorStatus } from "@/lib/mirror/types";
 import { formatTime } from "@/lib/mirror/types";
 
 interface MirrorCompleteProps {
   questionCount: number;
   elapsed: number;
-  dependencyFlags: number;
   summary: string;
   isLoadingSummary: boolean;
-  vocabStatus: IndicatorStatus;
-  depthStatus: IndicatorStatus;
-  langStatus: IndicatorStatus;
   onSaveReturn: () => void;
   onNewSession: () => void;
+  onRequestSummary: () => void;
 }
 
 function StatCard({ value, label, color }: { value: string; label: string; color: string }) {
@@ -27,24 +23,10 @@ function StatCard({ value, label, color }: { value: string; label: string; color
   );
 }
 
-function Pill({ label, status }: { label: string; status: IndicatorStatus }) {
-  const c = status === "good"
-    ? { bg: "rgba(0,217,126,0.10)", border: "rgba(0,217,126,0.25)", color: "#00D97E" }
-    : status === "warn"
-    ? { bg: "rgba(255,184,0,0.10)", border: "rgba(255,184,0,0.25)", color: "#FFB800" }
-    : { bg: "rgba(255,45,45,0.10)", border: "rgba(255,45,45,0.25)", color: "#FF2D2D" };
-  return (
-    <span className="text-xs rounded-full px-3 py-1 font-medium" style={{ background: c.bg, border: `1px solid ${c.border}`, color: c.color }}>
-      {label}
-    </span>
-  );
-}
-
 export default function MirrorComplete({
-  questionCount, elapsed, dependencyFlags, summary, isLoadingSummary,
-  vocabStatus, depthStatus, langStatus, onSaveReturn, onNewSession,
+  questionCount, elapsed, summary, isLoadingSummary,
+  onSaveReturn, onNewSession, onRequestSummary,
 }: MirrorCompleteProps) {
-  const depColor = dependencyFlags === 0 ? "#00D97E" : dependencyFlags <= 2 ? "#FFB800" : "#FF2D2D";
 
   return (
     <motion.div
@@ -77,13 +59,12 @@ export default function MirrorComplete({
         className="flex gap-4 flex-wrap justify-center">
         <StatCard value={String(questionCount)} label="questions explored" color="rgba(255,120,50,0.90)" />
         <StatCard value={formatTime(elapsed)} label="minutes" color="white" />
-        <StatCard value={String(dependencyFlags)} label="dependency flags" color={depColor} />
       </motion.div>
 
       {/* Summary */}
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
         className="w-full rounded-2xl p-6" style={{ maxWidth: 480, background: "#141420", border: "1px solid rgba(255,255,255,0.06)" }}>
-        <p className="text-sm font-semibold mb-4" style={{ color: "rgba(255,255,255,0.72)" }}>What The Mirror noticed</p>
+        <p className="text-sm font-semibold mb-4" style={{ color: "rgba(255,255,255,0.72)" }}>Session summary</p>
         {isLoadingSummary ? (
           <div className="flex gap-1.5 items-center py-2">
             {[0, 1, 2].map((i) => (
@@ -91,16 +72,9 @@ export default function MirrorComplete({
                 animate={{ y: [0, -4, 0] }} transition={{ duration: 0.7, delay: i * 0.15, repeat: Infinity }} />
             ))}
           </div>
-        ) : (
+        ) : summary ? (
           <p className="italic leading-relaxed" style={{ fontSize: 15, color: "rgba(255,255,255,0.70)", lineHeight: 1.7 }}>{summary}</p>
-        )}
-
-        {/* Indicator pills */}
-        <div className="flex gap-2 flex-wrap mt-4 pt-4" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-          <Pill label={`Vocabulary: ${vocabStatus === "good" ? "Matching" : vocabStatus === "warn" ? "Diverging" : "Drifting"}`} status={vocabStatus} />
-          <Pill label={`Depth: ${depthStatus === "good" ? "Deep" : depthStatus === "warn" ? "Surface" : "Brief"}`} status={depthStatus} />
-          <Pill label={`Pattern: ${langStatus === "good" ? "Authentic" : langStatus === "warn" ? "Shifted" : "Unfamiliar"}`} status={langStatus} />
-        </div>
+        ) : <button className="text-sm text-[#ff9c77] underline" onClick={onRequestSummary}>Request a summary</button>}
       </motion.div>
 
       {/* Actions */}

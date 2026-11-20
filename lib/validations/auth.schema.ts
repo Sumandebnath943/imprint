@@ -23,6 +23,7 @@ export const signUpSchema = z
       .regex(/[0-9]/, "Password must contain at least one number"),
     confirm_password: z.string().min(1, "Please confirm your password"),
     full_name: z.string().min(2, "Full name must be at least 2 characters").max(100),
+    adultConfirmed: z.boolean().refine((confirmed) => confirmed, "Confirm that you’re at least 18 to create an account."),
   })
   .refine((data) => data.password === data.confirm_password, {
     message: "Passwords do not match",

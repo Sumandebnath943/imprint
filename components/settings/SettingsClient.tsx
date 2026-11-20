@@ -28,6 +28,7 @@ export default function SettingsClient({ profile }: SettingsClientProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   const toggleLeaderboard = async () => {
     if (savingLeaderboard) return;
@@ -186,8 +187,27 @@ export default function SettingsClient({ profile }: SettingsClientProps) {
     }
   };
 
-  const exportData = () => {
-    toast.success("Export ready. Downloading...");
+  const exportData = async () => {
+    setExporting(true);
+    try {
+      const response = await fetch("/api/account/export", { cache: "no-store" });
+      if (!response.ok) {
+        const result = await response.json().catch(() => null);
+        throw new Error(result?.error ?? "Could not download your data. Try again.");
+      }
+      if (!response.headers.get("content-type")?.includes("application/gzip")) throw new Error("The archive could not be downloaded. Sign in and try again.");
+      const file = URL.createObjectURL(await response.blob());
+      const anchor = document.createElement("a");
+      anchor.href = file;
+      anchor.download = "imprint-data.tar.gz";
+      anchor.hidden = true;
+      document.body.append(anchor);
+      anchor.click();
+      anchor.remove();
+      setTimeout(() => URL.revokeObjectURL(file), 1000);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not download your data. Try again.");
+    } finally { setExporting(false); }
   };
 
   const getPasswordStrength = (pw: string) => {
@@ -424,6 +444,7 @@ export default function SettingsClient({ profile }: SettingsClientProps) {
 
               <div className="flex flex-col gap-6">
                 {[
+                  { key: 'imprint_task_emails', label: 'Imprint task emails', desc: 'Email me when practice, check-ins or reassessments are scheduled, due soon, or overdue.' },
                   { key: 'vault_challenges', label: 'Vault Challenge Reminders', desc: 'Notify when a skill is decaying and a challenge is due.' },
                   { key: 'calibration_reminders', label: 'Calibration Session Reminders', desc: 'Remind me when my bi-weekly calibration is due.' },
                   { key: 'streak_reminders', label: 'Streak Reminders', desc: "Remind me to journal if I haven't written today." },
@@ -584,9 +605,9 @@ export default function SettingsClient({ profile }: SettingsClientProps) {
               <div className="flex items-center justify-between mb-6 pb-6 border-b border-white/5">
                 <div>
                   <p className="text-[15px] font-medium text-white mb-1">Export All My Data</p>
-                  <p className="text-[13px] text-white/50">Download everything as JSON.</p>
+                  <p className="text-[13px] text-white/50">Download your records and owned attachments in a compressed archive.</p>
                 </div>
-                <button onClick={exportData} className="px-4 py-2 rounded-full text-[13px] text-white bg-white/5 hover:bg-white/10 transition-colors">Export Data</button>
+                <button onClick={exportData} disabled={exporting} className="px-4 py-2 rounded-full text-[13px] text-white bg-white/5 hover:bg-white/10 transition-colors disabled:opacity-50">{exporting ? "Preparing archive…" : "Export Data"}</button>
               </div>
 
               <div className="flex items-center justify-between">

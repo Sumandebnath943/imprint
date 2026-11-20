@@ -22,7 +22,7 @@ const NAV_GROUPS = [
       { href: "/dashboard/mirror", label: "The Mirror", icon: Sparkles },
       { href: "/dashboard/vault", label: "Skill Vault", icon: Shield },
       { href: "/dashboard/journal", label: "Journal", icon: BookOpen },
-      { href: "/dashboard/drift", label: "Drift Score", icon: Activity },
+      { href: "/dashboard/drift", label: "Progress", icon: Activity },
       { href: "/dashboard/calibration", label: "Calibration", icon: Radio },
     ],
   },

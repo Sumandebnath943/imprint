@@ -1,9 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import {} from "lucide-react";
 import type { ForgeTool } from "@/lib/forge/types";
-import { formatTime, countWords, calcWPM } from "@/lib/forge/types";
+import { formatTime } from "@/lib/forge/types";
+import ForgeMetrics from "./ForgeMetrics";
 
 interface ForgeCompleteProps {
   tool: ForgeTool;
@@ -11,15 +11,8 @@ interface ForgeCompleteProps {
   elapsed: number;
   audioSaved?: boolean;
   fileSaved?: boolean;
-  baselineVocabRichness?: number;
   onReturn: () => void;
   onDashboard: () => void;
-}
-
-function calcVocabRichness(text: string): number {
-  const words = text.toLowerCase().split(/\s+/).filter(Boolean);
-  if (words.length === 0) return 0;
-  return parseFloat((new Set(words).size / words.length).toFixed(2));
 }
 
 function Stat({ label, value, color = "white" }: { label: string; value: string; color?: string }) {
@@ -32,36 +25,13 @@ function Stat({ label, value, color = "white" }: { label: string; value: string;
   );
 }
 
-function Bar({ label, value, color }: { label: string; value: number; color: string }) {
-  return (
-    <div>
-      <div className="flex justify-between items-center mb-1.5">
-        <span className="text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>{label}</span>
-        <span className="text-sm font-medium" style={{ color }}>{Math.round(value * 100)}%</span>
-      </div>
-      <div className="w-full h-1 rounded-full" style={{ background: "rgba(255,255,255,0.08)" }}>
-        <motion.div className="h-full rounded-full" style={{ background: color }}
-          initial={{ width: 0 }} animate={{ width: `${value * 100}%` }}
-          transition={{ duration: 1.2, ease: "easeOut" }} />
-      </div>
-    </div>
-  );
-}
-
 const isTextTool = (t: ForgeTool) =>
   t === "free-write" || t === "timed-write" || t === "memory-recall" || t === "vault-challenge";
 
 export default function ForgeComplete({
   tool, content, elapsed, audioSaved, fileSaved,
-  baselineVocabRichness = 0.6, onReturn, onDashboard,
+  onReturn, onDashboard,
 }: ForgeCompleteProps) {
-  const words = countWords(content);
-  const wpm = calcWPM(words, elapsed);
-  const vocabRichness = calcVocabRichness(content);
-  const vocabMatch = baselineVocabRichness > 0
-    ? Math.min(1, vocabRichness / baselineVocabRichness)
-    : vocabRichness;
-
   return (
     <motion.div
       initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
@@ -94,11 +64,7 @@ export default function ForgeComplete({
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
         className="flex gap-4 flex-wrap justify-center">
         {isTextTool(tool) ? (
-          <>
-            <Stat label="Words Written" value={String(words)} color="#FF5500" />
-            <Stat label="Time Spent" value={formatTime(elapsed)} />
-            <Stat label="WPM" value={String(wpm)} />
-          </>
+          <div className="w-full min-w-[280px]"><ForgeMetrics content={content} elapsed={elapsed} /></div>
         ) : tool === "voice-note" ? (
           <>
             <Stat label="Duration" value={formatTime(elapsed)} color="#FF5500" />
@@ -111,22 +77,6 @@ export default function ForgeComplete({
           </>
         )}
       </motion.div>
-
-      {/* Baseline comparison (text sessions only) */}
-      {isTextTool(tool) && words > 30 && (
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}
-          className="w-full rounded-2xl p-6" style={{ maxWidth: 420, background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
-          <p className="text-sm font-semibold mb-4" style={{ color: "rgba(255,255,255,0.66)" }}>Compared to your Baseline</p>
-          <div className="flex flex-col gap-4">
-            <Bar label="Vocabulary match" value={vocabMatch} color={vocabMatch > 0.7 ? "#00D97E" : "#FFB800"} />
-            <Bar label="Writing pace" value={Math.min(1, wpm / 50)} color="#FF5500" />
-            <Bar label="Output depth" value={Math.min(1, words / 400)} color="#FF7A30" />
-          </div>
-          <p className="text-sm mt-5 leading-relaxed" style={{ color: "rgba(255,255,255,0.72)" }}>
-            This session has been saved to your Forge history and will inform your next Drift Score calculation.
-          </p>
-        </motion.div>
-      )}
 
       {/* Actions */}
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65 }}

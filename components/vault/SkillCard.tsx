@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import type { VaultSkill } from "@/lib/vault/types";
 import {
-  getStrengthColor, getStrengthLabel, getDecayStatus,
+  getStrengthColor,
   getRelativeTime, getDaysSinceExercised,
 } from "@/lib/vault/types";
 
@@ -23,11 +23,7 @@ export default function SkillCard({ skill, decayedStrength, hasActiveChallenge, 
   const router = useRouter();
 
   const color = getStrengthColor(decayedStrength);
-  const label = getStrengthLabel(decayedStrength);
   const daysSince = getDaysSinceExercised(skill.last_exercised);
-  const decayStatus = getDecayStatus(daysSince);
-  const isCritical = decayedStrength < 25;
-  const isDecaying = daysSince > 5;
   const practicedToday = daysSince === 0;
   const dots = Array.from({ length: 7 }, (_, i) => i < Math.min(skill.times_practiced, 7));
 
@@ -42,10 +38,10 @@ export default function SkillCard({ skill, decayedStrength, hasActiveChallenge, 
       className="relative overflow-hidden cursor-pointer"
       style={{
         background: "#111111",
-        border: isCritical ? "1px solid rgba(255,45,45,0.20)" : "1px solid rgba(255,255,255,0.07)",
+        border: "1px solid rgba(255,255,255,0.07)",
         borderRadius: 16,
         padding: "20px 24px",
-        boxShadow: isCritical ? "0 0 30px rgba(255,45,45,0.08)" : hovered ? "0 0 30px rgba(255,85,0,0.05)" : "none",
+        boxShadow: hovered ? "0 0 30px rgba(255,85,0,0.05)" : "none",
         transform: hovered ? "translateY(-2px)" : "translateY(0)",
         transition: "all 200ms ease",
       }}
@@ -66,7 +62,7 @@ export default function SkillCard({ skill, decayedStrength, hasActiveChallenge, 
         <p className="font-semibold text-white pr-2" style={{ fontSize: 16, lineHeight: 1.3 }}>{skill.skill_name}</p>
         <span className="rounded-full text-xs font-semibold shrink-0"
           style={{ background: `${color}26`, border: `1px solid ${color}59`, color, padding: "3px 10px" }}>
-          {decayedStrength}%
+          {decayedStrength}% self-rating
         </span>
       </div>
 
@@ -82,9 +78,7 @@ export default function SkillCard({ skill, decayedStrength, hasActiveChallenge, 
           animate={{ width: `${decayedStrength}%` }}
           transition={{ duration: 1, ease: "easeOut", delay: index * 0.05 + 0.2 }}
           style={{
-            background: isDecaying
-              ? `repeating-linear-gradient(45deg, ${color}, ${color} 4px, rgba(0,0,0,0.25) 4px, rgba(0,0,0,0.25) 8px)`
-              : color,
+            background: color,
           }}
         />
         {/* Practiced today shimmer */}
@@ -99,7 +93,6 @@ export default function SkillCard({ skill, decayedStrength, hasActiveChallenge, 
         <span className="text-xs" style={{ color: "rgba(255,255,255,0.62)" }}>
           Last practiced: {getRelativeTime(skill.last_exercised)}
         </span>
-        <span className="text-xs font-medium" style={{ color: decayStatus.color }}>{decayStatus.label}</span>
       </div>
 
       {/* Times practiced + dots */}
@@ -112,13 +105,6 @@ export default function SkillCard({ skill, decayedStrength, hasActiveChallenge, 
           ))}
         </div>
       </div>
-
-      {/* Critical warning */}
-      {isCritical && (
-        <div className="mt-3 -mx-6 px-6 py-2" style={{ background: "rgba(255,45,45,0.08)", borderTop: "1px solid rgba(255,45,45,0.15)" }}>
-          <p className="text-xs text-center" style={{ color: "#FF2D2D" }}>This skill is in critical decay. Practice today.</p>
-        </div>
-      )}
 
       {/* Hover actions */}
       <AnimatePresence>

@@ -65,7 +65,7 @@ export default function CredentialClient({ profile, driftScore, stats }: Credent
   // read Anchored/Stable/Drifting/Critical, so a score of 50 was "Stable"
   // on the shareable credential and "Drifting" everywhere else in the app.
   const dLabel = dScore < 40 ? "Anchored" : dScore < 60 ? "Drifting" : dScore < 80 ? "Critical" : "Crisis";
-  const iLabel = imprintScore >= 800 ? "Anchored" : imprintScore >= 600 ? "Strong" : imprintScore >= 400 ? "Solid" : imprintScore >= 200 ? "Building" : "Establishing";
+  const iLabel = imprintScore >= 800 ? "Anchored" : imprintScore >= 600 ? "Strong" : imprintScore >= 400 ? "Solid" : imprintScore >= 200 ? "Building" : "No activity score yet";
   const iColor = imprintScore >= 800 ? "#00D97E" : imprintScore >= 600 ? "#00D97E" : imprintScore >= 400 ? "#FFB800" : imprintScore >= 200 ? "#FF5500" : "#FF2D2D";
 
   const handleDownload = async () => {
@@ -159,7 +159,7 @@ export default function CredentialClient({ profile, driftScore, stats }: Credent
 
   const copyEmbed = () => copyToClipboard(embedSnippet, "Embed code copied!");
 
-  const shareText = `My IMPRINT score is ${imprintScore}/1000 — a measure of how much of my thinking is still my own in the age of AI.`;
+  const shareText = `My IMPRINT score is ${imprintScore}/1000 — a historical record of activity in Imprint.`;
 
   const shareOn = (network: "linkedin" | "x") => {
     if (!isPublic) {
@@ -250,7 +250,7 @@ export default function CredentialClient({ profile, driftScore, stats }: Credent
               {/* SCORES */}
               <div className="flex items-center gap-6 mb-8">
                 <div className="flex-1">
-                  <span className="block text-[10px] uppercase text-white/65 mb-1 tracking-widest">IMPRINT SCORE</span>
+                  <span className="block text-[10px] uppercase text-white/65 mb-1 tracking-widest">LEGACY ACTIVITY SCORE</span>
                   <div className="flex items-baseline gap-1 mb-2">
                     <span className="font-bold text-white text-[56px] leading-none">{imprintScore}</span>
                     <span className="text-[16px] text-white/65">/1000</span>
@@ -259,7 +259,7 @@ export default function CredentialClient({ profile, driftScore, stats }: Credent
                 </div>
                 <div className="w-[1px] h-20 bg-white/10" />
                 <div className="flex-1">
-                  <span className="block text-[10px] uppercase text-white/65 mb-1 tracking-widest">DRIFT SCORE</span>
+                  <span className="block text-[10px] uppercase text-white/65 mb-1 tracking-widest">LEGACY DRIFT SCORE</span>
                   <div className="flex items-baseline gap-1 mb-2">
                     <span className="font-bold text-[56px] leading-none" style={{ color: dColor }}>{dScore}</span>
                   </div>

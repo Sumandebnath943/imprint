@@ -1,4 +1,8 @@
 import CalibrationClient from "@/components/calibration/CalibrationClient";
+import RoleAssessment from "@/components/assessment/RoleAssessment";
+import { findRoleTrack } from "@/lib/assessment/catalog";
+import { isRoleScoringEnabled } from "@/lib/assessment/pilot";
+import { createClient } from "@/lib/supabase/server";
 import type { CalibrationPageData, CalibrationSession } from "@/lib/calibration/types";
 
 async function getCalibrationData(): Promise<CalibrationPageData> {
@@ -30,10 +34,8 @@ async function getCalibrationData(): Promise<CalibrationPageData> {
     const sessions = (sessionsRes.data ?? []) as CalibrationSession[];
     const scores = scoresRes.data ?? [];
 
-    // Find active session (in_progress AND created within 24h)
-    const cutoff = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
     const activeSession = sessions.find(
-      (s) => s.status === "in_progress" && s.created_at >= cutoff && s.prompts && s.prompts.length > 0
+      (s) => s.status === "in_progress" && s.prompts && s.prompts.length > 0
     ) ?? null;
 
     return {
@@ -51,6 +53,17 @@ async function getCalibrationData(): Promise<CalibrationPageData> {
 }
 
 export default async function CalibrationPage() {
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data } = await supabase.from("profiles").select("profession").eq("id", user.id).maybeSingle();
+      const role = findRoleTrack(data?.profession);
+      if (role && isRoleScoringEnabled(role.id)) {
+        return <div className="px-5 py-8"><RoleAssessment roleName={role.name} /></div>;
+      }
+    }
+  }
   const pageData = await getCalibrationData();
   return <CalibrationClient pageData={pageData} />;
 }

@@ -43,7 +43,7 @@ export function VaultSummaryStats({ skills, decayedStrengths }: SummaryStatsProp
     },
     {
       value: `${avg}%`,
-      label: "Average strength",
+      label: "Average self-rating",
       bar: avg,
       valueColor: avgColor,
       sub: null,
@@ -51,7 +51,7 @@ export function VaultSummaryStats({ skills, decayedStrengths }: SummaryStatsProp
     {
       value: String(decaying),
       label: "Need attention",
-      sub: decaying > 0 ? "Practice these this week" : "All skills healthy",
+      sub: decaying > 0 ? "Practice these this week" : "No practice overdue",
       subColor: decaying > 0 ? "#FFB800" : "#00D97E",
       valueColor: decaying > 0 ? "#FF2D2D" : "#00D97E",
     },
@@ -146,7 +146,7 @@ export function VaultChallengeBanner({ challenge, onBegin }: ChallengeBannerProp
         <div className="flex items-center gap-1.5">
           <ArrowUp size={14} style={{ color: "#00D97E" }} />
           <span className="text-sm font-semibold" style={{ color: "#00D97E" }}>
-            +{challenge.strength_gained} strength on completion
+            Records a practice session
           </span>
         </div>
         <button onClick={onBegin}

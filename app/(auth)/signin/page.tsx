@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useHydrated } from "@/hooks/useHydrated";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, type Variants } from "framer-motion";
@@ -55,13 +55,19 @@ const fieldVariants: Variants = {
 };
 
 export default function SignInPage() {
-  const router = useRouter();
-  const { signIn, signInWithGoogle, loading: authLoading } = useAuth();
+  const hydrated = useHydrated();
+  const { signIn, signInWithGoogle, loading: authLoading, error } = useAuth();
 
   const [googleLoading, setGoogleLoading] = useState(false);
   const [showForgot, setShowForgot] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [shakeKey, setShakeKey] = useState(0); // increment to re-trigger shake
+
+  useEffect(() => {
+    const issue = new URLSearchParams(location.search).get("error");
+    if (issue === "link") setFormError("This sign-in link is unavailable. Sign in or request a new link.");
+    if (issue === "session") setFormError("Your session has expired. Sign in again.");
+  }, []);
 
   const {
     register,
@@ -79,7 +85,7 @@ export default function SignInPage() {
     const { success, redirectTo } = await signIn(data.email, data.password);
 
     if (success && redirectTo) {
-      router.push(redirectTo);
+      window.location.replace(redirectTo);
     } else if (!success) {
       // Trigger shake
       setShakeKey((k) => k + 1);
@@ -153,14 +159,10 @@ export default function SignInPage() {
           </p>
         </div>
 
-        {/* Google */}
-        <GoogleButton
-          onClick={handleGoogle}
-          loading={googleLoading}
-          label="Continue with Google"
-        />
-
-        <OrDivider />
+        {process.env.NEXT_PUBLIC_IMPRINT_GOOGLE_OAUTH_ENABLED === "true" && <>
+          <GoogleButton onClick={handleGoogle} loading={googleLoading} label="Continue with Google" />
+          <OrDivider />
+        </>}
 
         {/* Form */}
         {/* method="post" is deliberate. Submitting before React hydrates falls
@@ -214,21 +216,22 @@ export default function SignInPage() {
           </div>
 
           {/* Global error */}
-          {formError && (
+          {(formError || error) && (
             <motion.p
+              role="alert"
               initial={{ opacity: 0, y: -4 }}
               animate={{ opacity: 1, y: 0 }}
               className="mb-3 text-xs text-center"
               style={{ color: "#FF2D2D" }}
             >
-              {formError}
+              {formError || error}
             </motion.p>
           )}
 
           {/* Submit */}
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={!hydrated || isLoading}
             className="w-full h-[52px] rounded-pill text-on-accent font-medium text-sm flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed mt-4"
             style={{
               background: "#FF5500",

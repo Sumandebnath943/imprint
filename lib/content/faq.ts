@@ -56,7 +56,7 @@ export const FAQ_GROUPS: FaqGroup[] = [
         id: "who-for",
         question: "Who is IMPRINT for?",
         answer:
-          "IMPRINT is for anyone whose work depends on judgement, language or creative instinct: writers, developers, designers, students, analysts, founders. During onboarding you pick a profession cluster and the baseline prompts adapt to it, so a developer and a novelist are measured against relevant work rather than one generic test.",
+          "IMPRINT is for people aged 18 and older whose work depends on judgement, language or creative instinct, including university students and adult learners. During onboarding you pick a profession cluster and the baseline prompts adapt to the work you do.",
       },
       {
         id: "who-built",
@@ -194,7 +194,7 @@ export const FAQ_GROUPS: FaqGroup[] = [
         id: "do-you-read",
         question: "Do you read what I write?",
         answer:
-          "Your writing is stored so IMPRINT can compare it against your baseline and show you your own history, protected by row-level security scoped to your account. Mirror sessions are processed by OpenAI to generate questions. IMPRINT does not sell personal data and does not run advertising.",
+          "Your writing is stored so IMPRINT can compare it against your baseline and show you your own history, protected by row-level security scoped to your account. When AI features are enabled, Gemini processes Mirror messages for safety checks and reflection, with Groq as a fallback. IMPRINT does not sell personal data and does not run advertising.",
       },
       {
         id: "train-models",
@@ -242,7 +242,7 @@ export const FAQ_GROUPS: FaqGroup[] = [
         id: "export-data",
         question: "Can I export my data?",
         answer:
-          "Not yet as a one-click export. Your journal entries, beliefs, time capsules and calibration history are all visible and readable in the dashboard, and account deletion removes everything. A structured export is a known gap rather than deliberate lock-in.",
+          "Open Settings and choose Export Data for a compressed archive of your records and owned attachments. The archive includes dates and titles for sealed Time Capsules. Their letters become exportable when they unlock.",
       },
     ],
   },

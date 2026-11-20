@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/terms" },
 };
 
-const UPDATED = "5 September 2026";
+const UPDATED = "20 November 2026";
 const CONTACT = "defy@houseofnamus.com";
 
 function Section({
@@ -92,16 +92,15 @@ export default function TermsPage() {
 
         <Section id="your-account" title="2. Your account">
           <p>
-            You need an account to use the product. Keep your credentials to
-            yourself; you are responsible for what happens under your account.
-            One account per person, and you must be old enough to consent to the
-            processing described in the{" "}
+            You must be at least 18 years old to create an account or use the
+            service. Keep your credentials private. Each person may have one
+            account and is responsible for activity on it. The{" "}
             <Link href="/privacy" className="hover:underline" style={{ color: "#FF5500" }}>
               privacy policy
             </Link>
-            .
+            {" "}explains how we handle your data.
           </p>
-          <p>You can delete your account at any time from Settings.</p>
+          <p>You can delete your account from Settings or from the age confirmation screen.</p>
         </Section>
 
         <Section id="your-content" title="3. Your writing stays yours">
@@ -117,9 +116,12 @@ export default function TermsPage() {
               We do not use your writing to train machine-learning models, and we
               do not sell it.
             </strong>{" "}
-            Messages you send in the Mirror are passed to OpenAI to generate the
-            next question; nothing else in the product sends your writing to a
-            model. The privacy policy sets out every processor involved.
+            When AI features are available, Mirror sends recent messages to Google
+            Gemini for safety checks, questions and requested summaries. With
+            your consent, Gemini also processes selected assessment responses
+            and earlier work, including supported media. Groq handles requests
+            when Gemini is temporarily unavailable. The privacy policy explains
+            how these providers process your data.
           </p>
           <p>
             If you choose to make your credential public, join a circle, or

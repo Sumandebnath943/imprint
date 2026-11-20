@@ -1,11 +1,10 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ArrowDown, ArrowUp } from "lucide-react";
-import { LineChart, Line, Tooltip, ResponsiveContainer } from "recharts";
+import { X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { VaultSkill } from "@/lib/vault/types";
-import { getStrengthColor, getDaysSinceExercised } from "@/lib/vault/types";
+import { getStrengthColor } from "@/lib/vault/types";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -30,29 +29,11 @@ function StrengthRing({ strength, color }: { strength: number; color: string }) 
   );
 }
 
-// Synthetic strength history (decay model)
-function buildHistory(skill: VaultSkill, decayedStrength: number) {
-  const data = [];
-  for (let i = 29; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    const daysAgo = i;
-    const loss = daysAgo * (skill.decay_rate ?? 0.5);
-    const val = Math.max(0, Math.round(decayedStrength + loss * (i / 30)));
-    data.push({ day: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }), strength: Math.min(100, val) });
-  }
-  return data;
-}
-
 export default function SkillDrawer({ skill, decayedStrength, onClose, onGenerateChallenge }: SkillDrawerProps) {
   const router = useRouter();
   const color = skill ? getStrengthColor(decayedStrength) : "#FF5500";
-  const historyData = skill ? buildHistory(skill, decayedStrength) : [];
-  const projectedIn7 = skill ? Math.max(0, Math.round(decayedStrength - (skill.decay_rate ?? 0.5) * 7)) : 0;
-  const projDropsBelowHealthy = projectedIn7 < 50;
-  const daysSince = skill ? getDaysSinceExercised(skill.last_exercised) : 0;
 
-  const [realHistory, setRealHistory] = useState<{ date: string; type: string; points: number; completed: boolean }[]>([]);
+  const [realHistory, setRealHistory] = useState<{ date: string; type: string; completed: boolean }[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
   useEffect(() => {
@@ -79,12 +60,12 @@ export default function SkillDrawer({ skill, decayedStrength, onClose, onGenerat
         const combined = [];
         if (challengesRes.data) {
           for (const c of challengesRes.data) {
-            combined.push({ date: c.completed_at, type: "Vault Challenge", points: c.strength_gained || 5, completed: true });
+            combined.push({ date: c.completed_at, type: "Vault Challenge", completed: true });
           }
         }
         if (practicesRes.data) {
           for (const p of practicesRes.data) {
-            combined.push({ date: p.created_at, type: "Practice Session", points: 2, completed: true });
+            combined.push({ date: p.created_at, type: "Practice Session", completed: true });
           }
         }
 
@@ -132,49 +113,11 @@ export default function SkillDrawer({ skill, decayedStrength, onClose, onGenerat
               {/* Strength ring */}
               <div className="flex flex-col items-center gap-2">
                 <StrengthRing strength={decayedStrength} color={color} />
-                <p className="text-sm font-medium" style={{ color }}>{decayedStrength >= 80 ? "Strong" : decayedStrength >= 50 ? "Healthy" : decayedStrength >= 25 ? "Weakening" : "Critical"}</p>
+                <p className="text-sm font-medium" style={{ color }}>Self-rating</p>
               </div>
             </div>
 
             <div className="flex-1 p-6 flex flex-col gap-6">
-              {/* Strength history chart */}
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.58)" }}>Strength over time (30 days)</p>
-                <ResponsiveContainer width="100%" height={100}>
-                  <LineChart data={historyData}>
-                    <Line type="monotone" dataKey="strength" stroke={color} strokeWidth={2} dot={false} />
-                    <Tooltip
-                      contentStyle={{ background: "#111111", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontSize: 12 }}
-                      labelStyle={{ color: "rgba(255,255,255,0.50)" }}
-                      itemStyle={{ color }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-
-              {/* Decay projection */}
-              <div className="rounded-xl p-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.58)" }}>If you don&apos;t practice this week</p>
-                <div className="flex items-center gap-6">
-                  <div className="text-center">
-                    <p className="font-bold text-white" style={{ fontSize: 24 }}>{decayedStrength}%</p>
-                    <p className="text-xs" style={{ color: "rgba(255,255,255,0.62)" }}>Current</p>
-                  </div>
-                  <div className="flex-1 flex items-center">
-                    <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.10)" }} />
-                    {projDropsBelowHealthy
-                      ? <ArrowDown size={14} style={{ color: "#FF2D2D" }} />
-                      : <ArrowDown size={14} style={{ color: "#FFB800" }} />
-                    }
-                    <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.10)" }} />
-                  </div>
-                  <div className="text-center">
-                    <p className="font-bold" style={{ fontSize: 24, color: projDropsBelowHealthy ? "#FF2D2D" : "#FFB800" }}>{projectedIn7}%</p>
-                    <p className="text-xs" style={{ color: "rgba(255,255,255,0.62)" }}>In 7 days</p>
-                  </div>
-                </div>
-              </div>
-
               {/* Challenge history */}
               <div>
                 <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.58)" }}>Practice & Challenge History</p>
@@ -195,15 +138,9 @@ export default function SkillDrawer({ skill, decayedStrength, onClose, onGenerat
                             {item.completed
                               ? <>
                                   <span className="text-xs" style={{ color: "#00D97E" }}>✓ Completed</span>
-                                  <span className="text-xs flex items-center gap-0.5" style={{ color: "#00D97E" }}>
-                                    <ArrowUp size={10} />+{item.points}
-                                  </span>
                                 </>
                               : <>
                                   <span className="text-xs" style={{ color: "#FF2D2D" }}>✗ Missed</span>
-                                  <span className="text-xs flex items-center gap-0.5" style={{ color: "#FF2D2D" }}>
-                                    <ArrowDown size={10} />-3
-                                  </span>
                                 </>
                             }
                           </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useHydrated } from "@/hooks/useHydrated";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Lock } from "lucide-react";
@@ -11,6 +12,7 @@ const COURSES = [
 ];
 
 export default function CoursesSection() {
+  const hydrated = useHydrated();
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
@@ -93,7 +95,7 @@ export default function CoursesSection() {
             viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.4 }}
             className="w-full lg:w-auto min-w-[320px] max-w-md"
           >
-            <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+            <form method="post" onSubmit={handleSubmit} className="flex flex-col gap-3">
               {submitted ? (
                 <div className="w-full flex items-center justify-center h-16 rounded-full text-[15px] font-bold" style={{ background: "rgba(0,217,126,0.12)", border: "1px solid rgba(0,217,126,0.25)", color: "#00D97E" }}>
                   You&apos;re on the waitlist ✓
@@ -111,6 +113,7 @@ export default function CoursesSection() {
                   />
                   <button
                     type="submit"
+                    disabled={!hydrated}
                     className="h-16 px-8 rounded-full text-[15px] font-bold text-white transition-all hover:scale-[1.02] active:scale-[0.98] sm:absolute sm:right-1.5 sm:top-1.5 sm:h-[52px]"
                     style={{ background: "linear-gradient(90deg, #FF6B00 0%, #FF2200 100%)", boxShadow: "0 10px 30px -10px rgba(255,69,0,0.6)" }}
                   >

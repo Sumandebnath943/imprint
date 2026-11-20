@@ -1,187 +1,74 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
+import { getTextMetrics } from "@/lib/forge/types";
 import { createClient } from "@/lib/supabase/server";
 
-export async function POST(req: Request) {
-  try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+const entrySchema = z.object({
+  attemptId: z.uuid(),
+  title: z.string().trim().max(200).optional(),
+  content: z.string().max(40000).nullish(),
+  was_timed: z.boolean().default(false),
+  time_limit_seconds: z.number().int().positive().max(86400).nullish(),
+  response_audio_url: z.string().max(240).optional(),
+  response_file_url: z.string().max(240).optional(),
+  item_type: z.enum(["sketch", "handwriting", "photo", "voice", "document"]).optional(),
+  challenge_id: z.uuid().optional(),
+  practiced_skill_id: z.uuid().optional(),
+  tool: z.enum(["free-write", "timed-write", "memory-recall", "vault-challenge", "voice-note", "sketch-upload"]),
+  time_spent_seconds: z.number().int().min(0).max(86400).default(0),
+});
 
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+export async function POST(request: Request) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Sign in to save your session." }, { status: 401 });
+  const parsed = entrySchema.safeParse(await request.json().catch(() => null));
+  if (!parsed.success) return NextResponse.json({ error: "Invalid Forge session." }, { status: 400 });
+  const entry = parsed.data;
 
-    const body = await req.json();
-    const {
-      title,
-      content,
-      word_count,
-      was_timed,
-      time_limit_seconds,
-      response_audio_url,
-      response_file_url,
-      item_type,
-      challenge_id,
-      tool,
-      time_spent_seconds,
-      practiced_skill_id,
-    } = body;
-
-    // ── Calculate real drift signals from baseline ──────────────────────
-    let drift_signals: Record<string, number> | null = null;
-
-    if (content && word_count > 0) {
-      // Fetch baseline for this user
-      const { data: baseline } = await supabase
-        .from("baseline_imprints")
-        .select("vocabulary_richness, avg_sentence_length, word_count")
-        .eq("user_id", user.id);
-
-      const words = content.toLowerCase().split(/\s+/).filter(Boolean);
-      const vocabRichness = words.length > 0 ? new Set(words).size / words.length : 0;
-      const sentences = content.split(/[.!?]+/).filter((s: string) => s.trim());
-      const avgSentLen = sentences.length > 0 ? word_count / sentences.length : 0;
-
-      const avgBaselineVocab = baseline?.length
-        ? baseline.reduce((s, b) => s + (b.vocabulary_richness || 0), 0) / baseline.length
-        : 0;
-      const avgBaselineSentLen = baseline?.length
-        ? baseline.reduce((s, b) => s + (b.avg_sentence_length || 0), 0) / baseline.length
-        : 0;
-      const avgBaselineWordCount = baseline?.length
-        ? baseline.reduce((s, b) => s + (b.word_count || 0), 0) / baseline.length
-        : 0;
-
-      drift_signals = {
-        vocabulary_richness: parseFloat(vocabRichness.toFixed(3)),
-        avg_sentence_length: parseFloat(avgSentLen.toFixed(2)),
-        // Delta vs baseline (positive = more verbose/complex than baseline)
-        vocabulary_delta: avgBaselineVocab > 0
-          ? parseFloat(((vocabRichness - avgBaselineVocab) / avgBaselineVocab * 100).toFixed(1))
-          : 0,
-        sentence_length_delta: avgBaselineSentLen > 0
-          ? parseFloat(((avgSentLen - avgBaselineSentLen) / avgBaselineSentLen * 100).toFixed(1))
-          : 0,
-        word_count_delta: avgBaselineWordCount > 0
-          ? parseFloat(((word_count - avgBaselineWordCount) / avgBaselineWordCount * 100).toFixed(1))
-          : 0,
-        // Writing pace. Derived here from values the client already sends,
-        // rather than trusting a number it computes for itself.
-        words_per_minute: time_spent_seconds > 0
-          ? Math.round((word_count / time_spent_seconds) * 60)
-          : 0,
-      };
-    } else if (tool || time_spent_seconds !== undefined) {
-      drift_signals = {};
-    }
-
-    if (drift_signals !== null || tool || time_spent_seconds !== undefined || practiced_skill_id) {
-      if (!drift_signals) drift_signals = {};
-      if (tool) drift_signals.forge_tool = tool;
-      if (time_spent_seconds !== undefined) drift_signals.time_spent_seconds = time_spent_seconds;
-      if (practiced_skill_id) drift_signals.practiced_skill_id = practiced_skill_id;
-    }
-
-    // ── Insert journal entry ────────────────────────────────────────────
-    let finalContent = content ?? null;
-    const fileUrl = response_file_url || response_audio_url;
-    if (fileUrl) {
-      if (finalContent) finalContent += `\n\n[Attached File: ${fileUrl}]`;
-      else finalContent = `[Attached File: ${fileUrl}]`;
-    }
-
-    // item_type/source/response_file_url were accepted from the client and then
-    // dropped, leaving the columns null. The gallery compensated by re-deriving
-    // the type from the file extension, which silently mislabels anything the
-    // extension list does not cover. Persist them instead.
-    const VALID_ITEM_TYPES = ["sketch", "handwriting", "photo", "voice", "document"];
-    const resolvedItemType = VALID_ITEM_TYPES.includes(item_type) ? item_type : null;
-
-    const { data: entry, error: insertError } = await supabase
-      .from("journal_entries")
-      .insert({
-        user_id: user.id,
-        title: title ?? `Forge Session — ${new Date().toLocaleDateString("en-US", { month: "long", day: "numeric" })}`,
-        content: finalContent,
-        word_count: word_count ?? 0,
-        is_forge_entry: true,
-        has_ai_assistance: false,
-        was_timed: was_timed ?? false,
-        time_limit_seconds: time_limit_seconds ?? null,
-        drift_signals,
-        response_file_url: fileUrl || null,
-        item_type: resolvedItemType,
-        source: fileUrl ? "forge" : null,
-      })
-      .select("id")
-      .single();
-
-    if (insertError) {
-      console.error("Error saving forge entry:", insertError);
-      return NextResponse.json({ error: "Failed to save forge entry" }, { status: 500 });
-    }
-
-    // ── Mark vault challenge as completed if applicable ──────────────────
-    if (challenge_id) {
-      // Get the challenge details to update the skill strength
-      const { data: challengeData } = await supabase
-        .from("vault_challenges")
-        .select("skill_id, strength_gained")
-        .eq("id", challenge_id)
-        .single();
-
-      const { error: challengeError } = await supabase
-        .from("vault_challenges")
-        .update({ status: "completed", completed_at: new Date().toISOString() })
-        .eq("id", challenge_id)
-        .eq("user_id", user.id);
-
-      if (challengeError) {
-        console.error("Error completing vault challenge:", challengeError);
-      } else if (challengeData?.skill_id) {
-        // Increment the skill strength in the vault
-        // Since we don't have a direct increment in this Supabase version from the client,
-        // we fetch the current skill and add to it.
-        const { data: currentSkill } = await supabase
-          .from("skill_vault")
-          .select("strength_level, times_practiced")
-          .eq("id", challengeData.skill_id)
-          .single();
-          
-        if (currentSkill) {
-          await supabase
-            .from("skill_vault")
-            .update({ 
-              strength_level: Math.min(100, (currentSkill.strength_level || 0) + (challengeData.strength_gained || 5)),
-              times_practiced: (currentSkill.times_practiced || 0) + 1,
-              last_exercised: new Date().toISOString()
-            })
-            .eq("id", challengeData.skill_id);
-        }
-      }
-    } else if (practiced_skill_id) {
-      // ── Practice a specific skill (not a vault challenge) ────────────────
-      const { data: currentSkill } = await supabase
-        .from("skill_vault")
-        .select("strength_level, times_practiced")
-        .eq("id", practiced_skill_id)
-        .single();
-        
-      if (currentSkill) {
-        await supabase
-          .from("skill_vault")
-          .update({ 
-            // A regular practice session gives a smaller boost (+2) compared to a challenge
-            strength_level: Math.min(100, (currentSkill.strength_level || 0) + 2),
-            times_practiced: (currentSkill.times_practiced || 0) + 1,
-            last_exercised: new Date().toISOString()
-          })
-          .eq("id", practiced_skill_id);
-      }
-    }
-
-    return NextResponse.json({ success: true, entryId: entry?.id, driftSignals: drift_signals });
-  } catch (error) {
-    console.error("Forge save error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  const file = entry.response_audio_url ?? entry.response_file_url;
+  const text = entry.content?.trim() ?? "";
+  if (!text && !file) return NextResponse.json({ error: "Add a response before saving." }, { status: 400 });
+  if (entry.tool === "vault-challenge" && !entry.challenge_id) {
+    return NextResponse.json({ error: "This challenge is unavailable." }, { status: 409 });
   }
+  if (file) {
+    if (!file.startsWith(`${user.id}/forge/`) || file.split("/").length !== 3) {
+      return NextResponse.json({ error: "Invalid Forge attachment." }, { status: 400 });
+    }
+    const bucket = entry.response_audio_url ? "forge-audio" : "forge-files";
+    const { data, error } = await supabase.storage.from(bucket).exists(file);
+    if (error || !data) return NextResponse.json({ error: "The attachment could not be found." }, { status: 400 });
+  }
+
+  const metrics = getTextMetrics(text, entry.time_spent_seconds);
+  const { data: id, error } = await supabase.rpc("save_imprint_forge", {
+    p_attempt_id: entry.attemptId,
+    p_challenge_id: entry.challenge_id ?? null,
+    p_skill_id: entry.practiced_skill_id ?? null,
+    p_entry: {
+      title: entry.title || "Forge session",
+      content: file ? [text, `[Attached File: ${file}]`].filter(Boolean).join("\n\n") : text,
+      word_count: metrics.words,
+      was_timed: entry.was_timed,
+      time_limit_seconds: entry.time_limit_seconds ?? null,
+      drift_signals: {
+        forge_tool: entry.tool,
+        time_spent_seconds: metrics.duration,
+        practiced_skill_id: entry.practiced_skill_id ?? null,
+        words_per_minute: metrics.wordsPerMinute,
+        vocabulary_richness: metrics.vocabularyRichness,
+        avg_sentence_length: metrics.averageSentenceLength,
+      },
+      response_file_url: file ?? null,
+      item_type: entry.item_type ?? null,
+      source: file ? "forge" : null,
+    },
+  });
+  if (error?.code === "P0001") return NextResponse.json({ error: error.message }, { status: 409 });
+  if (error) {
+    console.error("Forge save failed", error);
+    return NextResponse.json({ error: "Your Forge session could not be saved. Please retry." }, { status: 500 });
+  }
+  return NextResponse.json({ entryId: id, metrics });
 }

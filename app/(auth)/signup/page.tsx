@@ -1,8 +1,8 @@
 "use client";
 
+import { useHydrated } from "@/hooks/useHydrated";
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
@@ -61,11 +61,11 @@ const fieldVariants: Variants = {
 
 // ─── Sign Up Page ─────────────────────────────────────────────────────────────
 export default function SignUpPage() {
-  const router = useRouter();
-  const { signUp, signInWithGoogle, loading: authLoading } = useAuth();
+  const hydrated = useHydrated();
+  const { signUp, signInWithGoogle, loading: authLoading, error } = useAuth();
 
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [outcome, setOutcome] = useState<"active" | "pending" | null>(null);
   const [fadeToBlack, setFadeToBlack] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -77,6 +77,7 @@ export default function SignUpPage() {
   } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
     mode: "onBlur",
+    defaultValues: { adultConfirmed: false },
   });
 
   const passwordValue = watch("password", "");
@@ -84,15 +85,18 @@ export default function SignUpPage() {
 
   const onSubmit = async (data: SignUpFormData) => {
     setFormError(null);
-    const { success: ok } = await signUp(data.email, data.password, data.full_name);
-
-    if (ok) {
-      setSuccess(true);
+    const result = await signUp(data.email, data.password, data.full_name, data.adultConfirmed);
+    if (result.status === "error") {
+      setFormError(result.message);
+      return;
+    }
+    setOutcome(result.status);
+    if (result.status === "active") {
       // After 1.5s show success, then fade to black, then navigate
       setTimeout(() => {
         setFadeToBlack(true);
         setTimeout(() => {
-          router.push("/onboarding/welcome");
+          window.location.replace(result.redirectTo);
         }, 700);
       }, 1500);
     }
@@ -142,7 +146,7 @@ export default function SignUpPage() {
         }}
       >
         <AnimatePresence mode="wait">
-          {success ? (
+          {outcome ? (
             /* ── Success State ─────────────────────────────────────── */
             <motion.div
               key="success"
@@ -150,6 +154,7 @@ export default function SignUpPage() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
               className="text-center py-6"
+              role="status"
             >
               <motion.div
                 initial={{ scale: 0 }}
@@ -161,10 +166,10 @@ export default function SignUpPage() {
                 <CheckCircle size={32} style={{ color: "#00D97E" }} />
               </motion.div>
               <h2 className="font-bold mb-2" style={{ fontSize: 24, color: "#1A1A1A" }}>
-                Imprint created.
+                {outcome === "pending" ? "Check your email" : "Imprint created."}
               </h2>
               <p style={{ color: "rgba(0,0,0,0.50)", fontSize: 15 }}>
-                Welcome. Let&apos;s capture who you are.
+                {outcome === "pending" ? "If confirmation is needed, use the link in your inbox. Check spam if it doesn’t arrive. If you already have an account, sign in or reset your password." : "Welcome. Let’s capture who you are."}
               </p>
             </motion.div>
           ) : (
@@ -190,14 +195,10 @@ export default function SignUpPage() {
                 </p>
               </div>
 
-              {/* Google */}
-              <GoogleButton
-                onClick={handleGoogle}
-                loading={googleLoading}
-                label="Continue with Google"
-              />
-
-              <OrDivider />
+              {process.env.NEXT_PUBLIC_IMPRINT_GOOGLE_OAUTH_ENABLED === "true" && <>
+                <GoogleButton onClick={handleGoogle} loading={googleLoading} label="Continue with Google" />
+                <OrDivider />
+              </>}
 
               {/* Form */}
               <form method="post" onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -260,18 +261,25 @@ export default function SignUpPage() {
                 </motion.div>
 
                 {/* Global form error */}
-                {formError && (
+                {(formError || error) && (
                   <motion.p
+                    role="alert"
                     initial={{ opacity: 0, y: -4 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="mt-3 text-xs text-center"
                     style={{ color: "#FF2D2D" }}
                   >
-                    {formError}
+                    {formError || error}
                   </motion.p>
                 )}
 
                 {/* Terms */}
+                <label className="mt-4 flex items-start gap-2 text-sm text-black/75">
+                  <input {...register("adultConfirmed")} type="checkbox" className="mt-1 accent-[#FF5500]"
+                    aria-invalid={Boolean(errors.adultConfirmed)} aria-describedby={errors.adultConfirmed ? "adult-confirmation-error" : undefined} />
+                  I confirm that I’m 18 or older.
+                </label>
+                {errors.adultConfirmed && <p id="adult-confirmation-error" role="alert" className="mt-2 text-sm text-red-700">{errors.adultConfirmed.message}</p>}
                 <p
                   className="text-center mt-4 mb-4"
                   style={{ fontSize: 12, color: "rgba(0,0,0,0.40)", lineHeight: 1.6 }}
@@ -285,7 +293,7 @@ export default function SignUpPage() {
                 {/* Submit */}
                 <button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={!hydrated || isLoading}
                   className="w-full h-[52px] rounded-pill text-on-accent font-medium text-sm flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
                   style={{
                     background: "#FF5500",

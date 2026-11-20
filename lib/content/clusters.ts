@@ -162,10 +162,10 @@ export const CLUSTER_PAGES: ClusterPage[] = [
   {
     slug: "students",
     cluster: "life_personal",
-    title: "IMPRINT for Students",
-    h1: "For people still building the thing that could erode",
+    title: "IMPRINT for University Students and Adult Learners",
+    h1: "Build independent skills as an adult learner",
     description:
-      "Students face the sharpest version of cognitive drift: delegating work that exists to build a capability, before the capability exists. IMPRINT captures a baseline while it is still forming.",
+      "University students and adult learners can use IMPRINT to capture a baseline while building new skills and practise those skills independently.",
     lede: "Everyone else is protecting a capability they already have. You are trying to build one, using tools that will do the building for you if you let them.",
     erosion: [
       "Assigned work is not valuable because the output is needed. Nobody requires your essay. The essay exists because writing it builds something in you, which means delegating it does not save time — it removes the entire point of the exercise while leaving something to hand in.",
@@ -185,8 +185,8 @@ export const CLUSTER_PAGES: ClusterPage[] = [
         a: "It depends entirely on which part is delegated. Using AI to check work, explain a concept or find sources keeps the learning intact. Using it to produce work assigned to build a capability removes the reason the work exists, while still producing something to submit.",
       },
       {
-        q: "Does AI use affect young people more than adults?",
-        a: "Some researchers argue that offloading synthesis and judgement during prefrontal cortex development — birth to the mid-twenties — could have more lasting effects than in adults. This is a hypothesis with a plausible mechanism, not an established finding, and it has not been directly tested.",
+        q: "Who can create an Imprint account?",
+        a: "Imprint is available to university students and other learners aged 18 and older.",
       },
     ],
   },

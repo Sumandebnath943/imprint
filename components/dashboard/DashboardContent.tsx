@@ -5,14 +5,13 @@ import GreetingRow from "@/components/dashboard/GreetingRow";
 import HeroRow from "@/components/dashboard/HeroRow";
 import SkillsRow from "@/components/dashboard/SkillsRow";
 import ActivityRow from "@/components/dashboard/ActivityRow";
-import BottomRow from "@/components/dashboard/BottomRow";
 
 interface DashboardContentProps {
   data: DashboardData;
 }
 
 export default function DashboardContent({ data }: DashboardContentProps) {
-  const { profile, driftScore, skills, nextChallenge, journalCountThisWeek, calibration, activityByDay, streak } = data;
+  const { profile, proficiency, dueTask, skills, nextChallenge, journalCountThisWeek, activityByDay, streak } = data;
 
   return (
     <div style={{ fontFamily: "Space Grotesk, sans-serif" }}>
@@ -22,18 +21,12 @@ export default function DashboardContent({ data }: DashboardContentProps) {
           screen showed the real number. */}
       <GreetingRow profile={profile} streak={streak} />
       <HeroRow
-        driftScore={driftScore}
+        proficiency={proficiency}
         nextChallenge={nextChallenge}
-        calibration={calibration}
+        dueTask={dueTask}
       />
       <SkillsRow skills={skills} />
       <ActivityRow journalCount={journalCountThisWeek} activityData={activityByDay} streak={streak} />
-      <BottomRow
-        profile={profile}
-        calibration={calibration}
-        nextChallenge={nextChallenge}
-        streak={streak}
-      />
     </div>
   );
 }

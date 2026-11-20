@@ -4,7 +4,7 @@
  * Scope and limits: state lives in the module, so on a serverless platform it
  * is per-instance rather than global. That is enough to stop one user hammering
  * an expensive endpoint in a loop — which is the actual exposure here, since
- * /api/mirror calls gpt-4o on every message — but it is not a substitute for a
+ * /api/mirror makes provider calls on every message — but it is not a substitute for a
  * shared store (Upstash/Redis) if this ever needs a hard global guarantee.
  */
 

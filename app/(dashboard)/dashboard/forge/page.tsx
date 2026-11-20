@@ -6,9 +6,6 @@ async function getForgeData(): Promise<ForgeUserData> {
   const empty: ForgeUserData = {
     userId: "",
     professionCluster: "life_personal",
-    baselineWordCount: 300,
-    baselineVocabRichness: 0.6,
-    baselineSentenceLength: 15,
     activeChallenge: null,
     history: [],
   };
@@ -24,28 +21,14 @@ async function getForgeData(): Promise<ForgeUserData> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return empty;
 
-    const [profileRes, baselineRes, challengeRes, historyRes] = await Promise.all([
+    const [profileRes, challengeRes, historyRes] = await Promise.all([
       supabase.from("profiles").select("profession_cluster").eq("id", user.id).single(),
-      supabase.from("baseline_imprints").select("word_count,vocabulary_richness,avg_sentence_length")
-        .eq("user_id", user.id).limit(20),
       supabase.from("vault_challenges").select("*").eq("user_id", user.id)
         .eq("status", "pending").order("due_date", { ascending: true }).limit(1).single(),
       supabase.from("journal_entries").select("id,created_at,word_count,drift_signals,content,title")
         .eq("user_id", user.id).eq("is_forge_entry", true)
         .order("created_at", { ascending: false }).limit(10),
     ]);
-
-    // Aggregate baseline averages
-    const baselines = baselineRes.data ?? [];
-    const avgWordCount = baselines.length > 0
-      ? Math.round(baselines.reduce((s, b) => s + (b.word_count ?? 0), 0) / baselines.length)
-      : 300;
-    const avgVocabRichness = baselines.length > 0
-      ? baselines.reduce((s, b) => s + (b.vocabulary_richness ?? 0.6), 0) / baselines.length
-      : 0.6;
-    const avgSentenceLen = baselines.length > 0
-      ? baselines.reduce((s, b) => s + (b.avg_sentence_length ?? 15), 0) / baselines.length
-      : 15;
 
     // Map history entries — infer tool from drift_signals or content pattern for old entries
     const history = (historyRes.data ?? []).map((h) => {
@@ -77,10 +60,12 @@ async function getForgeData(): Promise<ForgeUserData> {
     return {
       userId: user.id,
       professionCluster: profileRes.data?.profession_cluster ?? "life_personal",
-      baselineWordCount: avgWordCount,
-      baselineVocabRichness: parseFloat(avgVocabRichness.toFixed(3)),
-      baselineSentenceLength: parseFloat(avgSentenceLen.toFixed(1)),
-      activeChallenge: challengeRes.data ?? null,
+            activeChallenge: challengeRes.data ? {
+        id: challengeRes.data.id, title: challengeRes.data.challenge_title,
+        description: challengeRes.data.challenge_description, due_date: challengeRes.data.due_date,
+        submissionMode: challengeRes.data.challenge_type === "creative_production" ? "sketch-upload" :
+          challengeRes.data.challenge_type === "explanation_exercise" ? "voice-note" : "text",
+      } : null,
       history,
     };
   } catch {

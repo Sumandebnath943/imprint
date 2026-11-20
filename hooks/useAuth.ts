@@ -4,149 +4,85 @@ import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useUserStore } from "@/lib/store/user.store";
-import type { Profile } from "@/types/user.types";
+import { AUTH_RESUME_PATH } from "@/lib/auth/resume";
+import { ADULT_ATTESTATION, ADULT_ONLY_MESSAGE } from "@/lib/auth/eligibility";
+
+type SignupResult =
+  | { status: "active"; redirectTo: string }
+  | { status: "pending" }
+  | { status: "error"; message: string };
+
+function recordAuthTime() {
+  try { localStorage.setItem("imprint_auth_ts", Date.now().toString()); } catch {}
+}
 
 export function useAuth() {
   const router = useRouter();
-  const { setProfile, clearProfile, setLoading } = useUserStore();
+  const { clearProfile, setLoading } = useUserStore();
   const [loading, setLocalLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const clearError = useCallback(() => setError(null), []);
 
-  // ─── Sign Up ──────────────────────────────────────────────────────────────
-  const signUp = useCallback(
-    async (
-      email: string,
-      password: string,
-      fullName: string
-    ): Promise<{ success: boolean }> => {
-      setLocalLoading(true);
-      setLoading(true);
-      setError(null);
-
-      try {
-        const supabase = createClient();
-
-        const { data, error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { full_name: fullName },
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
-          },
-        });
-
-        if (signUpError) {
-          if (signUpError.message.includes("already registered")) {
-            setError("An account with this email already exists.");
-          } else {
-            setError(signUpError.message);
-          }
-          return { success: false };
+  const signUp = useCallback(async (email: string, password: string, fullName: string, adultConfirmed: boolean): Promise<SignupResult> => {
+    if (!adultConfirmed) return { status: "error", message: ADULT_ONLY_MESSAGE };
+    setLocalLoading(true);
+    setLoading(true);
+    setError(null);
+    try {
+      const { data, error: failure } = await createClient().auth.signUp({
+        email: email.trim(), password,
+        options: {
+          data: { full_name: fullName.trim(), [ADULT_ATTESTATION]: true },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      if (failure) {
+        if (failure.code === "user_already_exists" || failure.code === "email_exists") return { status: "pending" };
+        if (failure.status === 429) return { status: "error", message: "Too many attempts. Wait a few minutes and try again." };
+        if (failure.code === "weak_password") return { status: "error", message: "Choose a stronger password and try again." };
+        if (failure.code === "email_address_invalid" || failure.code === "validation_failed") {
+          return { status: "error", message: "Check your email address and password, then try again." };
         }
-
-        if (data.user) {
-          // Upsert profile — the DB trigger will also handle this,
-          // but we do it explicitly to ensure full_name is set
-          const { data: profileData } = await supabase
-            .from("profiles")
-            .upsert(
-              {
-                id: data.user.id,
-                email: data.user.email ?? email,
-                full_name: fullName,
-                onboarding_completed: false,
-                onboarding_step: 0,
-                imprint_score: 0,
-                ai_use_context: [],
-              },
-              { onConflict: "id" }
-            )
-            .select()
-            .single();
-
-          if (profileData) {
-            setProfile(profileData as Profile);
-          }
-
-          // Store auth timestamp for analytics
-          localStorage.setItem("imprint_auth_ts", Date.now().toString());
-
-          return { success: true };
-        }
-
-        return { success: false };
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Signup failed. Please try again."
-        );
-        return { success: false };
-      } finally {
-        setLocalLoading(false);
-        setLoading(false);
+        return { status: "error", message: "Signup is temporarily unavailable. Try again in a moment." };
       }
-    },
-    [setProfile, setLoading]
-  );
-
-  // ─── Sign In ──────────────────────────────────────────────────────────────
-  const signIn = useCallback(
-    async (
-      email: string,
-      password: string
-    ): Promise<{ success: boolean; redirectTo?: string }> => {
-      setLocalLoading(true);
-      setLoading(true);
-      setError(null);
-
-      try {
-        const supabase = createClient();
-
-        const { data, error: signInError } =
-          await supabase.auth.signInWithPassword({ email, password });
-
-        if (signInError) {
-          if (signInError.message.toLowerCase().includes("invalid")) {
-            setError("Incorrect email or password. Please try again.");
-          } else if (signInError.message.toLowerCase().includes("not found")) {
-            setError("No account found with this email address.");
-          } else {
-            setError(signInError.message);
-          }
-          return { success: false };
-        }
-
-        if (data.user) {
-          const { data: profileData } = await supabase
-            .from("profiles")
-            .select("*")
-            .eq("id", data.user.id)
-            .single();
-
-          if (profileData) {
-            setProfile(profileData as Profile);
-            localStorage.setItem("imprint_auth_ts", Date.now().toString());
-
-            const redirectTo =
-              profileData.onboarding_completed ? "/dashboard" : "/onboarding/welcome";
-            return { success: true, redirectTo };
-          }
-        }
-
-        return { success: true, redirectTo: "/onboarding/welcome" };
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Sign in failed. Please try again."
-        );
-        return { success: false };
-      } finally {
-        setLocalLoading(false);
-        setLoading(false);
+      if (data.session) {
+        recordAuthTime();
+        return { status: "active", redirectTo: AUTH_RESUME_PATH };
       }
-    },
-    [setProfile, setLoading]
-  );
+      if (data.user) return { status: "pending" };
+      return { status: "error", message: "Signup is temporarily unavailable. Try again in a moment." };
+    } catch {
+      return { status: "error", message: "Signup is temporarily unavailable. Try again in a moment." };
+    } finally {
+      setLocalLoading(false);
+      setLoading(false);
+    }
+  }, [setLoading]);
+
+  const signIn = useCallback(async (email: string, password: string): Promise<{ success: boolean; redirectTo?: string }> => {
+    setLocalLoading(true);
+    setLoading(true);
+    setError(null);
+    try {
+      const { data, error: failure } = await createClient().auth.signInWithPassword({ email, password });
+      if (failure || !data.session) {
+        setError(failure?.status === 429 ? "Too many attempts. Wait a few minutes and try again."
+          : failure?.code === "email_not_confirmed" ? "Confirm your email using the link in your inbox, then sign in."
+          : failure?.status === 400 || failure?.status === 401 ? "Incorrect email or password. Please try again."
+          : "Sign-in is temporarily unavailable. Try again in a moment.");
+        return { success: false };
+      }
+      recordAuthTime();
+      return { success: true, redirectTo: AUTH_RESUME_PATH };
+    } catch {
+      setError("Sign-in is temporarily unavailable. Try again in a moment.");
+      return { success: false };
+    } finally {
+      setLocalLoading(false);
+      setLoading(false);
+    }
+  }, [setLoading]);
 
   // ─── Google OAuth ─────────────────────────────────────────────────────────
   const signInWithGoogle = useCallback(async () => {
@@ -163,12 +99,12 @@ export function useAuth() {
       });
 
       if (oauthError) {
-        setError(oauthError.message);
+        setError("Google sign-in is unavailable. Try again or sign in with email.");
         setLocalLoading(false);
       }
       // Navigation handled by Supabase redirect
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Google sign-in failed.");
+    } catch {
+      setError("Google sign-in is unavailable. Try again or sign in with email.");
       setLocalLoading(false);
     }
   }, []);

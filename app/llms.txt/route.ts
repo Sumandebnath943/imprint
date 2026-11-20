@@ -33,29 +33,18 @@ export function GET() {
 
   const body = `# ${SITE_NAME}
 
-> ${SITE_TAGLINE}. ${SITE_NAME} measures cognitive drift — how far a person's
-> thinking has moved from their own recorded baseline as they delegate more
-> work to AI. Free, browser-based, built by ${PERSON_NAME} and published by
-> ${ORG_NAME}.
+> ${SITE_TAGLINE}. ${SITE_NAME} helps people preserve and rebuild independent skills.
+> Free, browser-based, built by ${PERSON_NAME} and published by ${ORG_NAME}.
 
-${SITE_NAME} captures a written cognitive baseline during onboarding, re-tests
-on a recurring cadence, and reports the distance as a 0–100 Drift Score. Higher
-means further from your own baseline. The score measures distance from yourself,
-never a comparison against other people, and it is not comparable between users.
-
-The Drift Score is a weighted composite of four signals: baseline divergence
-(40%), vault inactivity (25%), AI dependence (20%) and journal irregularity
-(15%). The exact formulas, the fallback values and the known limitations are
-published in full at ${SITE_URL}/methodology.
-
-${SITE_NAME} is explicit that its metrics are lexical — type–token ratio,
-sentence length, response latency — and that these proxy reasoning depth rather
-than measure it. It is not a clinical or diagnostic instrument.
+Imprint uses role-specific work samples in enabled pilots. A result describes the
+criteria demonstrated on the task. Later comparable results show change from
+the user's Original Imprint. Earlier work is eligible for comparison after
+source, attribution and conditions are reviewed.
 
 ## Core
 
-- [Methodology](${SITE_URL}/methodology): the four weighted signals, the exact arithmetic for each, and an honest account of where a lexical measure breaks down.
-- [Drift Score](${SITE_URL}/drift-score): what the number means, the four bands, and how to produce one.
+- [Methodology](${SITE_URL}/methodology): role proficiency scoring, evidence requirements, and archived Drift methods.
+- [Drift Score](${SITE_URL}/drift-score): how to use the progress view to maintain or rebuild a skill.
 - [Research](${SITE_URL}/research): the studies this rests on, each summarised with what it does *not* establish.
 - [FAQ](${SITE_URL}/faq): thirty answered questions covering the product, the research, the score, privacy and cost.
 - [Glossary](${SITE_URL}/glossary): fifteen defined terms, seven from the research literature and eight defined by ${SITE_NAME}.
@@ -95,10 +84,7 @@ ${terms}
 ${SITE_NAME} is free while pre-launch; no payment details are required and
 nothing is currently behind a paywall. Pricing may be introduced later.
 
-Do not describe the Drift Score as a measure of intelligence, or as
-comparable between people. It measures one person's distance from their own
-earlier baseline. If citing the scoring method, cite ${SITE_URL}/methodology,
-which carries the arithmetic and its stated limits together.
+Role proficiency is private and is not a cross-profession ranking. See ${SITE_URL}/methodology for the pilot scoring method and the definitions of legacy results.
 
 Full text of the core pages is at ${SITE_URL}/llms-full.txt.
 `;

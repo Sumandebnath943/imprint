@@ -1,3 +1,5 @@
+import { ROLE_TRACKS } from "@/lib/assessment/catalog";
+
 export type ResponseType = "text" | "audio" | "file" | "choice";
 
 export interface BaselineModule {
@@ -334,43 +336,7 @@ export const CLUSTER_SKILLS: Record<string, string[]> = {
 };
 
 // ─── Profession → cluster map (subset; full list in lib/utils/profession.ts) ─
-export const PROFESSIONS: { name: string; cluster: string }[] = [
-  { name: "Writer", cluster: "language_voice" },
-  { name: "Journalist", cluster: "language_voice" },
-  { name: "Screenwriter", cluster: "language_voice" },
-  { name: "Marketer", cluster: "language_voice" },
-  { name: "Customer Support", cluster: "language_voice" },
-  { name: "Sales Representative", cluster: "language_voice" },
-  { name: "Designer", cluster: "visual_creative" },
-  { name: "Illustrator", cluster: "visual_creative" },
-  { name: "Photographer", cluster: "visual_creative" },
-  { name: "Videographer", cluster: "visual_creative" },
-  { name: "Architect", cluster: "visual_creative" },
-  { name: "Musician", cluster: "visual_creative" },
-  { name: "Performer", cluster: "visual_creative" },
-  { name: "Actor", cluster: "visual_creative" },
-  { name: "Chef", cluster: "visual_creative" },
-  { name: "Software Developer", cluster: "technical_analytical" },
-  { name: "Data Scientist", cluster: "technical_analytical" },
-  { name: "Researcher", cluster: "technical_analytical" },
-  { name: "Scientist", cluster: "technical_analytical" },
-  { name: "Accountant", cluster: "technical_analytical" },
-  { name: "Educator", cluster: "human_social" },
-  { name: "Doctor", cluster: "human_social" },
-  { name: "Lawyer", cluster: "human_social" },
-  { name: "Therapist", cluster: "human_social" },
-  { name: "Social Worker", cluster: "human_social" },
-  { name: "Product Manager", cluster: "leadership_strategy" },
-  { name: "Entrepreneur", cluster: "leadership_strategy" },
-  { name: "Executive", cluster: "leadership_strategy" },
-  { name: "Athlete", cluster: "leadership_strategy" },
-  { name: "Coach", cluster: "leadership_strategy" },
-  { name: "Student", cluster: "life_personal" },
-  { name: "Homemaker / Parent", cluster: "life_personal" },
-  { name: "Retired", cluster: "life_personal" },
-  { name: "Between Jobs", cluster: "life_personal" },
-  { name: "Freelancer", cluster: "life_personal" },
-];
+export const PROFESSIONS = ROLE_TRACKS.map(({ name, cluster }) => ({ name, cluster }));
 
 export const CLUSTER_COLORS: Record<string, string> = {
   language_voice: "#FF5500",
@@ -389,14 +355,6 @@ export const CLUSTER_LABELS: Record<string, string> = {
   leadership_strategy: "Leadership & Strategy",
   life_personal: "Life & Personal",
 };
-
-export const AGE_GROUPS = [
-  { label: "8 – 12", value: "child_8_12" },
-  { label: "13 – 15", value: "teen_13_15" },
-  { label: "16 – 18", value: "teen_16_18" },
-  { label: "19 – 64", value: "adult_19_64" },
-  { label: "65+", value: "senior_65_plus" },
-];
 
 export const AI_EXPOSURE_LEVELS = [
   { value: "none", label: "None", description: "I don't use AI tools at all", color: "#00D97E" },

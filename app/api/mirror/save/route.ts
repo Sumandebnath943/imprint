@@ -15,7 +15,6 @@ export async function POST(req: Request) {
       messages,
       aiQuestionCount,
       userMessageCount,
-      dependencyFlags,
       topics,
       sessionDurationSeconds
     } = body;
@@ -25,7 +24,7 @@ export async function POST(req: Request) {
       messages: messages,
       ai_question_count: aiQuestionCount || 0,
       user_message_count: userMessageCount || 0,
-      dependency_flags: dependencyFlags || 0,
+      dependency_flags: 0,
       topics: topics || [],
       session_duration_seconds: sessionDurationSeconds || 0
     }).select().single();

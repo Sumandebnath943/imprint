@@ -140,10 +140,11 @@ export default function AIExposurePage() {
             Anything else about your AI use worth recording?
           </p>
           <p className="text-[12px] mb-2.5" style={{ color: "rgba(255,255,255,0.55)" }}>
-            Optional. This is for you, not us — we&apos;ll reflect it back in 90 days.
+            Optional. Imprint saves this privately when you finish onboarding. It will appear in your progress page 90 days later, and you can download it from Settings.
           </p>
           <textarea
             value={answers.aiReflectionNote}
+            maxLength={2000}
             onChange={(e) => setAiReflectionNote(e.target.value)}
             placeholder="Write freely, or skip this."
             className="w-full text-white outline-none resize-none transition-all duration-200"

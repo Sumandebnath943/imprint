@@ -220,6 +220,8 @@ function recordAction(type: ActionType, label: string) {
 
 /** A human-readable name for whatever was clicked. */
 function labelFor(el: Element): string {
+  if (el.closest("input, textarea, select, [contenteditable]")) return "field";
+  if (/^\/(dashboard|onboarding)(\/|$)/.test(location.pathname)) return "private page control";
   const target = el.closest(
     "a, button, [role='button'], input[type='submit'], input[type='button'], summary, label"
   );
@@ -234,7 +236,6 @@ function labelFor(el: Element): string {
   const title = node.getAttribute?.("title");
   if (title) return title.trim();
 
-  if (node instanceof HTMLInputElement) return node.value || node.name || node.type;
   if (node instanceof HTMLAnchorElement && node.href) return node.href;
 
   return node.tagName.toLowerCase();

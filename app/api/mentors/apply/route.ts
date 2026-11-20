@@ -1,34 +1,8 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { z } from "zod";
+import { mentorAction } from "@/lib/mentors/server";
 
-export async function POST(req: Request) {
-  try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+const input = z.object({ mentor_bio: z.string().trim().min(12).max(1000), mentoring_style: z.array(z.string().max(40)).max(6).default([]), max_mentees: z.number().int().min(1).max(10) });
 
-    const { mentor_bio, mentoring_style, max_mentees, accepting_mentees } = await req.json();
-
-    // Verify eligibility (IMPRINT > 500, Drift < 40 for 60d, 3+ calibrations)
-    // For simplicity in the API route, we assume the client checks and the DB allows updates
-    // In a strict environment, re-verify server-side here.
-
-    const { error } = await supabase
-      .from("profiles")
-      .update({
-        mentor_bio: mentor_bio || "",
-        mentoring_style: mentoring_style || [],
-        max_mentees: max_mentees || 2,
-        accepting_mentees: accepting_mentees ?? true,
-      })
-      .eq("id", user.id);
-
-    if (error) {
-      return NextResponse.json({ error: "Failed to update profile" }, { status: 500 });
-    }
-
-    return NextResponse.json({ success: true });
-  } catch (_err) {
-    return NextResponse.json({ error: "Internal error" }, { status: 500 });
-  }
+export async function POST(request: Request) {
+  return mentorAction(request, input, "apply_to_mentor", ({ mentor_bio, mentoring_style, max_mentees }) => ({ p_bio: mentor_bio, p_style: mentoring_style, p_capacity: max_mentees }));
 }

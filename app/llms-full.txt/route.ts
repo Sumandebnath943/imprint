@@ -43,79 +43,24 @@ Created by: ${PERSON_NAME} (https://sumandebnath.houseofnamus.com)
 Published by: ${ORG_NAME} (https://houseofnamus.com)
 Licence: content on this page may be quoted with attribution to ${SITE_NAME}.
 
-${SITE_NAME} measures cognitive drift — how far a person's thinking has moved
-from their own recorded baseline as they delegate more work to AI. It is free,
-runs in the browser, and is explicit that its metrics are lexical proxies rather
-than direct measures of reasoning.
+${SITE_NAME} helps people preserve and rebuild independent skills.
 
----
+## Assessment and progress
 
-## How the Drift Score is calculated
+Enabled role pilots use two work samples with published criteria. Each rating
+is anchored from 0 to 4. The rubric rating times 25 gives the criterion score.
+Where a task has an objective check, use 75 percent rubric and 25 percent check.
+The overall proficiency score is the rounded average of the two criterion scores.
 
-The Drift Score is a 0–100 composite describing how far current work sits from
-the user's own recorded baseline. Higher means further from yourself. It
-measures distance, not quality, and is not comparable between people.
+The first score is the user's Original Imprint. Practice is recorded alongside
+new assessment results. AI-use check-ins describe reported behavior outside
+Imprint. Mirror reflection contributes zero scoring points.
 
-Bands: 0–39 Anchored · 40–59 Drifting · 60–79 Critical · 80–100 Identity Crisis.
+Eligible earlier work receives independent provenance review and shares a
+criterion with the live assessment. A gap requires at least two approved pieces
+from the same period. Results using legacy Drift calculations remain in archive.
 
-### The composite
-
-    drift_score = round(
-        baseline_divergence   * 0.40
-      + vault_inactivity      * 0.25
-      + ai_dependence         * 0.20
-      + journal_irregularity  * 0.15
-    )
-    drift_score = max(0, min(100, drift_score))
-
-The 40/25/20/15 split is a considered judgement, not an empirically fitted
-result. No dataset sits behind those numbers.
-
-### Signal 1 — Baseline divergence (40%)
-
-    vocabulary_richness = unique_words / total_words     // type-token ratio
-    avg_sentence_length = total_words / sentence_count
-
-    vocab_divergence    = |cal_richness - baseline_richness| / baseline_richness
-    sentence_divergence = |cal_sent_len - baseline_sent_len| / baseline_sent_len
-
-    baseline_divergence = min(100,
-      round((vocab_divergence * 50 + sentence_divergence * 50) * 100)
-    )
-
-Divergence is relative, so the signal means the same thing for writers of long
-dense sentences and short plain ones. Missing baselines fall back to a richness
-of 0.5 and a sentence length of 15 words — placeholders, not norms.
-
-### Signal 2 — Vault inactivity (25%)
-
-    vault_inactivity = round(
-      100 - (skills_practised_in_last_14_days / total_tracked_skills) * 100
-    )
-    // with no tracked skills: 50
-
-### Signal 3 — AI dependence (20%)
-
-    ai_dependence = min(100, dependency_flags_last_14_days * 10)
-
-Flags are raised by the Mirror when a user asks it to decide rather than to
-reflect. The ten-points-per-flag scale is arbitrary and uncalibrated.
-
-### Signal 4 — Journal irregularity (15%)
-
-    journal_days = count(distinct days with >= 1 entry, last 14 days)
-    journal_irregularity = round(max(0, 100 - (journal_days / 14) * 100))
-
-### Stated limitations
-
-- Lexical, not semantic. Type-token ratio, sentence length and latency proxy reasoning depth rather than measuring it.
-- Type-token ratio falls mechanically as text lengthens, so a calibration longer than the baseline can register divergence created by length rather than by any change in thinking. Length-corrected measures such as MTLD are not used.
-- Divergence is absolute, so writing more richly than baseline registers exactly as much drift as writing less richly.
-- Sentences are counted by splitting on . ! and ?, which miscounts abbreviations, decimals and ellipses.
-- Three of the four signals measure engagement with ${SITE_NAME} itself and together carry 60% of the score, so a fortnight away from the product raises the score regardless of any change in thinking.
-- There are no population norms, no comparison group and no validation study. The bands are labels, not diagnostic thresholds.
-
-Full page: ${SITE_URL}/methodology
+Full method: ${SITE_URL}/methodology
 
 ---
 

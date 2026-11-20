@@ -1,17 +1,12 @@
 import { z } from "zod";
+import { ADULT_AGE_GROUPS } from "@/lib/auth/age-groups";
 
 export const whoAreYouSchema = z.object({
   full_name: z
     .string()
     .min(2, "Name must be at least 2 characters")
     .max(100, "Name must be under 100 characters"),
-  age_group: z.enum([
-    "child_8_12",
-    "teen_13_15",
-    "teen_16_18",
-    "adult_19_64",
-    "senior_65_plus",
-  ]),
+  age_group: z.enum(ADULT_AGE_GROUPS),
   profession: z.string().min(1, "Please select your profession"),
   profession_cluster: z.enum([
     "language_voice",

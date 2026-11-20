@@ -106,7 +106,7 @@ const FOOTER_LINKS = {
     { label: "Designers", href: "/for/designers" },
     { label: "Educators & clinicians", href: "/for/educators" },
     { label: "Founders & leaders", href: "/for/leaders" },
-    { label: "Students", href: "/for/students" },
+    { label: "University students", href: "/for/students" },
   ],
   Company: [
     { label: "Testimonials", href: "/#testimonials" },

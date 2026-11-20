@@ -31,6 +31,7 @@ export interface CalibrationSession {
   status: CalibrationStatus;
   prompts: CalibrationPrompt[];
   responses: CalibrationResponse[];
+  progress_version: number;
   drift_score_produced?: number;
   comparison_vs_baseline?: Record<string, unknown>;
   completed_at?: string;
@@ -42,12 +43,7 @@ export interface CalibrationScoreResult {
   score: number;
   scoreLabel: "anchored" | "drifting" | "critical" | "crisis";
   delta: number | null;
-  signals: {
-    baselineConsistency: number;
-    vaultActivity: number;
-    aiIndependence: number;
-    journalRegularity: number;
-  };
+  signals: { baseline_divergence?: number; vault_inactivity?: number; journal_irregularity?: number };
   nextSessionDue: string;
 }
 

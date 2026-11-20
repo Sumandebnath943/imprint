@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search } from "lucide-react";
 import { useOnboardingStore } from "@/lib/store/onboarding.store";
+import { AGE_GROUPS, isAdultAgeGroup } from "@/lib/auth/age-groups";
 import BottomNav from "@/components/onboarding/BottomNav";
 import StepLayout from "@/components/onboarding/StepLayout";
 import {
-  AGE_GROUPS,
   PROFESSIONS,
   CLUSTER_COLORS,
   CLUSTER_LABELS,
@@ -19,7 +19,7 @@ const TOTAL = 7;
 
 export default function WhoAreYouPage() {
   const router = useRouter();
-  const { answers, setStep, setAgeGroup, setProfession } = useOnboardingStore();
+  const { currentStep, answers, setStep, setAgeGroup, setProfession } = useOnboardingStore();
 
   const [search, setSearch] = useState("");
 
@@ -30,9 +30,14 @@ export default function WhoAreYouPage() {
     );
   }, [search]);
 
-  const canContinue = !!answers.ageGroup && !!answers.profession;
+  const canContinue = isAdultAgeGroup(answers.ageGroup) && !!answers.profession;
 
   const handleContinue = () => {
+    if (!canContinue) return;
+    if (currentStep > STEP) {
+      router.push("/onboarding/resume");
+      return;
+    }
     setStep(3);
     router.push("/onboarding/ai-exposure");
   };
@@ -54,9 +59,7 @@ export default function WhoAreYouPage() {
         }
         description={
           <>
-            Not your job title. Not your LinkedIn bio.
-            <br />
-            Who you actually are, right now.
+            Choose the work you want to assess and the skills you want to preserve.
           </>
         }
         aside={
@@ -76,7 +79,7 @@ export default function WhoAreYouPage() {
                 >
                   {CLUSTER_LABELS[answers.professionCluster]}
                 </span>{" "}
-                cluster. Your baseline will be tailored for you.
+                cluster. Your profession determines the assessment track when available.
               </motion.p>
             )}
           </AnimatePresence>
@@ -93,7 +96,7 @@ export default function WhoAreYouPage() {
           </p>
           <div className="flex flex-wrap gap-2">
             {AGE_GROUPS.map((g) => {
-              const selected = answers.ageGroup === g.value;
+              const selected = answers.ageGroup === g.value || (g.value === "adult_18_64" && answers.ageGroup === "adult_19_64");
               return (
                 <button
                   key={g.value}

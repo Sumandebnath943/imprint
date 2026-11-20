@@ -6,7 +6,7 @@ const checkinSchema = z.object({
   circle_id: z.string().uuid(),
   checkin_type: z.string().min(1),
   content: z.string().max(280, "Check-in content must be 280 characters or less."),
-  drift_score_shared: z.number().nullable().optional()
+  drift_score_shared: z.number().int().min(0).max(100).nullable().optional()
 });
 
 export async function POST(req: Request) {
@@ -50,6 +50,7 @@ export async function POST(req: Request) {
       .single();
 
     if (error) {
+      if (error.code === "P0001") return NextResponse.json({ error: error.message }, { status: 409 });
       return NextResponse.json({ error: "Failed to post check-in" }, { status: 500 });
     }
 

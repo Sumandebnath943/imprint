@@ -1,5 +1,6 @@
 "use client";
 
+import { useHydrated } from "@/hooks/useHydrated";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Mail, CheckCircle } from "lucide-react";
@@ -16,6 +17,7 @@ export default function ForgotPasswordModal({
   onClose,
 }: ForgotPasswordModalProps) {
   const { resetPassword, loading } = useAuth();
+  const hydrated = useHydrated();
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [localError, setLocalError] = useState("");
@@ -112,7 +114,7 @@ export default function ForgotPasswordModal({
 
                     <button
                       type="submit"
-                      disabled={loading}
+                      disabled={!hydrated || loading}
                       className="w-full h-[52px] rounded-pill text-on-accent text-sm font-medium transition-all duration-200 disabled:opacity-60 flex items-center justify-center gap-2"
                       style={{
                         background: "#FF5500",

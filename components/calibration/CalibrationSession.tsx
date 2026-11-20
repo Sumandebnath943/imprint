@@ -7,6 +7,7 @@ import type { CalibrationSession, CalibrationPrompt, CalibrationResponse } from 
 interface SessionProps {
   session: CalibrationSession;
   sessionNumber: number;
+  onProgress: (responses: CalibrationResponse[]) => Promise<boolean>;
   onComplete: (responses: CalibrationResponse[]) => void;
   onPause: (responses: CalibrationResponse[]) => void;
 }
@@ -22,13 +23,14 @@ function TimerDisplay({ seconds, maxSeconds }: { seconds: number; maxSeconds: nu
   return <span className="font-mono" style={{ fontSize: 14, color }}>{formatTime(seconds)}</span>;
 }
 
-export default function CalibrationSessionView({ session, sessionNumber, onComplete, onPause }: SessionProps) {
+export default function CalibrationSessionView({ session, sessionNumber, onProgress, onComplete, onPause }: SessionProps) {
   const prompts: CalibrationPrompt[] = session.prompts;
   const total = prompts.length;
 
   const [currentIdx, setCurrentIdx] = useState(() => {
     // Resume from last answered prompt
-    return Math.min(session.responses.length, total - 1);
+    const next = prompts.findIndex((prompt) => !session.responses.some((item) => item.promptId === prompt.id && item.wordCount >= (prompt.minWords ?? 1)));
+    return next < 0 ? total - 1 : next;
   });
   const [responses, setResponses] = useState<CalibrationResponse[]>(session.responses);
   const [content, setContent] = useState("");
@@ -36,21 +38,29 @@ export default function CalibrationSessionView({ session, sessionNumber, onCompl
   const [promptStart, setPromptStart] = useState(Date.now());
   const [timerLeft, setTimerLeft] = useState<number | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const autoSaveRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const navigationRef = useRef(false);
 
   const prompt = prompts[currentIdx];
   const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
-  const minWords = prompt.minWords ?? 0;
+  const minWords = prompt.minWords ?? 1;
   const canContinue = wordCount >= minWords || prompt.responseType !== "text";
 
-  // Load existing response for this prompt
+  const draftKey = `imprint-calibration-${session.id}-${prompt.id}`;
+  const [draftLoaded, setDraftLoaded] = useState("");
   useEffect(() => {
-    const existing = responses.find((r) => r.promptId === prompt.id);
-    setContent(existing?.content ?? "");
-    setPromptStart(Date.now());
-    if (prompt.timed) setTimerLeft(prompt.timed * 60);
-    setTimeout(() => textareaRef.current?.focus(), 100);
-  }, [currentIdx]); // eslint-disable-line react-hooks/exhaustive-deps
+    const existing = responses.find((response) => response.promptId === prompt.id);
+    const storedStart = Number(localStorage.getItem(draftKey + "-start"));
+    const start = storedStart > 0 ? storedStart : Date.now();
+    localStorage.setItem(draftKey + "-start", String(start));
+    setContent(localStorage.getItem(draftKey) ?? existing?.content ?? "");
+    setPromptStart(start);
+    setDraftLoaded(draftKey);
+    textareaRef.current?.focus();
+  }, [draftKey]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (draftLoaded === draftKey) localStorage.setItem(draftKey, content);
+  }, [draftKey, draftLoaded, content]);
 
   // Session elapsed timer
   useEffect(() => {
@@ -58,41 +68,20 @@ export default function CalibrationSessionView({ session, sessionNumber, onCompl
     return () => clearInterval(iv);
   }, []);
 
-  // Prompt countdown timer
   useEffect(() => {
-    if (timerLeft === null) return;
-    if (timerLeft <= 0) return;
-    const iv = setInterval(() => {
-      setTimerLeft((p) => {
-        if (p === null || p <= 1) { clearInterval(iv); return 0; }
-        return p - 1;
-      });
-    }, 1000);
-    return () => clearInterval(iv);
-  }, [timerLeft]);
-
-  // Backspace disabling
-  useEffect(() => {
-    if (!prompt.disableBackspace) return;
-    const handler = (e: KeyboardEvent) => { if (e.key === "Backspace") e.preventDefault(); };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [prompt.disableBackspace]);
-
-  // Auto-save every 60s
-  useEffect(() => {
-    autoSaveRef.current = setInterval(() => {
-      fetch("/api/calibration/save-progress", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId: session.id, responses }),
-      });
-    }, 60000);
-    return () => { if (autoSaveRef.current) clearInterval(autoSaveRef.current); };
-  }, [responses, session.id]);
+    if (!prompt.timed) {
+      setTimerLeft(null);
+      return;
+    }
+    const deadline = promptStart + prompt.timed * 60000;
+    const tick = () => setTimerLeft(Math.max(0, Math.ceil((deadline - Date.now()) / 1000)));
+    tick();
+    const interval = setInterval(tick, 250);
+    return () => clearInterval(interval);
+  }, [prompt.timed, promptStart]);
 
   const saveCurrentResponse = useCallback(() => {
-    const elapsed_secs = Math.floor((Date.now() - promptStart) / 1000);
+    const elapsed_secs = Math.min(86400, Math.floor((Date.now() - promptStart) / 1000));
     const resp: CalibrationResponse = {
       promptId: prompt.id,
       content,
@@ -101,31 +90,37 @@ export default function CalibrationSessionView({ session, sessionNumber, onCompl
       recordedAt: new Date().toISOString(),
     };
     const updated = [...responses.filter((r) => r.promptId !== prompt.id), resp];
-    setResponses(updated);
     return updated;
   }, [prompt.id, content, wordCount, promptStart, responses]);
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    if (!canContinue || navigationRef.current) return;
+    navigationRef.current = true;
     const updated = saveCurrentResponse();
-    if (currentIdx < total - 1) {
-      setCurrentIdx(currentIdx + 1);
-      // Save progress on advance
-      fetch("/api/calibration/save-progress", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId: session.id, responses: updated }),
-      });
-    } else {
-      onComplete(updated);
+    try {
+      if (currentIdx < total - 1) {
+        if (await onProgress(updated)) {
+          setResponses(updated);
+          setCurrentIdx(currentIdx + 1);
+        }
+      } else {
+        await onComplete(updated);
+      }
+    } finally {
+      navigationRef.current = false;
     }
   };
 
   const handleBack = () => {
-    if (currentIdx > 0) { saveCurrentResponse(); setCurrentIdx(currentIdx - 1); }
+    if (navigationRef.current) return;
+    if (currentIdx > 0) {
+      setResponses(saveCurrentResponse());
+      setCurrentIdx(currentIdx - 1);
+    }
   };
 
   const handlePause = () => {
-    const updated = saveCurrentResponse();
-    onPause(updated);
+    if (!navigationRef.current) onPause(saveCurrentResponse());
   };
 
   const progressPct = ((currentIdx) / total) * 100;
@@ -198,7 +193,9 @@ export default function CalibrationSessionView({ session, sessionNumber, onCompl
             {/* Textarea */}
             <div className="relative">
               <textarea ref={textareaRef} value={content}
-                disabled={timerLeft === 0 && prompt.timed !== undefined}
+                onCopy={(event) => event.preventDefault()}
+                onPaste={(event) => event.preventDefault()}
+                onDrop={(event) => event.preventDefault()}
                 onChange={(e) => {
                   if (prompt.disableBackspace && e.target.value.length < content.length) return;
                   setContent(e.target.value);

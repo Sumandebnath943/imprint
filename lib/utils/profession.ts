@@ -23,6 +23,7 @@ export const PROFESSION_CLUSTER_MAP: Record<Profession, ProfessionCluster> = {
   chef: "visual_creative",
   // technical_analytical
   software_developer: "technical_analytical",
+  software_qa: "technical_analytical",
   data_scientist: "technical_analytical",
   researcher: "technical_analytical",
   scientist: "technical_analytical",
@@ -69,6 +70,7 @@ export const CLUSTER_PROFESSIONS: Record<ProfessionCluster, Profession[]> = {
   ],
   technical_analytical: [
     "software_developer",
+    "software_qa",
     "data_scientist",
     "researcher",
     "scientist",

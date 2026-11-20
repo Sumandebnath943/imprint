@@ -13,30 +13,23 @@ import MirrorSessionViewer from "@/components/mirror/MirrorSessionViewer";
 
 import type {
   SessionContext, MirrorMessage, MirrorUserData, MirrorSessionStats,
-  IndicatorStatus,
 } from "@/lib/mirror/types";
 import {
-  OPENING_QUESTIONS, OPENING_FALLBACK, detectDependency,
-  calcVocabRichness, calcAvgSentenceLen,
-  getVocabStatus, getDepthStatus, formatTime,
+  OPENING_QUESTIONS, OPENING_FALLBACK,
+  formatTime,
 } from "@/lib/mirror/types";
-import { createClient } from "@/lib/supabase/client";
 
 /** Shown once per flagged message — by the client on send, or by the server. */
-const DEPENDENCY_NOTICE =
-  "The Mirror noticed you asked for a recommendation. It will only reflect your thinking back.";
-
 type SessionState = "idle" | "active" | "complete";
 const LS_KEY = (uid: string) => `imprint_mirror_session_${uid}`;
 const MAX_CHARS = 1500;
 
-interface MirrorClientProps { userData: MirrorUserData; }
+interface MirrorClientProps { userData: MirrorUserData; aiEnabled: boolean; }
 
 function nanoid() { return Math.random().toString(36).slice(2, 11); }
 
-export default function MirrorClient({ userData }: MirrorClientProps) {
+export default function MirrorClient({ userData, aiEnabled }: MirrorClientProps) {
   const router = useRouter();
-  const supabase = createClient();
 
   // ── Core state ────────────────────────────────────────────────────────
   const [sessionState, setSessionState] = useState<SessionState>("idle");
@@ -45,13 +38,11 @@ export default function MirrorClient({ userData }: MirrorClientProps) {
   const [isTyping, setIsTyping] = useState(false);
   const [selectedContext, setSelectedContext] = useState<SessionContext | null>(null);
   const [customTopic, setCustomTopic] = useState("");
-  const [dependencyFlags, setDependencyFlags] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const [draftBanner, setDraftBanner] = useState(false);
   const [sessionComplete, setSessionComplete] = useState(false);
   const [completeSummary, setCompleteSummary] = useState("");
   const [isLoadingSummary, setIsLoadingSummary] = useState(false);
-  const [sessionStartTime, setSessionStartTime] = useState<number>(0);
   const [viewingSessionId, setViewingSessionId] = useState<string | null>(null);
 
   // ── Refs ─────────────────────────────────────────────────────────────
@@ -65,14 +56,7 @@ export default function MirrorClient({ userData }: MirrorClientProps) {
   const stats: MirrorSessionStats = {
     questionCount: messages.filter((m) => m.role === "mirror").length,
     userCount: messages.filter((m) => m.role === "user").length,
-    dependencyFlags,
   };
-
-  const vocabRichness = calcVocabRichness(messages);
-  const avgSentLen = calcAvgSentenceLen(messages);
-  const vocabStatus: IndicatorStatus = getVocabStatus(vocabRichness, userData.baselineSummary.vocabularyRichness);
-  const depthStatus: IndicatorStatus = getDepthStatus(avgSentLen, userData.baselineSummary.avgSentenceLength);
-  const langStatus: IndicatorStatus = vocabStatus === "bad" || depthStatus === "bad" ? "bad" : vocabStatus === "warn" || depthStatus === "warn" ? "warn" : "good";
 
   // ── Scroll to bottom on new message ───────────────────────────────────
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, isTyping]);
@@ -90,11 +74,8 @@ export default function MirrorClient({ userData }: MirrorClientProps) {
   // ── Auto-save every 30s ───────────────────────────────────────────────
   useEffect(() => {
     if (sessionState !== "active") return;
-    const id = setInterval(() => {
-      localStorage.setItem(LS_KEY(userData.userId), JSON.stringify({ messages, context: selectedContext, customTopic, dependencyFlags, ts: Date.now() }));
-    }, 30000);
-    return () => clearInterval(id);
-  }, [sessionState, messages, selectedContext, customTopic, dependencyFlags, userData.userId]);
+    localStorage.setItem(LS_KEY(userData.userId), JSON.stringify({ messages, context: selectedContext, customTopic, ts: Date.now() }));
+  }, [sessionState, messages, selectedContext, customTopic, userData.userId]);
 
   // ── Draft restore check ───────────────────────────────────────────────
   useEffect(() => {
@@ -116,120 +97,48 @@ export default function MirrorClient({ userData }: MirrorClientProps) {
   }, [inputVal]);
 
   // ── Send message to API ────────────────────────────────────────────────
-  /**
-   * `alreadyFlagged` means the client detected the dependency itself and has
-   * already shown the notice. The API checks the same trigger list, so without
-   * this both fired and the notice rendered twice for every flagged message.
-   * The count still comes from the server, which is the authority.
-   */
-  const sendToMirror = useCallback(async (userMsg: string, history: MirrorMessage[], alreadyFlagged = false) => {
+  const sendToMirror = useCallback(async (userMsg: string, history: MirrorMessage[]) => {
     setIsTyping(true);
-
-    // Minimum 1.2s typing delay
-    const minDelay = new Promise((r) => setTimeout(r, 1200));
-
-    const context = selectedContext ?? "Something Else";
-    const res = await fetch("/api/mirror", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        message: userMsg,
-        conversationHistory: history.map((m) => ({ role: m.role === "mirror" ? "assistant" : m.role, content: m.content })),
-        sessionContext: context === "Something Else" ? customTopic || "open reflection" : context,
-        userCluster: userData.userCluster,
-        baselineSummary: userData.baselineSummary,
-        dependencyFlagCount: dependencyFlags,
-        mode: "question",
-      }),
-    });
-
-    await minDelay;
-    setIsTyping(false);
-
-    if (!res.ok) {
-      // The API returns a human-readable `response` for expected failures
-      // (rate limit, malformed input); fall back only when it doesn't.
-      const fallback = "The Mirror is momentarily unavailable. Your thoughts are still here.";
-      const content = await res
-        .json()
-        .then((d) => (typeof d?.response === "string" ? d.response : fallback))
-        .catch(() => fallback);
-      setMessages((p) => [...p, { id: nanoid(), role: "system", content, timestamp: Date.now() }]);
-      return;
-    }
-
-    const data = await res.json();
-
-    if (data.dependencyFlagged) {
-      setDependencyFlags((p) => p + 1);
-      if (!alreadyFlagged) {
-        setMessages((p) => [...p, { id: nanoid(), role: "system", content: DEPENDENCY_NOTICE, timestamp: Date.now() }]);
-      }
-    }
-
-    setMessages((p) => [...p, { id: nanoid(), role: "mirror", content: data.response, timestamp: Date.now() }]);
-  }, [selectedContext, customTopic, userData, dependencyFlags]);
-
-  // ── Begin session ─────────────────────────────────────────────────────
-  const beginSession = useCallback(async () => {
-    const ctx = selectedContext ?? "Something Else";
-    const opening = OPENING_QUESTIONS[ctx] ?? OPENING_FALLBACK;
-
-    setMessages([]);
-    setDependencyFlags(0);
-    setElapsed(0);
-    setSessionStartTime(Date.now());
-    setSessionState("active");
-    setDraftBanner(false);
-    localStorage.removeItem(LS_KEY(userData.userId));
-
-    // Show typing → opening question
-    setIsTyping(true);
-    await new Promise((r) => setTimeout(r, 1500));
-    setIsTyping(false);
-
-    let openingText = opening;
-    // If "Something Else" with no preset, call API for opening
-    if (ctx === "Something Else" && customTopic) {
-      const res = await fetch("/api/mirror", {
+    try {
+      const response = await fetch("/api/mirror", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          message: customTopic,
-          conversationHistory: [],
-          sessionContext: customTopic,
-          userCluster: userData.userCluster,
-          baselineSummary: userData.baselineSummary,
-          dependencyFlagCount: 0,
+          message: userMsg,
+          conversationHistory: history.slice(-30).map(({ role, content }) => ({ role, content })),
+          sessionContext: selectedContext === "Something Else" ? customTopic : selectedContext ?? "Open reflection",
           mode: "question",
         }),
       });
-      if (res.ok) { const d = await res.json(); openingText = d.response; }
+      const data = await response.json();
+      setMessages((previous) => [...previous, {
+        id: nanoid(), role: response.ok && data.kind === "question" ? "mirror" : "system",
+        content: data.response, timestamp: Date.now(),
+      }]);
+    } catch {
+      toast.error("Mirror is temporarily unavailable.");
+    } finally {
+      setIsTyping(false);
     }
+  }, [selectedContext, customTopic]);
 
-    setMessages([{ id: nanoid(), role: "mirror", content: openingText, timestamp: Date.now() }]);
-    textareaRef.current?.focus();
-  }, [selectedContext, customTopic, userData]);
+  const beginSession = () => {
+    if (!aiEnabled) return;
+    const topic = selectedContext ?? "Something Else";
+    setMessages([{ id: nanoid(), role: "mirror", content: OPENING_QUESTIONS[topic] ?? OPENING_FALLBACK, timestamp: Date.now() }]);
+    setElapsed(0);
+    setSessionState("active");
+    setDraftBanner(false);
+    localStorage.removeItem(LS_KEY(userData.userId));
+  };
 
-  // ── Handle user send ──────────────────────────────────────────────────
-  const handleSend = useCallback(async () => {
+  const handleSend = () => {
     const text = inputVal.trim();
     if (!text || isTyping) return;
-
-    const userMsg: MirrorMessage = { id: nanoid(), role: "user", content: text, timestamp: Date.now() };
-    const updated = [...messages, userMsg];
-    setMessages(updated);
+    setMessages([...messages, { id: nanoid(), role: "user", content: text, timestamp: Date.now() }]);
     setInputVal("");
-
-    // Surfaced immediately rather than waiting on the round trip. The server
-    // re-checks and owns the count; it is told not to repeat the notice.
-    const flagged = detectDependency(text);
-    if (flagged) {
-      setMessages((p) => [...p, { id: nanoid(), role: "system", content: DEPENDENCY_NOTICE, timestamp: Date.now() + 1 }]);
-    }
-
-    await sendToMirror(text, updated, flagged);
-  }, [inputVal, isTyping, messages, sendToMirror]);
+    void sendToMirror(text, messages);
+  };
 
   // ── Keyboard: Enter to send, Shift+Enter = newline ────────────────────
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -237,35 +146,33 @@ export default function MirrorClient({ userData }: MirrorClientProps) {
   };
 
   // ── End session ───────────────────────────────────────────────────────
-  const handleEndSession = useCallback(async () => {
+  const handleEndSession = () => {
     if (timerRef.current) clearInterval(timerRef.current);
     setSessionState("idle");
     setSessionComplete(true);
-    setIsLoadingSummary(true);
+  };
 
-    // Second OpenAI call for summary
+  const requestSummary = async () => {
+    setIsLoadingSummary(true);
     try {
-      const res = await fetch("/api/mirror", {
+      const response = await fetch("/api/mirror", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          message: "",
-          conversationHistory: messages.map((m) => ({ role: m.role === "mirror" ? "assistant" : m.role, content: m.content })),
-          sessionContext: selectedContext ?? "open reflection",
-          userCluster: userData.userCluster,
-          baselineSummary: userData.baselineSummary,
-          dependencyFlagCount: dependencyFlags,
+          conversationHistory: messages.slice(-30).map(({ role, content }) => ({ role, content })),
+          sessionContext: selectedContext === "Something Else" ? customTopic : selectedContext ?? "Open reflection",
           mode: "summary",
         }),
       });
-      const d = await res.json();
-      setCompleteSummary(d.response);
+      const data = await response.json();
+      if (!response.ok) throw new Error();
+      setCompleteSummary(data.response);
     } catch {
-      setCompleteSummary("A rich reflection — the themes you explored will resurface when you need them. What will you do differently now that you've thought this through?");
+      toast.error("A summary is temporarily unavailable.");
+    } finally {
+      setIsLoadingSummary(false);
     }
-    setIsLoadingSummary(false);
-    localStorage.removeItem(LS_KEY(userData.userId));
-  }, [messages, selectedContext, userData, dependencyFlags]);
+  };
 
   // ── Save session to Supabase + navigate ───────────────────────────────
   const handleSaveReturn = async () => {
@@ -277,8 +184,7 @@ export default function MirrorClient({ userData }: MirrorClientProps) {
           messages,
           aiQuestionCount: stats.questionCount,
           userMessageCount: stats.userCount,
-          dependencyFlags,
-          topics: selectedContext ? [selectedContext] : [],
+                topics: selectedContext ? [selectedContext] : [],
           sessionContext: selectedContext ?? "Something Else",
           sessionDurationSeconds: Math.floor(elapsed)
         })
@@ -287,7 +193,9 @@ export default function MirrorClient({ userData }: MirrorClientProps) {
     } catch (error) {
       console.error('Mirror end session error:', error);
       toast.error('Session data failed to save.');
+      return;
     }
+    localStorage.removeItem(LS_KEY(userData.userId));
     router.push("/dashboard");
   };
 
@@ -295,7 +203,6 @@ export default function MirrorClient({ userData }: MirrorClientProps) {
     setSessionComplete(false);
     setMessages([]);
     setInputVal("");
-    setDependencyFlags(0);
     setElapsed(0);
     setCompleteSummary("");
   };
@@ -309,7 +216,6 @@ export default function MirrorClient({ userData }: MirrorClientProps) {
       setMessages(p.messages ?? []);
       setSelectedContext(p.context ?? null);
       setCustomTopic(p.customTopic ?? "");
-      setDependencyFlags(p.dependencyFlags ?? 0);
       setSessionState("active");
       setDraftBanner(false);
     } catch { /* ignore */ }
@@ -330,7 +236,7 @@ export default function MirrorClient({ userData }: MirrorClientProps) {
 
       {/* Draft recovery banner */}
       <AnimatePresence>
-        {draftBanner && !isActive && (
+        {aiEnabled && draftBanner && !isActive && (
           <motion.div initial={{ y: -60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -60, opacity: 0 }}
             className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-3"
             style={{ background: "rgba(255,120,50,0.10)", borderBottom: "1px solid rgba(255,120,50,0.20)" }}>
@@ -351,9 +257,6 @@ export default function MirrorClient({ userData }: MirrorClientProps) {
         stats={stats}
         isActive={isActive}
         elapsed={elapsed}
-        vocabStatus={vocabStatus}
-        depthStatus={depthStatus}
-        langStatus={langStatus}
         pastSessions={userData.pastSessions}
         onSelectContext={setSelectedContext}
         onCustomTopic={setCustomTopic}
@@ -392,7 +295,9 @@ export default function MirrorClient({ userData }: MirrorClientProps) {
                   You&apos;ll leave knowing more about what you actually think.
                 </p>
 
-                {!selectedContext ? (
+                {!aiEnabled ? (
+                  <p className="text-sm text-white/70">New Mirror sessions are currently unavailable. You can still view saved sessions.</p>
+                ) : !selectedContext ? (
                   <p className="italic" style={{ fontSize: 14, color: "rgba(255,255,255,0.58)" }}>Select a context from the left to begin.</p>
                 ) : (
                   <div className="flex flex-col items-center gap-4 mt-2">
@@ -405,6 +310,9 @@ export default function MirrorClient({ userData }: MirrorClientProps) {
                       style={{ background: "rgba(255,120,50,0.85)", boxShadow: "0 0 40px rgba(255,120,50,0.20)" }}>
                       Begin Session →
                     </motion.button>
+                    <p className="max-w-md text-center text-xs text-white/70">
+                      Mirror sends recent messages to Google Gemini for safety checks and reflection. Groq handles the request if Gemini is unavailable. You can skip any question or end the session.
+                    </p>
                   </div>
                 )}
               </div>
@@ -422,12 +330,11 @@ export default function MirrorClient({ userData }: MirrorClientProps) {
                 </span>
                 <span className="font-mono text-sm" style={{ color: "rgba(255,255,255,0.62)" }}>{formatTime(elapsed)}</span>
                 <div className="flex items-center gap-3">
-                  {dependencyFlags > 0 && (
-                    <span className="text-xs rounded-full px-2 py-0.5" style={{ background: "rgba(255,184,0,0.12)", border: "1px solid rgba(255,184,0,0.25)", color: "#FFB800" }}>
-                      {dependencyFlags} flags
-                    </span>
-                  )}
-                  <button onClick={handleEndSession}
+                  <button onClick={() => {
+                    setInputVal("");
+                    setMessages((previous) => [...previous, { id: nanoid(), role: "mirror", content: "What would you prefer to focus on instead?", timestamp: Date.now() }]);
+                  }} disabled={isTyping} className="text-xs text-white/70">Skip question</button>
+                  <button disabled={isTyping} onClick={handleEndSession}
                     className="text-xs font-medium rounded-full transition-all"
                     style={{ border: "1px solid rgba(255,255,255,0.20)", color: "rgba(255,255,255,0.50)", padding: "4px 12px" }}
                     onMouseOver={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,120,50,0.50)"; (e.currentTarget as HTMLElement).style.color = "rgba(255,120,50,0.90)"; }}
@@ -488,7 +395,7 @@ export default function MirrorClient({ userData }: MirrorClientProps) {
                   </button>
                 </div>
                 <p className="text-center mt-2 text-xs" style={{ color: "rgba(255,255,255,0.50)" }}>
-                  The Mirror asks questions. It never answers.
+                  Mirror is an AI reflection tool. You can skip any question or end the session.
                 </p>
               </div>
             </motion.div>
@@ -501,14 +408,11 @@ export default function MirrorClient({ userData }: MirrorClientProps) {
             <MirrorComplete
               questionCount={stats.questionCount}
               elapsed={elapsed}
-              dependencyFlags={dependencyFlags}
               summary={completeSummary}
               isLoadingSummary={isLoadingSummary}
-              vocabStatus={vocabStatus}
-              depthStatus={depthStatus}
-              langStatus={langStatus}
               onSaveReturn={handleSaveReturn}
               onNewSession={handleNewSession}
+              onRequestSummary={requestSummary}
             />
           )}
         </AnimatePresence>

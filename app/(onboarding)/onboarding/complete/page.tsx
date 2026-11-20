@@ -4,72 +4,42 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useOnboardingStore } from "@/lib/store/onboarding.store";
-import { useUserStore } from "@/lib/store/user.store";
-import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
 
 export default function CompletePage() {
   const router = useRouter();
   const { answers, totalWordCount, reset } = useOnboardingStore();
-  const { profile } = useUserStore();
   const [entering, setEntering] = useState(false);
 
   const moduleCount = Object.keys(answers.baselineResponses).length;
   const skillCount = answers.skills.length;
 
   const handleEnter = async () => {
-    if (!profile?.id) { router.push("/dashboard"); return; }
+    if (entering) return;
     setEntering(true);
-
     try {
-      const supabase = createClient();
-      const now = new Date();
-      const startOfYear = new Date(now.getFullYear(), 0, 1);
-      const weekNumber = Math.ceil(((now.getTime() - startOfYear.getTime()) / 86400000 + startOfYear.getDay() + 1) / 7);
-
-      // Mark onboarding complete + save all collected profile data
-      await supabase
-        .from("profiles")
-        .update({
-          onboarding_completed: true,
-          onboarding_step: 7,
-          age_group: answers.ageGroup ?? null,
-          profession: answers.profession ?? null,
-          profession_cluster: answers.professionCluster ?? null,
-          ai_exposure_level: answers.aiExposureLevel ?? null,
-        })
-        .eq("id", profile.id);
-
-      // Insert starting drift score (0 = anchored)
-      await supabase.from("drift_scores").insert({
-        user_id: profile.id,
-        score: 0,
-        score_label: "anchored",
-        delta_from_previous: 0,
-        contributing_signals: {},
-        week_number: weekNumber,
-        year: now.getFullYear(),
+      const response = await fetch("/api/onboarding/finish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          profession: answers.profession,
+          ageGroup: answers.ageGroup,
+          aiExposureLevel: answers.aiExposureLevel,
+          aiUseContext: answers.aiUseContext,
+          reflection: answers.aiReflectionNote,
+          skills: answers.skills,
+        }),
       });
-
-      // Insert skills
-      if (answers.skills.length > 0) {
-        const skillRows = answers.skills.map((s) => ({
-          user_id: profile.id,
-          skill_name: s.name,
-          skill_category: "general",
-          cluster: answers.professionCluster,
-          strength_level: s.strengthLevel,
-          times_practiced: 0,
-          decay_rate: 0.5,
-        }));
-        await supabase.from("skill_vault").insert(skillRows);
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error ?? "Could not finish onboarding.");
       }
-
-      // Clear store
       reset();
-
-      setTimeout(() => router.push("/dashboard"), 700);
-    } catch {
-      router.push("/dashboard");
+      router.replace("/dashboard");
+      router.refresh();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not finish onboarding.");
+      setEntering(false);
     }
   };
 
@@ -146,9 +116,7 @@ export default function CompletePage() {
           className="mb-10 lg:mb-4"
           style={{ fontSize: 18, color: "rgba(255,255,255,0.55)", lineHeight: 1.8, maxWidth: 480 }}
         >
-          You&apos;ve created your Baseline Imprint. This is the fingerprint of your authentic mind — right now, today.
-          <br /><br />
-          Every session, challenge, and reflection from here will be measured against this moment.
+          Your onboarding responses are saved. Your proficiency result appears after a scored assessment.
         </motion.p>
 
         {/* CTA */}
@@ -167,7 +135,7 @@ export default function CompletePage() {
         </motion.button>
 
         <p className="text-sm" style={{ color: "rgba(255,255,255,0.58)" }}>
-          Your first Vault Challenge drops in 24 hours.
+          Continue to your dashboard for next steps.
         </p>
 
         </div>
@@ -195,33 +163,6 @@ export default function CompletePage() {
               <p className="text-xs" style={{ color: "rgba(255,255,255,0.66)", lineHeight: 1.5 }}>{label}</p>
             </div>
           ))}
-        </motion.div>
-
-        {/* Drift score ring */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.55, type: "spring", stiffness: 200, damping: 20 }}
-          className="flex flex-col items-center mb-10"
-        >
-          <svg width={120} height={120} viewBox="0 0 120 120">
-            <circle cx={60} cy={60} r={52} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={6} />
-            <motion.circle
-              cx={60} cy={60} r={52}
-              fill="none"
-              stroke="#00D97E"
-              strokeWidth={6}
-              strokeLinecap="round"
-              strokeDasharray={`${2 * Math.PI * 52}`}
-              initial={{ strokeDashoffset: 2 * Math.PI * 52 }}
-              animate={{ strokeDashoffset: 2 * Math.PI * 52 * 0.95 }}
-              transition={{ duration: 1.5, delay: 0.7, ease: "easeOut" }}
-              style={{ transform: "rotate(-90deg)", transformOrigin: "center" }}
-            />
-            <text x={60} y={60} textAnchor="middle" dy="0.3em" fill="white" fontSize={28} fontWeight={700} fontFamily="Space Grotesk, sans-serif">0</text>
-          </svg>
-          <p className="text-sm mt-3" style={{ color: "rgba(255,255,255,0.72)" }}>Your starting Drift Score</p>
-          <p className="text-sm font-medium mt-1" style={{ color: "#00D97E" }}>Anchored. Completely you.</p>
         </motion.div>
 
         </div>

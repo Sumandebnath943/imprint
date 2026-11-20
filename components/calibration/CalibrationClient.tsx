@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import CalibrationHub from "@/components/calibration/CalibrationHub";
 import CalibrationSessionView from "@/components/calibration/CalibrationSession";
@@ -21,14 +21,16 @@ export default function CalibrationClient({ pageData }: CalibrationClientProps) 
   const [activeSession, setActiveSession] = useState<CalibrationSession | null>(pageData.activeSession);
   const [scoreResult, setScoreResult] = useState<CalibrationScoreResult | null>(null);
 
+  const saving = useRef(false);
+
   const completedCount = pageData.sessions.filter((s) => s.status === "completed").length;
   const sessionNumber = completedCount + 1;
 
   // ── Begin calibration ─────────────────────────────────────────────────
   const handleBegin = async () => {
     // If resuming
-    if (pageData.activeSession) {
-      setActiveSession(pageData.activeSession);
+    if (activeSession) {
+      setActiveSession(activeSession);
       setPhase("active");
       return;
     }
@@ -41,17 +43,7 @@ export default function CalibrationClient({ pageData }: CalibrationClientProps) 
         throw new Error(data.error || "Failed to start calibration");
       }
       
-      // Map returned session ID to a dummy session object to satisfy typing if full object is not returned
-      setActiveSession({
-        id: data.sessionId || data.session?.id,
-        user_id: pageData.userId,
-        session_number: data.sessionNumber || data.session?.session_number,
-        status: "in_progress",
-        prompts: data.session?.prompts || [],
-        responses: [],
-        created_at: new Date().toISOString()
-      } as CalibrationSession);
-      
+      setActiveSession(data.session as CalibrationSession);
       setPhase("active");
     } catch (err: any) {
       console.error("Calibration start error:", err);
@@ -59,27 +51,35 @@ export default function CalibrationClient({ pageData }: CalibrationClientProps) 
     }
   };
 
-  // ── Pause ─────────────────────────────────────────────────────────────
-  const handlePause = async (responses: CalibrationResponse[]) => {
-    if (!activeSession) return;
-    await fetch("/api/calibration/save-progress", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sessionId: activeSession.id, responses }),
-    });
-    setPhase("hub");
+  const handleSave = async (responses: CalibrationResponse[]) => {
+    if (!activeSession || saving.current) return false;
+    saving.current = true;
+    try {
+      const response = await fetch("/api/calibration/save-progress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId: activeSession.id, responses, version: activeSession.progress_version,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error ?? "Could not save progress.");
+      setActiveSession({ ...activeSession, responses, progress_version: data.version });
+      return true;
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not save progress.");
+      return false;
+    } finally {
+      saving.current = false;
+    }
   };
 
-  // ── Complete ──────────────────────────────────────────────────────────
+  const handlePause = async (responses: CalibrationResponse[]) => {
+    if (await handleSave(responses)) setPhase("hub");
+  };
+
   const handleComplete = async (responses: CalibrationResponse[]) => {
-    if (!activeSession) return;
-    // Save final responses first
-    await fetch("/api/calibration/save-progress", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sessionId: activeSession.id, responses }),
-    });
-    setPhase("processing");
+    if (await handleSave(responses)) setPhase("processing");
   };
 
   // ── Score result received ─────────────────────────────────────────────
@@ -96,13 +96,13 @@ export default function CalibrationClient({ pageData }: CalibrationClientProps) 
       )}
 
       {/* Resume banner (shown in hub if active session) */}
-      {phase === "hub" && pageData.activeSession && (
+      {phase === "hub" && activeSession && (
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 flex items-center gap-4 rounded-2xl px-6 py-4"
           style={{ background: "rgba(255,85,0,0.08)", border: "1px solid rgba(255,85,0,0.25)", boxShadow: "0 0 40px rgba(255,85,0,0.08)" }}>
           <div>
             <p className="text-sm font-medium text-white">You have a session in progress.</p>
             <p className="text-xs" style={{ color: "rgba(255,255,255,0.72)" }}>
-              {pageData.activeSession.responses.length} of {pageData.activeSession.prompts.length} prompts completed.
+              {activeSession.responses.length} of {activeSession.prompts.length} prompts completed.
             </p>
           </div>
           <button onClick={handleBegin}
@@ -120,6 +120,7 @@ export default function CalibrationClient({ pageData }: CalibrationClientProps) 
             <CalibrationSessionView
               session={activeSession}
               sessionNumber={activeSession.session_number}
+              onProgress={handleSave}
               onComplete={handleComplete}
               onPause={handlePause}
             />

@@ -1,6 +1,6 @@
 "use client";
 
-import {useState, useEffect, useCallback} from "react";
+import {useState, useMemo, useCallback} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PlusCircle, Shield } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -12,7 +12,7 @@ import SkillDrawer from "@/components/vault/SkillDrawer";
 import { AddSkillPanel, VaultHistory } from "@/components/vault/AddSkillPanel";
 
 import type { VaultSkill, VaultChallenge, VaultPageData, FilterType, SortType } from "@/lib/vault/types";
-import { calcDecayedStrength, getStrengthLabel, SUGGESTED_SKILLS } from "@/lib/vault/types";
+import { getStrengthLabel, SUGGESTED_SKILLS } from "@/lib/vault/types";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 
@@ -25,8 +25,7 @@ export default function VaultClient({ pageData }: VaultClientProps) {
   // ── Skills state (optimistic) ─────────────────────────────────────────
   const [skills, setSkills] = useState<VaultSkill[]>(pageData.skills);
   const [activeChallenge, setActiveChallenge] = useState<VaultChallenge | null>(pageData.activeChallenge);
-  const [decayedStrengths, setDecayedStrengths] = useState<Record<string, number>>({});
-  const [syncToast, setSyncToast] = useState(false);
+  const decayedStrengths = useMemo(() => Object.fromEntries(skills.map((skill) => [skill.id, skill.strength_level])), [skills]);
 
   // ── UI state ──────────────────────────────────────────────────────────
   const [filter, setFilter] = useState<FilterType>("All");
@@ -34,34 +33,6 @@ export default function VaultClient({ pageData }: VaultClientProps) {
   const [search, setSearch] = useState("");
   const [drawerSkill, setDrawerSkill] = useState<VaultSkill | null>(null);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
-
-  // ── Decay engine on mount ─────────────────────────────────────────────
-  useEffect(() => {
-    const newStrengths: Record<string, number> = {};
-    const updates: { id: string; strength: number }[] = [];
-
-    for (const skill of skills) {
-      const decayed = calcDecayedStrength(skill);
-      newStrengths[skill.id] = decayed;
-      if (Math.abs(decayed - skill.strength_level) > 5) {
-        updates.push({ id: skill.id, strength: decayed });
-      }
-    }
-    setDecayedStrengths(newStrengths);
-
-    // Batch Supabase update
-    if (updates.length > 0) {
-      Promise.all(
-        updates.map(({ id, strength }) =>
-          supabase.from("skill_vault").update({ strength_level: strength, updated_at: new Date().toISOString() }).eq("id", id)
-        )
-      ).then(() => {
-        setSyncToast(true);
-        setTimeout(() => setSyncToast(false), 2500);
-      });
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // ── Filter + sort + search ────────────────────────────────────────────
   const filteredSkills = skills
@@ -77,7 +48,7 @@ export default function VaultClient({ pageData }: VaultClientProps) {
       const sb = decayedStrengths[b.id] ?? b.strength_level;
       if (sort === "strength-asc")   return sa - sb;
       if (sort === "strength-desc")  return sb - sa;
-      if (sort === "last-practiced") return new Date(a.last_exercised).getTime() - new Date(b.last_exercised).getTime();
+      if (sort === "last-practiced") return (b.last_exercised ? Date.parse(b.last_exercised) : 0) - (a.last_exercised ? Date.parse(a.last_exercised) : 0);
       if (sort === "recently-added") return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       return a.skill_name.localeCompare(b.skill_name);
     });
@@ -107,12 +78,11 @@ export default function VaultClient({ pageData }: VaultClientProps) {
     const newSkill: VaultSkill = {
       id: tempId, user_id: user.id, skill_name: name,
       cluster: cluster, strength_level: strength,
-      decay_rate: 0.5, last_exercised: now, times_practiced: 0,
+      decay_rate: 0.5, last_exercised: null, times_practiced: 0,
       created_at: now, updated_at: now,
     };
     // Optimistic insert
     setSkills((p) => [...p, newSkill]);
-    setDecayedStrengths((p) => ({ ...p, [tempId]: strength }));
 
     try {
       const { data, error } = await supabase.from("skill_vault").insert({
@@ -120,7 +90,7 @@ export default function VaultClient({ pageData }: VaultClientProps) {
         skill_name: name,
         skill_category: cluster,
         cluster: cluster, 
-        strength_level: strength || 60,
+        strength_level: strength,
         decay_rate: 0.5, 
         last_exercised: now,
         times_practiced: 0
@@ -128,38 +98,34 @@ export default function VaultClient({ pageData }: VaultClientProps) {
 
       if (error) {
         console.error("Add skill error:", error.message, error.details, error.hint);
-        toast.error("Failed to add skill: " + error.message);
-        return;
+        throw error;
       }
 
       if (data) {
         setSkills((p) => p.map((s) => s.id === tempId ? data as VaultSkill : s));
-        setDecayedStrengths((p) => { const n = { ...p }; n[data.id] = strength; delete n[tempId]; return n; });
         toast.success(`${name} added to your Vault.`);
       }
     } catch (err) {
       console.error("Add skill exception:", err);
       // Rollback optimistic update
       setSkills((p) => p.filter((s) => s.id !== tempId));
-      setDecayedStrengths((p) => { const n = { ...p }; delete n[tempId]; return n; });
       toast.error("Failed to add skill. Please try again.");
     }
-  }, [pageData.userId, pageData.userCluster, supabase]);
+  }, [pageData.userCluster, supabase]);
 
   // ── Generate challenge ────────────────────────────────────────────────
   const handleGenerateChallenge = useCallback(async (skill: VaultSkill) => {
-    const str = decayedStrengths[skill.id] ?? skill.strength_level;
     const res = await fetch("/api/vault/generate-challenge", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ skillId: skill.id, skillName: skill.skill_name, cluster: skill.cluster, currentStrength: str }),
+      body: JSON.stringify({ skillId: skill.id }),
     });
     if (res.ok) {
       const { challenge } = await res.json();
       setActiveChallenge({ ...challenge, skill_name: skill.skill_name });
-      showToast("Challenge assigned. You have 3 days to complete it.");
-    }
-  }, [decayedStrengths]);
+      showToast("Challenge assigned.");
+    } else { toast.error("Could not assign a challenge."); }
+  }, []);
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
@@ -181,7 +147,7 @@ export default function VaultClient({ pageData }: VaultClientProps) {
         <div className="flex items-start justify-between mb-8">
           <div>
             <h1 className="font-bold text-white mb-1" style={{ fontSize: 32 }}>Skill Vault</h1>
-            <p style={{ fontSize: 15, color: "rgba(255,255,255,0.66)" }}>Your human skills. Exercised or forgotten.</p>
+            <p style={{ fontSize: 15, color: "rgba(255,255,255,0.66)" }}>Record practice for the skills you want to keep using.</p>
           </div>
           <button onClick={() => {
               const panelDiv = document.getElementById("add-skill-toggle");
@@ -277,15 +243,7 @@ export default function VaultClient({ pageData }: VaultClientProps) {
         onGenerateChallenge={handleGenerateChallenge}
       />
 
-      {/* Sync toast */}
       <AnimatePresence>
-        {syncToast && (
-          <motion.div key="sync" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 rounded-full px-5 py-2 text-sm z-50"
-            style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.60)" }}>
-            Vault synced.
-          </motion.div>
-        )}
         {toastMsg && (
           <motion.div key="toast" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }}
             className="fixed bottom-6 right-8 rounded-xl px-5 py-3 text-sm z-50 max-w-xs"

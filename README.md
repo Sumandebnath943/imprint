@@ -17,68 +17,34 @@ IMPRINT captures that "before" and keeps measuring the distance from it.
 
 ## How it works
 
-**1 — Baseline capture.** During onboarding you answer a set of prompts drawn
-from four universal modules (opinion & belief, decision under pressure, memory
-& recall, emotional fingerprint) plus modules specific to your profession
-cluster — language & voice, visual & creative, technical & analytical, human &
-social, leadership & strategy, or life & personal. Responses can be text,
-voice, or file upload.
+1. Choose the work you want to preserve. Imprint has draft assessment tracks
+   for all 36 selectable roles, including separate developer and tester tracks.
+2. An enabled role pilot captures two work samples, grades published criteria
+   using objective checks where available and bounded AI evaluation, and
+   saves your first result as your Original Imprint.
+3. The Progress page shows your proficiency and comparable results, and
+   assigns practice, AI-use check-ins, and reassessment. Journaling and
+   practice activity have separate measures.
+4. Eligible users can submit dated earlier work for independent source and
+   authorship review. A historical comparison requires two usable samples for
+   the same criterion, period, and scoring version.
+5. Older text and activity comparisons remain visible as legacy records.
 
-**2 — Metric extraction.** Each response is reduced to four measurable
-signals:
-
-| Signal | How it is computed |
-| --- | --- |
-| `word_count` | tokens in the response |
-| `avg_sentence_length` | words ÷ sentences |
-| `vocabulary_richness` | unique words ÷ total words (type–token ratio) |
-| `response_time_seconds` | time to compose |
-
-**3 — Calibration.** On a recurring cadence you answer the same modules again.
-Each response is compared against its own baseline, per module.
-
-**4 — Drift Score.** Four signals are combined into a weighted composite on a
-0–100 scale, where **higher means further from yourself**:
-
-| Signal | Weight | What it measures |
-| --- | --- | --- |
-| Baseline divergence | 40% | How far this calibration's vocabulary richness and sentence length sit from your baseline |
-| Vault inactivity | 25% | Share of your tracked skills not practised in the last 14 days |
-| AI dependence | 20% | Dependency flags the Mirror raised in the last 14 days |
-| Journal irregularity | 15% | Share of the last 14 days with no entry |
-
-Baseline divergence carries the heaviest weight because language degrades
-earliest and most visibly under delegation. The dashboard presents each
-signal inverted — as the quality drift erodes — so a fuller bar always
-reads as better.
-
-| Score | Label |
-| --- | --- |
-| 0–39 | **Anchored** |
-| 40–59 | **Drifting** |
-| 60–79 | **Critical** |
-| 80–100 | **Identity Crisis** |
-
-The score is directionless by design — it measures *distance* from your
-baseline, not improvement or decline against anyone else.
+See the [methodology](https://imprint.houseofnamus.com/methodology) for scoring
+formulas and evidence requirements.
 
 ## Features
 
 ### Measurement
-- **Drift** — your score over time, with the contributing signals broken out so
-  you can see *which* dimension moved.
-- **Calibration** — the recurring re-test that produces each new score.
+- **Progress** — private proficiency, skill changes, due tasks, and archived Drift comparisons.
+- **Calibration** — reassessment for the selected role when that pilot is enabled.
 - **Skill Vault** — the skills you are deliberately protecting, each with a
   strength value and generated practice challenges.
 
 ### Practice
-- **The Mirror** — a Socratic reflection surface built on `gpt-4o`. It is
-  constrained to ask questions and nothing else: it will not answer, advise,
-  recommend, or write for you. It detects when you are asking it to decide
-  something and redirects the question back at you, tracking how often that
-  happens.
-- **The Forge** — distraction-free composition with drift signals captured as
-  you write.
+- **The Mirror** asks open reflection questions and can summarize the dialogue on request.
+  It invites users to make their own decisions. Reflection contributes zero proficiency points.
+- **The Forge** — distraction-free composition and practice with consistent session measurements.
 - **Journal**, **Beliefs**, **Time Capsule** — longitudinal records of what you
   thought and when.
 
@@ -106,9 +72,7 @@ Alongside the product, IMPRINT publishes what it is doing and why:
 | [`/drift-score`](https://imprint.houseofnamus.com/drift-score) | What the number means and how to get one |
 | [`/notes`](https://imprint.houseofnamus.com/notes) | Long-form articles, authored as MDX under `content/notes/` |
 
-The scoring page exists because a score you cannot inspect asks for trust it has
-not earned. If the algorithm in `app/api/calibration/complete/route.ts` changes,
-`/methodology` is wrong and must be updated with it.
+Update the public methodology when an assessment rubric, scoring rule, or evidence requirement changes.
 
 ## Tech stack
 
@@ -118,7 +82,7 @@ not earned. If the algorithm in `app/api/calibration/complete/route.ts` changes,
 | Language | TypeScript, `strict: true` |
 | Styling | Tailwind CSS |
 | Database / Auth / Storage | Supabase (Postgres, RLS enforced) |
-| AI | OpenAI `gpt-4o` |
+| AI | Google Gemini primary with Groq fallback for temporary provider failures |
 | Client state | Zustand |
 | Forms / validation | react-hook-form + zod |
 | Motion / charts | framer-motion, recharts |
@@ -135,15 +99,13 @@ not earned. If the algorithm in `app/api/calibration/complete/route.ts` changes,
 - **Authorisation is in the database, not the app.** Every table has RLS
   enabled and policies scoped to `auth.uid()`. Route handlers use the caller's
   session — the service role key is never used to bypass a policy.
-- **Prompt safety.** The Mirror reads the user's cluster and baseline from the
-  database rather than the request body, so a client cannot fabricate the
-  baseline it is being measured against. The free-text session context is
-  sanitised before it reaches the system prompt, and requests are rate-limited
-  per user because every message is a billed model call.
+- **Assessment and reflection.** The server validates evidence and calculates
+  proficiency. Model outputs reference a published criterion. Mirror receives
+  recent conversation and the selected topic. User content remains data.
 
 ## Running locally
 
-**Prerequisites:** Node 18+, a Supabase project, an OpenAI API key.
+**Prerequisites:** Node 18+ and a Supabase project. AI features require separate provider setup.
 
 ```bash
 git clone https://github.com/Sumandebnath943/imprint.git
@@ -162,7 +124,10 @@ cp .env.local.example .env.local
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server-only; never exposed to the client |
-| `OPENAI_API_KEY` | Powers The Mirror |
+| `GEMINI_API_KEY` | Server-only primary provider for AI scoring, transcription and Mirror |
+| `GROQ_API_KEY` | Server-only fallback for temporary Gemini failures |
+| `IMPRINT_AI_ENABLED` | Defaults off. Set to `true` only for isolated synthetic QA or an approved deployment |
+| `NEXT_PUBLIC_IMPRINT_GOOGLE_OAUTH_ENABLED` | Defaults off. Enable after configuring and verifying Google sign-in |
 | `NEXT_PUBLIC_APP_URL` | Canonical origin, used for OG images and the sitemap |
 | `TELEGRAM_BOT_TOKEN` | Optional. Visitor and crawler alerts; unset means both are a no-op |
 | `TELEGRAM_CHAT_ID` | Optional. Destination chat for those alerts |
@@ -195,6 +160,61 @@ npm run indexnow       # push the sitemap to Bing, Yandex, Naver, Seznam, Yep
 URLs is what the protocol's 429 response exists to punish. Google does not
 participate in IndexNow; discovery there runs through Search Console and the
 sitemap.
+
+## Assessment pilot setup
+
+Apply all migrations in order on a staging Supabase project. Configure the
+service role key server-side. Set `IMPRINT_PILOT_ROLES` to the exact IDs of roles
+approved for an invited pilot, for example `software-qa,software-developer`.
+An empty list disables new proficiency scoring. Role content and criteria
+live in `lib/assessment/catalog.ts`. Verify tasks with practitioners, compare
+model output with independent ratings, and test alternate forms and relevant
+input modes before enabling a role more broadly. Pilot differences are
+descriptive until meaningful change thresholds are established.
+
+Set `IMPRINT_REVIEWER_IDS` to the account IDs of authorized reviewers. Their
+queue is under `/dashboard/assessment-review`. Request a review from a scored
+assessment. Submit historical evidence from Progress.
+
+## Launch scope
+
+Imprint is for people aged 18 and older. Apply migration 020 before deploying
+the age gate. New email signups confirm their age during registration, and
+existing accounts confirm it on their next visit.
+
+Google OAuth is deferred. Launch uses email and password. Keep the Google
+sign-in flag off. Configure authentication emails in Supabase Auth. Task
+reminders can be activated separately after verifying email delivery.
+
+Task reminder delivery requires server-only `RESEND_API_KEY`,
+`IMPRINT_REMINDER_FROM` and `IMPRINT_CRON_SECRET`, and an hourly signed POST
+to `/api/internal/imprint-reminders`. Follow the rollout instructions for
+Supabase Cron. The worker checks the opt-in, adult confirmation, and the
+confirmed Supabase Auth email address. Verify delivery using a test account
+before enabling a production schedule.
+
+Run `npm run test:assessment` for the assessment rule tests. Run
+`supabase/tests/imprint_flow.sql` against a fresh local or staging database
+after migration to verify retry behavior, scheduling, and access boundaries.
+The test creates temporary fixtures inside a rolled-back transaction.
+
+## Disposable QA backend
+
+Run `bash scripts/qa-local-supabase.sh` with Docker and Supabase CLI v2.84.2.
+The script creates a new local project with Auth, PostgREST, PostgreSQL, Storage,
+and Mailpit. It applies the original migration history after checking that the
+managed Storage table already has row-level security. Set `QA_PORT` to your
+local app port, `QA_EMAIL_CONFIRMATIONS` to `true` or `false`, and use a unique
+`QA_DB_PORT_PREFIX` for each stack. `QA_SUPABASE_ENV` selects the private file
+containing the local connection settings. On Windows the script runs inside
+WSL. For upgrade testing, set `QA_UPGRADE_FIXTURE` to the absolute path of
+`supabase/tests/qa_upgrade_seed.sql` and run `qa_upgrade_verify.sql` afterward.
+
+Mentor applications are reviewed at `/dashboard/mentors/review` by an account
+listed in `IMPRINT_REVIEWER_IDS`. Approval applies to the profession reviewed.
+The mentor chooses when to open requests. Mentorship check-ins and Time Capsule
+unlock dates use UTC. Settings exports a `tar.gz` of account records and owned
+attachments, including metadata for still-sealed Time Capsules.
 
 ## Project structure
 
@@ -231,10 +251,7 @@ types/            shared domain types
 
 Honest notes on where the MVP stops:
 
-- Drift metrics are lexical (type–token ratio, sentence length, latency). They
-  are deliberately transparent and cheap to compute, but they are a proxy for
-  reasoning depth rather than a direct measure of it. Semantic and embedding-
-  based signals are the natural next step.
+- Legacy text comparisons describe text characteristics and activity. Role proficiency scoring is in pilot and requires independent validation for each supported track.
 - Courses are presented as upcoming with a waitlist; no course content ships in
   this build. `/courses` says so on the page rather than only here.
 - A small number of credential statistics are placeholders pending the full

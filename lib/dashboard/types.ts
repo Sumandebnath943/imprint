@@ -58,6 +58,8 @@ export interface DashboardData {
   calibration: DashboardCalibration | null;
   activityByDay: { day: string; value: number; isToday: boolean }[];
   streak: number;
+  proficiency?: { score: number; date: string } | null;
+  dueTask?: { kind: string; due_at: string } | null;
 }
 
 // Drift score helpers

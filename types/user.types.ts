@@ -2,6 +2,7 @@ export type AgeGroup =
   | "child_8_12"
   | "teen_13_15"
   | "teen_16_18"
+  | "adult_18_64"
   | "adult_19_64"
   | "senior_65_plus";
 
@@ -37,6 +38,7 @@ export type Profession =
   | "actor"
   | "chef"
   | "software_developer"
+  | "software_qa"
   | "data_scientist"
   | "researcher"
   | "scientist"

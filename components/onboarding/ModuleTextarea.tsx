@@ -10,6 +10,7 @@ interface ModuleTextareaProps {
   minHeight?: number;
   disableBackspace?: boolean;
   timerSeconds?: number; // total seconds, 0 = no timer
+  startedAt?: number;
   onTimerEnd?: () => void;
 }
 
@@ -30,27 +31,30 @@ export default function ModuleTextarea({
   minHeight = 200,
   disableBackspace = false,
   timerSeconds = 0,
+  startedAt,
   onTimerEnd,
 }: ModuleTextareaProps) {
   const ref = useRef<HTMLTextAreaElement>(null);
+  const timerEndRef = useRef(onTimerEnd);
   const [remaining, setRemaining] = useState(timerSeconds);
 
-  // Timer
+  useEffect(() => { timerEndRef.current = onTimerEnd; }, [onTimerEnd]);
+
   useEffect(() => {
     if (!timerSeconds) return;
-    setRemaining(timerSeconds);
-    const id = setInterval(() => {
-      setRemaining((prev) => {
-        if (prev <= 1) {
-          clearInterval(id);
-          onTimerEnd?.();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    const deadline = (startedAt ?? Date.now()) + timerSeconds * 1000;
+    const id = setInterval(tick, 250);
+    function tick() {
+      const seconds = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+      setRemaining(seconds);
+      if (seconds === 0) {
+        clearInterval(id);
+        timerEndRef.current?.();
+      }
+    }
+    tick();
     return () => clearInterval(id);
-  }, [timerSeconds, onTimerEnd]);
+  }, [timerSeconds, startedAt]);
 
   // Timer color
   const timerColor =
@@ -98,6 +102,8 @@ export default function ModuleTextarea({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
+        onDrop={(event) => event.preventDefault()}
+        readOnly={timerSeconds > 0 && remaining === 0}
         placeholder={placeholder}
         spellCheck={false}
         autoComplete="off"

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import type { DashboardProfile, DashboardDriftScore } from "@/lib/dashboard/types";
+import { AUTH_RESUME_PATH } from "@/lib/auth/resume";
 
 // Gracefully attempt Supabase fetch — skip if env vars missing (local dev)
 async function getDashboardLayoutData(): Promise<{
@@ -35,11 +36,6 @@ async function getDashboardLayoutData(): Promise<{
 
     const profile = profileRes.data as DashboardProfile | null;
 
-    // Redirect to onboarding if not completed
-    if (profile && !profile.onboarding_completed) {
-      redirect("/onboarding/welcome");
-    }
-
     return {
       profile,
       driftScore: driftRes.data as DashboardDriftScore | null,
@@ -51,6 +47,7 @@ async function getDashboardLayoutData(): Promise<{
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const { profile, driftScore } = await getDashboardLayoutData();
+  if (profile && !profile.onboarding_completed) redirect(AUTH_RESUME_PATH);
 
   return (
     <DashboardShell profile={profile} driftScore={driftScore}>

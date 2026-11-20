@@ -1,48 +1,17 @@
-import CirclesClient, { type HumanCircle, type CircleMember } from "@/components/circles/CirclesClient";
-
-async function getData() {
-  const empty = { circles: [], memberships: [], userId: "" };
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return empty;
-  
-  try {
-    const { createClient } = await import("@/lib/supabase/server");
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return empty;
-
-    const { data: memberships } = await supabase
-      .from("circle_members")
-      .select("*")
-      .eq("user_id", user.id);
-
-    if (!memberships || memberships.length === 0) {
-      return { circles: [], memberships: [], userId: user.id };
-    }
-
-    const circleIds = memberships.map(m => m.circle_id);
-
-    const { data: circles } = await supabase
-      .from("human_circles")
-      .select("*")
-      .in("id", circleIds);
-
-    // Fetch all members for these circles to calculate counts
-    const { data: allMemberships } = await supabase
-      .from("circle_members")
-      .select("*")
-      .in("circle_id", circleIds);
-
-    return { 
-      circles: (circles ?? []) as HumanCircle[], 
-      memberships: (allMemberships ?? []) as CircleMember[], 
-      userId: user.id 
-    };
-  } catch {
-    return empty;
-  }
-}
+import CirclesClient, { type HumanCircle, type CircleMember, type PublicCircle } from "@/components/circles/CirclesClient";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function CirclesPage() {
-  const { circles, memberships, userId } = await getData();
-  return <CirclesClient circles={circles} memberships={memberships} userId={userId} />;
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+  const [circles, directory] = await Promise.all([
+    supabase.from("human_circles").select("id,name,description,cluster_focus,member_limit,invite_code"),
+    supabase.rpc("public_circle_directory"),
+  ]);
+  const items = (circles.data ?? []) as HumanCircle[];
+  const { data: members, error: memberError } = items.length ? await supabase.from("circle_members")
+    .select("id,circle_id,user_id,role,joined_at").in("circle_id", items.map(({ id }) => id)) : { data: [], error: null };
+  if (circles.error || directory.error || memberError) return <section className="p-8"><h1 className="text-2xl font-semibold">Human Circles</h1><p role="alert">Circles could not be loaded. Reload to try again.</p></section>;
+  return <CirclesClient circles={items} memberships={(members ?? []) as CircleMember[]} directory={(directory.data ?? []) as PublicCircle[]} userId={user.id} />;
 }

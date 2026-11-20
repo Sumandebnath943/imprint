@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import MirrorSessionViewer from "@/components/mirror/MirrorSessionViewer";
 import type { MirrorPastSession } from "@/lib/mirror/types";
 import { formatTime } from "@/lib/mirror/types";
+import LocalDate from "@/components/shared/LocalDate";
 
 export default function MirrorHistoryClient({ initialSessions }: { initialSessions: MirrorPastSession[] }) {
   const [viewingSessionId, setViewingSessionId] = useState<string | null>(null);
@@ -40,7 +41,7 @@ export default function MirrorHistoryClient({ initialSessions }: { initialSessio
                 (e.currentTarget as HTMLElement).style.boxShadow = "none";
               }}>
               <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.58)" }}>
-                {new Date(s.created_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                <LocalDate value={s.created_at} locale="en-US" options={{ month: "long", day: "numeric", year: "numeric" }} />
               </p>
               <h3 className="text-lg font-bold text-white mb-2 line-clamp-2">
                 {(s.topics && s.topics.length > 0) ? s.topics.join(", ") : "Open Reflection"}

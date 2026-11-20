@@ -19,47 +19,10 @@ export interface MirrorMessage {
 export interface MirrorSessionStats {
   questionCount: number;   // mirror messages
   userCount: number;       // user messages
-  dependencyFlags: number;
-}
-
-export interface BaselineSummary {
-  avgWordCount: number;
-  vocabularyRichness: number;
-  avgSentenceLength: number;
-  commonPhrases: string[];
-  writingStyle: string;
-}
-
-/**
- * A short prose description of how someone writes, derived from their baseline
- * metrics. It goes into the Mirror's system prompt so its questions can name
- * the user's habits back to them.
- *
- * This used to be read from baseline_imprints.writing_style, a column that was
- * never created. Selecting it made Postgres reject the whole query, so the
- * Mirror silently fell back to generic defaults and compared every user's live
- * writing against 300 words / 0.6 richness / 15-word sentences rather than
- * their own baseline.
- */
-export function describeWritingStyle(
-  avgSentenceLength: number,
-  vocabularyRichness: number
-): string {
-  const cadence =
-    avgSentenceLength < 12 ? "terse" : avgSentenceLength <= 20 ? "measured" : "expansive";
-  const range =
-    vocabularyRichness < 0.5
-      ? "plain-spoken"
-      : vocabularyRichness <= 0.7
-      ? "varied"
-      : "wide-ranging";
-  return `${cadence} and ${range}`;
 }
 
 export interface MirrorUserData {
   userId: string;
-  userCluster: string;
-  baselineSummary: BaselineSummary;
   pastSessions: MirrorPastSession[];
 }
 
@@ -87,65 +50,7 @@ export const OPENING_QUESTIONS: Record<SessionContext, string | null> = {
 };
 
 export const OPENING_FALLBACK =
-  "What's sitting heaviest on your mind right now — not what you think you should be thinking about, but what keeps surfacing on its own?";
-
-export const DEPENDENCY_TRIGGERS = [
-  "tell me",
-  "should i",
-  "what should",
-  "recommend",
-  "advise",
-  "decide for me",
-  "what would you do",
-  "what do you think i should",
-  "help me decide",
-  "can you write",
-  "draft me",
-  "what is",
-  "how does",
-  "what do you think",
-];
-
-export function detectDependency(message: string): boolean {
-  const lower = message.toLowerCase();
-  return DEPENDENCY_TRIGGERS.some((t) => lower.includes(t));
-}
-
-export function calcVocabRichness(messages: MirrorMessage[]): number {
-  const text = messages
-    .filter((m) => m.role === "user")
-    .map((m) => m.content)
-    .join(" ");
-  const words = text.toLowerCase().split(/\s+/).filter(Boolean);
-  if (words.length === 0) return 0;
-  return parseFloat((new Set(words).size / words.length).toFixed(3));
-}
-
-export function calcAvgSentenceLen(messages: MirrorMessage[]): number {
-  const text = messages.filter((m) => m.role === "user").map((m) => m.content).join(" ");
-  const sentences = text.split(/[.!?]+/).filter((s) => s.trim());
-  const words = text.split(/\s+/).filter(Boolean);
-  if (sentences.length === 0) return 0;
-  return parseFloat((words.length / sentences.length).toFixed(1));
-}
-
-export type IndicatorStatus = "good" | "warn" | "bad";
-
-export function getVocabStatus(current: number, baseline: number): IndicatorStatus {
-  if (baseline === 0) return "good";
-  const ratio = current / baseline;
-  if (ratio >= 0.75) return "good";
-  if (ratio >= 0.5) return "warn";
-  return "bad";
-}
-
-export function getDepthStatus(avgLen: number, baseline: number): IndicatorStatus {
-  if (baseline === 0) return "good";
-  const ratio = avgLen / baseline;
-  if (ratio >= 0.7) return "good";
-  if (ratio >= 0.4) return "warn";
-  return "bad";
-}
+  "What would you like to think through today?";
 
 export function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);

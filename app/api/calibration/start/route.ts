@@ -1,46 +1,33 @@
 import { NextResponse } from "next/server";
 import { buildCalibrationPrompts } from "@/lib/calibration/prompts";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 
 export async function POST() {
   try {
-    const { createClient } = await import("@/lib/supabase/server");
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    // Get cluster
-    const profileRes = await supabase.from("profiles").select("profession_cluster").eq("id", user.id).single();
-    const cluster = profileRes.data?.profession_cluster ?? "life_personal";
-
-    // Get session count for this user
-    const { count } = await supabase
-      .from('calibration_sessions')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .eq('status', 'completed');
-
-    const sessionNumber = (count || 0) + 1;
-    const prompts = buildCalibrationPrompts(sessionNumber, cluster);
-
-    const { data: session, error } = await supabase.from("calibration_sessions").insert({
-      user_id: user.id,
-      session_number: sessionNumber,
-      status: "in_progress",
-      responses: [],
-      next_session_due: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
-    }).select().single();
-
-    if (error) {
-      console.error("Calibration start error:", error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    if (!user) return NextResponse.json({ error: "Sign in to calibrate." }, { status: 401 });
+    const { data: profile, error: profileError } = await supabase.from("profiles")
+      .select("profession_cluster,onboarding_completed").eq("id", user.id).single();
+    if (profileError || !profile?.onboarding_completed) {
+      return NextResponse.json({ error: "Finish onboarding to start a calibration." }, { status: 409 });
     }
-    
-    // Add prompts directly to session object for the client
-    session.prompts = prompts;
-    
-    return NextResponse.json({ success: true, session });
-  } catch (err) {
-    console.error("[calibration/start]", err);
-    return NextResponse.json({ error: "Failed to start session" }, { status: 500 });
+
+    const prompts = Array.from({ length: 6 }, (_, index) =>
+      buildCalibrationPrompts(index + 1, profile.profession_cluster ?? "life_personal"));
+    const { data, error } = await createAdminClient().rpc("start_imprint_calibration", {
+      p_user_id: user.id,
+      p_cluster: profile.profession_cluster,
+      p_prompt_sets: prompts,
+      p_due: new Date(Date.now() + 14 * 86400000).toISOString(),
+    });
+    if (error) throw error;
+    const session = Array.isArray(data) ? data[0] : data;
+    if (!session) throw new Error("No calibration was returned");
+    return NextResponse.json({ session });
+  } catch (error) {
+    console.error("Calibration start failed", error);
+    return NextResponse.json({ error: "Could not start calibration." }, { status: 500 });
   }
 }

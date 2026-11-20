@@ -2,8 +2,7 @@
 
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, ChevronDown, Activity, Flame, Shield, Brain } from "lucide-react";
-import { LineChart, Line, ResponsiveContainer } from "recharts";
+import { Camera, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
@@ -26,16 +25,9 @@ interface ProfileData {
 
 interface ProfileClientProps {
   profile: ProfileData;
-  latestDriftScore: { score: number; status: string; date: string } | null;
+  proficiency: { score: number; scored_at: string } | null;
   stats: {
     calibrations: number;
-    // The four components profiles.imprint_score is the sum of.
-    scoreComponents: {
-      vaultStrength: number;
-      calibrationRecord: number;
-      journalConsistency: number;
-      aiIndependence: number;
-    };
     streak: number;
     skillsTracked: number;
     vaultChallenges: number;
@@ -49,41 +41,22 @@ interface ProfileClientProps {
     bestDriftScore: number | null;
     bestDriftDate: string | null;
   };
-  scoreHistory: { score: number }[];
-  timeline: any[];
-  skills: any[];
-  baseline: any;
-  beliefs: any[];
 }
-
-const getZoneColor = (score: number) => {
-  if (score < 40) return "#00D97E";
-  if (score < 60) return "#FFB800";
-  if (score < 80) return "#FF5500";
-  return "#FF2D2D";
-};
-
-const getImprintLabel = (score: number) => {
-  if (score >= 800) return { label: "Anchored", color: "#00D97E" };
-  if (score >= 600) return { label: "Strong", color: "#00D97E" };
-  if (score >= 400) return { label: "Solid", color: "#FFB800" };
-  if (score >= 200) return { label: "Building", color: "#FF5500" };
-  return { label: "Establishing", color: "#FF2D2D" };
-};
 
 const AGE_GROUP_LABELS: Record<string, string> = {
   child_8_12: "Age 8–12",
   teen_13_15: "Age 13–15",
   teen_16_18: "Age 16–18",
+  adult_18_64: "Age 18–64",
   adult_19_64: "Age 19–64",
   senior_65_plus: "Age 65+",
 };
 
 export default function ProfileClient({
-  profile, latestDriftScore, stats, scoreHistory, timeline, skills, baseline, beliefs
+  profile, proficiency, stats
 }: ProfileClientProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
+  const [savedFields, setSavedFields] = useState({
     full_name: profile?.full_name || "",
     username: profile?.username || "",
     bio: profile?.bio || "",
@@ -92,6 +65,7 @@ export default function ProfileClient({
     profession: profile?.profession || "",
     profession_cluster: profile?.profession_cluster || "",
   });
+  const [formData, setFormData] = useState(savedFields);
 
   const handleProfessionChange = (professionName: string) => {
     const found = PROFESSIONS.find(p => p.name === professionName);
@@ -135,30 +109,32 @@ export default function ProfileClient({
     }
   };
 
-  const driftScore = latestDriftScore?.score ?? 0;
-  const driftColor = getZoneColor(driftScore);
-  const imprintStatus = getImprintLabel(profile?.imprint_score || 0);
-
-  // Computed server-side from the same inputs as the stored score, so these
-  // four always sum to the IMPRINT score displayed above them.
-  const { vaultStrength, calibrationRecord, journalConsistency, aiIndependence } =
-    stats.scoreComponents;
-
   const handleSave = async () => {
+    const changes: Record<string, string | null> = {};
+    for (const key of Object.keys(formData) as (keyof typeof formData)[]) {
+      const value = formData[key].trim();
+      if (value !== savedFields[key].trim()) changes[key] = value || (key === "age_group" || key === "profession" || key === "profession_cluster" ? null : "");
+    }
+    if (Object.keys(changes).length === 0) { setIsEditing(false); return; }
     setSaving(true);
     try {
       const res = await fetch("/api/profile/update", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(changes)
       });
       if (res.ok) {
+        const saved = { ...formData };
+        for (const key of Object.keys(changes) as (keyof typeof formData)[]) saved[key] = changes[key] ?? "";
+        setSavedFields(saved);
+        setFormData(saved);
         toast.success("Profile updated.");
         setIsEditing(false);
       } else {
-        toast.error("Failed to update profile.");
+        const result = await res.json().catch(() => null);
+        toast.error(result?.error ?? "Failed to update profile.");
       }
-    } catch (e) {
+    } catch {
       toast.error("An error occurred.");
     } finally {
       setSaving(false);
@@ -228,42 +204,14 @@ export default function ProfileClient({
               </div>
             </div>
 
-            {/* CENTER: Drift Ring */}
-            <div className="flex flex-col items-center">
-              <div className="relative w-[140px] h-[140px] flex items-center justify-center">
-                <svg className="absolute inset-0 w-full h-full transform -rotate-90">
-                  <circle cx="70" cy="70" r="62" fill="transparent" stroke="rgba(255,255,255,0.05)" strokeWidth="6" />
-                  <circle cx="70" cy="70" r="62" fill="transparent" stroke={driftColor} strokeWidth="6" strokeDasharray={`${(driftScore / 100) * 389} 389`} strokeLinecap="round" />
-                </svg>
-                <div className="text-center">
-                  <span className="block font-bold text-white" style={{ fontSize: 40, lineHeight: 1 }}>{driftScore}</span>
-                  <span className="block text-[11px] font-medium uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.66)", marginTop: 4 }}>Drift Score</span>
-                </div>
-              </div>
-              <span className="mt-4 px-4 py-1.5 rounded-full text-[12px] font-bold uppercase tracking-wider" style={{ background: `${driftColor}15`, color: driftColor }}>
-                {latestDriftScore?.status || "Unknown"}
-              </span>
+            <div className="rounded-2xl border border-white/10 px-5 py-4 text-center">
+              <p className="mb-2 text-sm text-white/70">Role proficiency</p>
+              <p className="text-3xl font-semibold text-[#ff9c77]">{proficiency ? `${proficiency.score}/100` : "—"}</p>
+              <Link href="/dashboard/drift" className="mt-2 inline-block text-sm text-[#ff9c77] underline">View progress</Link>
             </div>
-
-            {/* RIGHT: IMPRINT Score Card */}
-            <div className="flex flex-col items-end">
-              <div className="rounded-[16px] p-5 w-[220px]" style={{ background: "rgba(255,85,0,0.06)", border: "1px solid rgba(255,85,0,0.20)" }}>
-                <span className="block text-[11px] font-bold uppercase tracking-widest mb-2" style={{ color: "#FF5500" }}>IMPRINT SCORE</span>
-                <div className="flex items-baseline gap-1 mb-2">
-                  <span className="font-bold text-white" style={{ fontSize: 48, lineHeight: 1 }}>{profile?.imprint_score || 0}</span>
-                  <span className="text-[18px]" style={{ color: "rgba(255,255,255,0.66)" }}>/1000</span>
-                </div>
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="w-2 h-2 rounded-full" style={{ background: imprintStatus.color }} />
-                  <span className="text-[14px] font-medium" style={{ color: imprintStatus.color }}>{imprintStatus.label}</span>
-                </div>
-                <Link href="/dashboard/profile/credential" className="text-[13px] font-medium text-[#FF5500] hover:underline">
-                  View Credential →
-                </Link>
-              </div>
-              <span className="mt-3 px-3 py-1 rounded-full text-[13px]" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.50)" }}>
-                {profile?.age_group ? (AGE_GROUP_LABELS[profile.age_group] ?? profile.age_group) : "Age not set"}
-              </span>
+            <div className="flex flex-col gap-3">
+              <Link href="/dashboard/profile/credential" className="text-sm text-[#ff9c77] underline">View credential</Link>
+              <span className="text-sm text-white/65">{profile?.age_group ? (AGE_GROUP_LABELS[profile.age_group] ?? profile.age_group) : "Age not set"}</span>
             </div>
           </div>
 
@@ -283,55 +231,6 @@ export default function ProfileClient({
           </div>
         </motion.div>
 
-        {/* SECTION 2: IMPRINT SCORE WIDGET */}
-        <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }} className="rounded-[20px] p-8 md:p-10" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
-          <div className="flex justify-between items-center mb-8">
-            <div>
-              <h2 className="font-semibold text-white mb-1" style={{ fontSize: 20 }}>Your IMPRINT Score</h2>
-              <p className="text-[13px]" style={{ color: "rgba(255,255,255,0.66)" }}>A composite measure of identity preservation.</p>
-            </div>
-            <Link href="/dashboard/profile/credential" className="px-4 py-2 rounded-full text-[13px] font-medium text-white transition-all hover:bg-white/10" style={{ background: "rgba(255,85,0,0.15)", color: "#FF5500" }}>
-              View Full Credential →
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-center">
-            <div className="md:col-span-4 grid grid-cols-2 md:grid-cols-4 gap-6">
-              {[
-                { name: "Vault Strength", val: vaultStrength, max: 250, icon: <Shield size={16} color="#00D97E"/>, color: "#00D97E" },
-                { name: "Calibration Record", val: calibrationRecord, max: 300, icon: <Activity size={16} color="#FF5500"/>, color: "#FF5500" },
-                { name: "Journal Consistency", val: journalConsistency, max: 250, icon: <Flame size={16} color="#FFB800"/>, color: "#FFB800" },
-                { name: "AI Independence", val: aiIndependence, max: 200, icon: <Brain size={16} color="#4FC3F7"/>, color: "#4FC3F7" },
-              ].map(c => (
-                <div key={c.name} className="flex flex-col gap-2">
-                  <div className="flex items-center gap-2">
-                    {c.icon}
-                    <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.66)" }}>{c.name}</span>
-                  </div>
-                  <div className="h-2 w-full rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
-                    <motion.div initial={{ width: 0 }} animate={{ width: `${(c.val / c.max) * 100}%` }} transition={{ duration: 1, delay: 0.2 }} className="h-full" style={{ background: c.color }} />
-                  </div>
-                  <div className="flex items-baseline gap-1 mt-1">
-                    <span className="font-bold text-white text-[20px]">{c.val}</span>
-                    <span className="text-[12px]" style={{ color: "rgba(255,255,255,0.58)" }}>/{c.max} max</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="md:col-span-1 pl-6 border-l border-white/5 flex flex-col items-center">
-              <div className="h-[50px] w-full mb-2 opacity-50">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={scoreHistory}>
-                    <Line type="monotone" dataKey="score" stroke="#FF5500" strokeWidth={2} dot={{ fill: '#FF5500', r: 3 }} isAnimationActive={false} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-              <span className="text-[12px] font-medium text-white">Trending stable</span>
-            </div>
-          </div>
-        </motion.div>
-
         {/* SECTION 3: STATS OVERVIEW ROW */}
         <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           <div className="rounded-[16px] p-6" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
@@ -339,8 +238,8 @@ export default function ProfileClient({
             <span className="text-[13px]" style={{ color: "rgba(255,255,255,0.66)" }}>Days active on IMPRINT</span>
           </div>
           <div className="rounded-[16px] p-6" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
-            <span className="block font-bold mb-1" style={{ fontSize: 32, lineHeight: 1, color: "#00D97E" }}>{stats.bestDriftScore || "--"}</span>
-            <span className="text-[13px]" style={{ color: "rgba(255,255,255,0.66)" }}>Best Drift Score (lowest)</span>
+            <span className="block font-bold mb-1" style={{ fontSize: 32, lineHeight: 1, color: "#00D97E" }}>{stats.bestDriftScore ?? "—"}</span>
+            <span className="text-[13px]" style={{ color: "rgba(255,255,255,0.66)" }}>Lowest legacy Drift Score</span>
             <p className="text-[12px] mt-2" style={{ color: "rgba(255,255,255,0.58)" }}>{stats.bestDriftDate || "N/A"}</p>
           </div>
           <div className="rounded-[16px] p-6" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
@@ -388,9 +287,11 @@ export default function ProfileClient({
                       <label className="block text-[13px] font-medium text-white/60 mb-2">Age Group</label>
                       <select value={formData.age_group} onChange={e => setFormData({ ...formData, age_group: e.target.value })} className="w-full text-[15px] outline-none text-white rounded-[10px]" style={{ background: "#1A1A1A", padding: "12px 16px", border: "1px solid transparent" }}>
                         <option value="">Select age group</option>
-                        {Object.entries(AGE_GROUP_LABELS).map(([val, label]) => (
-                          <option key={val} value={val}>{label}</option>
-                        ))}
+                        {formData.age_group && !["adult_18_64", "senior_65_plus"].includes(formData.age_group) && (
+                          <option value={formData.age_group} disabled>{AGE_GROUP_LABELS[formData.age_group]}</option>
+                        )}
+                        <option value="adult_18_64">Age 18–64</option>
+                        <option value="senior_65_plus">Age 65+</option>
                       </select>
                     </div>
                     <div className="md:col-span-2">

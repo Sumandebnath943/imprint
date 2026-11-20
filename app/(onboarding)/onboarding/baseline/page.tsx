@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mic, FileText, Upload } from "lucide-react";
 import { useOnboardingStore } from "@/lib/store/onboarding.store";
-import { createClient } from "@/lib/supabase/client";
-import { useUserStore } from "@/lib/store/user.store";
+import { toast } from "sonner";
+import { useOnboardingUserId } from "@/components/onboarding/OnboardingShell";
 import ModuleTextarea from "@/components/onboarding/ModuleTextarea";
 import VoiceRecorder from "@/components/onboarding/VoiceRecorder";
 import FileUploadZone from "@/components/onboarding/FileUploadZone";
@@ -92,8 +92,7 @@ function FinalModuleContent({
 export default function BaselinePage() {
   const router = useRouter();
   const { answers, setStep, saveBaselineResponse } = useOnboardingStore();
-  const { profile } = useUserStore();
-  const supabase = createClient();
+  const userId = useOnboardingUserId();
 
   const modules = answers.baselineModules;
   const [moduleIndex, setModuleIndex] = useState(0);
@@ -102,40 +101,50 @@ export default function BaselinePage() {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [fading, setFading] = useState(false);
-  const moduleStartTime = useRef<number>(Date.now());
+  const [startedAt, setStartedAt] = useState<number>();
+  const [saving, setSaving] = useState(false);
+  const savingRef = useRef(false);
+  const resumedRef = useRef(false);
 
   const currentModule: BaselineModule | undefined = modules[moduleIndex];
   const isLastModule = moduleIndex === modules.length - 1;
   const isFinalModule = currentModule?.id === "FINAL";
 
-  // Reset state when module changes
+  const moduleKey = userId && currentModule
+    ? `imprint_baseline_${userId}_${currentModule.id}`
+    : null;
+  const [loadedKey, setLoadedKey] = useState<string | null>(null);
+
   useEffect(() => {
-    setTextValue("");
+    if (resumedRef.current || !modules.length || !userId) return;
+    resumedRef.current = true;
+    const next = modules.findIndex(({ id }) => !answers.baselineResponses[id]);
+    setModuleIndex(next < 0 ? modules.length - 1 : next);
+  }, [answers.baselineResponses, modules, userId]);
+
+  useEffect(() => {
+    if (!moduleKey || !currentModule) return;
+    const startKey = `${moduleKey}_start`;
+    const stored = Number(localStorage.getItem(startKey));
+    const start = Number.isFinite(stored) && stored > 0 ? stored : Date.now();
+    localStorage.setItem(startKey, String(start));
+    setTextValue(localStorage.getItem(moduleKey) ?? answers.baselineResponses[currentModule.id]?.responseText ?? "");
     setAudioBlob(null);
     setUploadedFile(null);
-    setInputMode(currentModule?.responseType === "audio" ? "audio" : currentModule?.responseType === "file" ? "file" : "text");
-    moduleStartTime.current = Date.now();
+    setInputMode(currentModule.responseType === "audio" ? "audio" : currentModule.responseType === "file" ? "file" : "text");
+    setStartedAt(start);
+    setLoadedKey(moduleKey);
+  }, [answers.baselineResponses, currentModule, moduleKey]);
 
-    // Restore from localStorage if available
-    if (profile?.id && currentModule) {
-      const saved = localStorage.getItem(`imprint_baseline_${profile.id}_${currentModule.id}`);
-      if (saved) setTextValue(saved);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [moduleIndex]);
-
-  // Auto-save text to localStorage
   useEffect(() => {
-    if (profile?.id && currentModule && textValue) {
-      localStorage.setItem(`imprint_baseline_${profile.id}_${currentModule.id}`, textValue);
-    }
-  }, [textValue, profile?.id, currentModule]);
+    if (moduleKey && moduleKey === loadedKey) localStorage.setItem(moduleKey, textValue);
+  }, [loadedKey, moduleKey, textValue]);
 
   const canContinue = () => {
-    if (!currentModule) return false;
+    if (!currentModule || !startedAt || saving || loadedKey !== moduleKey) return false;
     if (inputMode === "text") {
       const wc = countWords(textValue);
-      return wc >= (currentModule.minWords ?? 1) || isFinalModule;
+      return wc >= (currentModule.minWords ?? 1) || isFinalModule || Boolean(currentModule.timed && Date.now() >= startedAt + currentModule.timed * 60000);
     }
     if (inputMode === "audio") return !!audioBlob;
     if (inputMode === "file") return !!uploadedFile;
@@ -143,105 +152,81 @@ export default function BaselinePage() {
   };
 
   const uploadAudio = async (): Promise<string | null> => {
-    if (!audioBlob || !profile?.id || !currentModule) return null;
-    const path = `${profile.id}/baseline/${currentModule.id}.webm`;
+    if (!audioBlob || !userId || !currentModule) return null;
+    const path = `${userId}/baseline/${currentModule.id}.${audioBlob.type.includes("mp4") ? "m4a" : "webm"}`;
     const formData = new FormData();
     formData.append("file", audioBlob);
     formData.append("bucket", "baseline-audio");
     formData.append("path", path);
     const res = await fetch("/api/storage/upload", { method: "POST", body: formData });
     if (!res.ok) return null;
-    const data = await res.json();
-    return data.url;
+    return path;
   };
 
   const uploadFile = async (): Promise<string | null> => {
-    if (!uploadedFile || !profile?.id || !currentModule) return null;
+    if (!uploadedFile || !userId || !currentModule) return null;
     const ext = uploadedFile.name.split(".").pop() ?? "bin";
-    const path = `${profile.id}/baseline/${currentModule.id}.${ext}`;
+    const path = `${userId}/baseline/${currentModule.id}.${ext}`;
     const formData = new FormData();
     formData.append("file", uploadedFile);
     formData.append("bucket", "baseline-files");
     formData.append("path", path);
     const res = await fetch("/api/storage/upload", { method: "POST", body: formData });
     if (!res.ok) return null;
-    const data = await res.json();
-    return data.url;
+    return path;
   };
 
   const handleContinue = async () => {
-    if (!currentModule || !canContinue()) return;
-
-    const responseTimeSeconds = Math.round((Date.now() - moduleStartTime.current) / 1000);
-    const wc = countWords(textValue);
-
-    let audioUrl: string | null = null;
-    let fileUrl: string | null = null;
-
-    if (inputMode === "audio" && audioBlob) audioUrl = await uploadAudio();
-    if (inputMode === "file" && uploadedFile) fileUrl = await uploadFile();
-
-    // Save to store (offline backup)
-    saveBaselineResponse({
-      moduleId: currentModule.id,
-      responseText: inputMode === "text" ? textValue : undefined,
-      responseAudioUrl: audioUrl ?? undefined,
-      responseFileUrl: fileUrl ?? undefined,
-      responseType: inputMode,
-      wordCount: wc,
-      responseTimeSeconds,
-      completedAt: new Date().toISOString(),
-    });
-
-    // Persist to Supabase via API route
-    if (profile?.id) {
-      const sentences = textValue.split(/[.!?]+/).filter((s) => s.trim().length > 0);
-      const avgSentenceLength = sentences.length > 0 ? wc / sentences.length : 0;
-      const words = textValue.toLowerCase().split(/\s+/).filter(Boolean);
-      const vocabRichness = words.length > 0 ? new Set(words).size / words.length : 0;
-
-      fetch("/api/onboarding/baseline", {
+    if (!currentModule || !startedAt || !moduleKey || !canContinue() || savingRef.current) return;
+    savingRef.current = true;
+    setSaving(true);
+    const responseTimeSeconds = Math.min(86400, Math.floor((Date.now() - startedAt) / 1000));
+    try {
+      const path = inputMode === "audio" ? await uploadAudio() : inputMode === "file" ? await uploadFile() : null;
+      if (inputMode !== "text" && !path) throw new Error("Your upload did not finish. Please retry.");
+      const res = await fetch("/api/onboarding/baseline", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          cluster: currentModule.cluster,
-          module_id: currentModule.id,
-          module_name: currentModule.name,
-          prompt_given: currentModule.prompt,
-          response_text: inputMode === "text" ? textValue : null,
-          response_audio_url: audioUrl,
-          response_file_url: fileUrl,
-          response_type: inputMode,
-          word_count: wc,
-          avg_sentence_length: parseFloat(avgSentenceLength.toFixed(2)),
-          vocabulary_richness: parseFloat(vocabRichness.toFixed(3)),
-          response_time_seconds: responseTimeSeconds,
-          step_data: { onboarding_step: isLastModule ? 6 : 5 },
-          is_final_step: isLastModule
-        })
-      }).then(() => {
-        // Clear localStorage backup after successful save
-        if (profile?.id) {
-          localStorage.removeItem(`imprint_baseline_${profile.id}_${currentModule.id}`);
-        }
+          profession: answers.profession,
+          moduleId: currentModule.id,
+          mode: inputMode,
+          text: inputMode === "text" ? textValue : "",
+          path: path ?? undefined,
+          duration: responseTimeSeconds,
+        }),
       });
-    }
-
-    // Advance or finish
-    if (isLastModule) {
-      setFading(true);
-      setStep(6);
-      setTimeout(() => router.push("/onboarding/skill-vault"), 700);
-    } else {
-      setFading(true);
-      setTimeout(() => {
-        setModuleIndex((i) => i + 1);
-        setFading(false);
-      }, 300);
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error ?? "The response could not be saved.");
+      }
+      saveBaselineResponse({
+        moduleId: currentModule.id,
+        responseText: inputMode === "text" ? textValue : undefined,
+        responseAudioUrl: inputMode === "audio" ? path ?? undefined : undefined,
+        responseFileUrl: inputMode === "file" ? path ?? undefined : undefined,
+        responseType: inputMode,
+        wordCount: inputMode === "text" ? countWords(textValue) : 0,
+        responseTimeSeconds,
+        completedAt: new Date().toISOString(),
+      });
+      if (isLastModule) {
+        setFading(true);
+        setStep(6);
+        router.push("/onboarding/skill-vault");
+      } else {
+        setModuleIndex((index) => index + 1);
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "The response could not be saved.");
+    } finally {
+      savingRef.current = false;
+      setSaving(false);
     }
   };
 
   const handleBack = () => {
+    if (savingRef.current) return;
     if (moduleIndex > 0) {
       setModuleIndex((i) => i - 1);
     } else {
@@ -329,7 +314,7 @@ export default function BaselinePage() {
               onChange={setTextValue}
               mode={inputMode}
               setMode={setInputMode}
-              onVoiceDone={(blob, secs) => { setAudioBlob(blob); }}
+              onVoiceDone={(blob, _secs) => { setAudioBlob(blob); }}
               onFileDone={(file, _url) => setUploadedFile(file)}
             />
           ) : currentModule.responseType === "audio" && !currentModule.allowVoiceAlternative ? (
@@ -340,9 +325,9 @@ export default function BaselinePage() {
             <div>
               {/* Mode toggle */}
               <div className="flex gap-3 mb-5 md:mb-3">
-                {(["text", "audio"] as InputMode[]).map((m) => {
-                  const labels = { text: "Write", audio: "Voice" };
-                  const icons = { text: FileText, audio: Mic };
+                {([currentModule.responseType, "audio"] as ("text" | "file" | "audio")[]).map((m) => {
+                  const labels = { text: "Write", audio: "Voice", file: "Upload" };
+                  const icons = { text: FileText, audio: Mic, file: Upload };
                   const Icon = icons[m as keyof typeof icons];
                   const active = inputMode === m;
                   return (
@@ -367,10 +352,13 @@ export default function BaselinePage() {
                   value={textValue}
                   onChange={setTextValue}
                   timerSeconds={currentModule.timed ? currentModule.timed * 60 : 0}
+                  startedAt={startedAt}
                   onTimerEnd={handleContinue}
                   disableBackspace={currentModule.disableBackspace}
                   minHeight={220}
                 />
+              ) : inputMode === "file" ? (
+                <FileUploadZone onFileSelected={setUploadedFile} />
               ) : (
                 <VoiceRecorder onRecordingComplete={(blob, _secs) => { setAudioBlob(blob); }} />
               )}
@@ -380,7 +368,8 @@ export default function BaselinePage() {
               value={textValue}
               onChange={setTextValue}
               timerSeconds={currentModule.timed ? currentModule.timed * 60 : 0}
-              onTimerEnd={handleContinue}
+              startedAt={startedAt}
+                  onTimerEnd={handleContinue}
               disableBackspace={currentModule.disableBackspace}
               minHeight={220}
             />
@@ -402,7 +391,7 @@ export default function BaselinePage() {
         total={TOTAL}
         onBack={handleBack}
         onContinue={handleContinue}
-        continueLabel={isLastModule ? "That's my Imprint." : "Continue →"}
+        continueLabel={saving ? "Saving…" : isLastModule ? "That's my Imprint." : "Continue →"}
         continueDisabled={!canContinue()}
       />
     </div>

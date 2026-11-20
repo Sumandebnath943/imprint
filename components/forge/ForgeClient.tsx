@@ -15,7 +15,7 @@ import ForgeRightPanel from "@/components/forge/ForgeRightPanel";
 
 import type { ForgeTool, ForgeUserData } from "@/lib/forge/types";
 import { countWords, formatTime } from "@/lib/forge/types";
-import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
 import { formatDate } from "@/lib/utils/format";
 
 type SessionState = "idle" | "active" | "complete";
@@ -23,11 +23,11 @@ type SessionState = "idle" | "active" | "complete";
 interface ForgeClientProps { userData: ForgeUserData; }
 
 const LS_KEY_PREFIX = "imprint_forge_draft_";
+type ForgeDraft = { content: string; elapsed: number; tool: ForgeTool; attemptId?: string; duration?: number; challengeId?: string };
 
 export default function ForgeClient({ userData }: ForgeClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const supabase = createClient();
 
   const practiceSkillId = searchParams.get("practice_skill_id");
   const practiceSkillName = searchParams.get("practice_skill_name");
@@ -50,7 +50,17 @@ export default function ForgeClient({ userData }: ForgeClientProps) {
   const startTimeRef = useRef<number>(0);
 
   // Draft recovery
-  const [draftBanner, setDraftBanner] = useState<{ content: string; elapsed: number; tool: ForgeTool } | null>(null);
+  const [draftBanner, setDraftBanner] = useState<ForgeDraft | null>(null);
+
+  const [saving, setSaving] = useState(false);
+  const [challengeDisplayTool, setChallengeDisplayTool] = useState<ForgeTool | null>(null);
+  const attemptRef = useRef("");
+  const savingRef = useRef(false);
+  const challengeRef = useRef<string>();
+  const sessionTool = challengeDisplayTool ?? activeTool;
+  const deadline = activeTool === "timed-write" ? timerDuration : 0;
+  const endRef = useRef<(at?: number) => void>(() => undefined);
+  const draftKey = LS_KEY_PREFIX + userData.userId;
 
   // ── Load draft on mount ───────────────────────────────────────────────
   useEffect(() => {
@@ -63,196 +73,158 @@ export default function ForgeClient({ userData }: ForgeClientProps) {
     }
   }, [userData.userId]);
 
-  // ── Auto-save to localStorage every 60s during active session ─────────
+  const autoSave = useCallback(() => {
+    if (sessionState !== "active" || sessionTool === "voice-note" || sessionTool === "sketch-upload") return;
+    localStorage.setItem(draftKey, JSON.stringify({
+      content, elapsed, tool: activeTool, attemptId: attemptRef.current, duration: timerDuration,
+      challengeId: challengeRef.current,
+    }));
+  }, [activeTool, content, draftKey, elapsed, sessionState, sessionTool, timerDuration]);
+
+  useEffect(() => { autoSave(); }, [autoSave]);
+
   useEffect(() => {
     if (sessionState !== "active") return;
-    const id = setInterval(() => {
-      localStorage.setItem(LS_KEY_PREFIX + userData.userId, JSON.stringify({ content, elapsed, tool: activeTool }));
-    }, 60000);
-    return () => clearInterval(id);
-  }, [sessionState, content, elapsed, activeTool, userData.userId]);
-
-  // ── Timer tick ────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (sessionState === "active") {
-      timerRef.current = setInterval(() => {
-        const secs = Math.floor((Date.now() - startTimeRef.current) / 1000);
-        setElapsed(secs);
-        // Countdown: auto-complete when time's up
-        if (timerDuration > 0 && secs >= timerDuration) {
-          handleEndSession();
-        }
-      }, 500);
-    } else {
-      if (timerRef.current) clearInterval(timerRef.current);
-    }
+    timerRef.current = setInterval(() => {
+      const seconds = Math.floor((Date.now() - startTimeRef.current) / 1000);
+      setElapsed(deadline ? Math.min(deadline, seconds) : seconds);
+      if (deadline && seconds >= deadline) endRef.current(deadline);
+    }, 500);
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionState, timerDuration]);
+  }, [deadline, sessionState]);
 
-  // ── Keyboard shortcuts (global) ────────────────────────────────────────
   useEffect(() => {
-    const endHandler = () => handleEndSession();
-    const saveHandler = () => autoSave();
-    window.addEventListener("forge:end-session", endHandler);
-    window.addEventListener("forge:save", saveHandler);
+    const end = () => { if (sessionState === "active") endRef.current(); };
+    const leave = (event: BeforeUnloadEvent) => {
+      if (sessionState === "active") event.preventDefault();
+    };
+    window.addEventListener("forge:end-session", end);
+    window.addEventListener("forge:save", autoSave);
+    window.addEventListener("beforeunload", leave);
     return () => {
-      window.removeEventListener("forge:end-session", endHandler);
-      window.removeEventListener("forge:save", saveHandler);
+      window.removeEventListener("forge:end-session", end);
+      window.removeEventListener("forge:save", autoSave);
+      window.removeEventListener("beforeunload", leave);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [content, elapsed]);
+  }, [autoSave, sessionState]);
 
-  // ── beforeunload guard ────────────────────────────────────────────────
-  useEffect(() => {
-    const handler = (e: BeforeUnloadEvent) => {
-      if (sessionState === "active") {
-        e.preventDefault();
-        e.returnValue = "You have an active Forge session. Leaving will save your progress.";
-      }
-    };
-    window.addEventListener("beforeunload", handler);
-    return () => window.removeEventListener("beforeunload", handler);
-  }, [sessionState]);
-
-  // ── Escape key ────────────────────────────────────────────────────────
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        if (sessionState === "idle") router.push("/dashboard");
-        else if (sessionState === "active") {
-          if (confirm("End your current Forge session?")) handleEndSession();
-        }
-      }
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionState]);
-
-  // ── Start session ─────────────────────────────────────────────────────
-  const handleStartSession = useCallback(() => {
-    setContent("");
-    setElapsed(0);
+  const handleStartSession = (tool = activeTool, draft?: ForgeDraft) => {
+    if (tool === "vault-challenge" && (!userData.activeChallenge ||
+        (draft?.challengeId && draft.challengeId !== userData.activeChallenge.id))) {
+      toast.error("The challenge attached to this session is unavailable.");
+      return;
+    }
+    setActiveTool(tool);
+    const mode = userData.activeChallenge?.submissionMode;
+    setChallengeDisplayTool(tool === "vault-challenge" && mode && mode !== "text" ? mode : null);
+    if (draft?.duration) setTimerDuration(draft.duration);
+    setContent(draft?.content ?? "");
+    setElapsed(draft?.elapsed ?? 0);
     setAudioSaved(false);
     setFileSaved(false);
-    startTimeRef.current = Date.now();
+    attemptRef.current = draft?.attemptId ?? crypto.randomUUID();
+    challengeRef.current = tool === "vault-challenge" ? userData.activeChallenge?.id : undefined;
+    startTimeRef.current = Date.now() - (draft?.elapsed ?? 0) * 1000;
     setSessionState("active");
     setDraftBanner(null);
-    localStorage.removeItem(LS_KEY_PREFIX + userData.userId);
-  }, [userData.userId]);
+  };
 
-  // ── End session ───────────────────────────────────────────────────────
-  const handleEndSession = useCallback(() => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    setSessionState("complete");
-    localStorage.removeItem(LS_KEY_PREFIX + userData.userId);
-    // Persist to Supabase
-    saveToSupabase();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [content, elapsed, activeTool]);
-
-  // ── Auto-save (mid-session) ───────────────────────────────────────────
-  const autoSave = useCallback(() => {
-    localStorage.setItem(LS_KEY_PREFIX + userData.userId, JSON.stringify({ content, elapsed, tool: activeTool }));
-  }, [content, elapsed, activeTool, userData.userId]);
-
-  // ── Save to Supabase ──────────────────────────────────────────────────
-  const saveToSupabase = async () => {
-    if (!userData.userId) return;
-    const wc = countWords(content);
-    if ((activeTool === "free-write" || activeTool === "timed-write" || activeTool === "memory-recall") && wc === 0) return;
-
-    // Text metrics and the deltas against baseline are computed server-side
-    // from content, word_count and time_spent_seconds — recomputing them here
-    // only produced values that were then discarded.
-    await fetch("/api/forge/save", {
+  const saveSession = async (payload: Record<string, unknown>) => {
+    const response = await fetch("/api/forge/save", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        title: activeTool === "vault-challenge" && userData.activeChallenge ? `Vault Challenge: ${userData.activeChallenge.title}` : `Forge Session — ${new Date().toLocaleDateString("en-US", { month: "long", day: "numeric" })}`,
-        content: content || null,
-        word_count: wc,
-        was_timed: timerDuration > 0,
-        time_limit_seconds: timerDuration > 0 ? timerDuration : null,
+        attemptId: attemptRef.current,
         tool: activeTool,
-        time_spent_seconds: elapsed,
-        challenge_id: activeTool === "vault-challenge" ? userData.activeChallenge?.id : undefined,
-        practiced_skill_id: practiceSkillId || undefined,
-      })
+        practiced_skill_id: practiceSkillId ?? undefined,
+        challenge_id: challengeRef.current,
+        ...payload,
+      }),
     });
+    if (!response.ok) {
+      const result = await response.json();
+      throw new Error(result.error ?? "Your Forge session could not be saved.");
+    }
   };
 
-  // ── Voice save ────────────────────────────────────────────────────────
-  const handleVoiceSave = async (blob: Blob, duration: number) => {
+  const runSave = async (save: () => Promise<void>) => {
+    if (savingRef.current || sessionState !== "active") return;
+    savingRef.current = true;
+    setSaving(true);
+    try {
+      await save();
+      setSessionState("complete");
+      localStorage.removeItem(draftKey);
+      router.refresh();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Your Forge session could not be saved.");
+    } finally {
+      savingRef.current = false;
+      setSaving(false);
+    }
+  };
+
+  const handleEndSession = (at?: number) => {
+    if (sessionTool === "voice-note" || sessionTool === "sketch-upload") {
+      toast.info("Use the tool’s Save button to finish the session.");
+      return;
+    }
+    if (!content.trim()) {
+      if (at !== undefined && timerRef.current) clearInterval(timerRef.current);
+      toast.info("Write a response before saving.");
+      return;
+    }
+    if (timerRef.current) clearInterval(timerRef.current);
+    const finalElapsed = at ?? Math.min(deadline || 86400, Math.floor((Date.now() - startTimeRef.current) / 1000));
+    setElapsed(finalElapsed);
+    void runSave(() => saveSession({
+      title: challengeRef.current ? userData.activeChallenge?.title : undefined,
+      content: content.trim(), time_spent_seconds: finalElapsed,
+      was_timed: deadline > 0, time_limit_seconds: deadline || null,
+    }));
+  };
+
+  useEffect(() => { endRef.current = handleEndSession; });
+
+  const upload = async (file: Blob, bucket: string, extension: string) => {
+    const path = `${userData.userId}/forge/${attemptRef.current}.${extension}`;
+    const form = new FormData();
+    form.append("file", file);
+    form.append("bucket", bucket);
+    form.append("path", path);
+    const response = await fetch("/api/storage/upload", { method: "POST", body: form });
+    if (!response.ok) throw new Error("The attachment could not be uploaded.");
+    return path;
+  };
+
+  const handleVoiceSave = (blob: Blob, duration: number) => runSave(async () => {
+    const path = await upload(blob, "forge-audio", blob.type.includes("mp4") ? "m4a" : "webm");
+    await saveSession({ title: "Voice note", response_audio_url: path, item_type: "voice", time_spent_seconds: duration });
     setElapsed(duration);
     setAudioSaved(true);
-    const ts = Date.now();
-    const path = `${userData.userId}/forge/${ts}.webm`;
-    
-    const formData = new FormData();
-    formData.append("file", blob);
-    formData.append("bucket", "forge-audio");
-    formData.append("path", path);
+  });
 
-    const res = await fetch("/api/storage/upload", { method: "POST", body: formData });
-    if (res.ok) {
-      await fetch("/api/forge/save", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: `Voice Note — ${new Date().toLocaleDateString()}`,
-          was_timed: false,
-          response_audio_url: path,
-          tool: "voice-note",
-          item_type: "voice"
-        })
-      });
-    }
-    setSessionState("complete");
-  };
-
-  // ── Sketch save ───────────────────────────────────────────────────────
-  const handleSketchSave = async (file: File, caption: string) => {
+  const handleSketchSave = (file: File, caption: string) => runSave(async () => {
+    const path = await upload(file, "forge-files", file.name.split(".").pop() ?? "png");
+    await saveSession({
+      title: "Sketch or file", content: caption, response_file_url: path,
+      item_type: file.type.startsWith("image/") ? "sketch" : "document",
+    });
     setFileSaved(true);
-    const ext = file.name.split(".").pop() ?? "png";
-    const path = `${userData.userId}/forge/${Date.now()}.${ext}`;
-    
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("bucket", "forge-files");
-    formData.append("path", path);
-
-    const res = await fetch("/api/storage/upload", { method: "POST", body: formData });
-    if (res.ok) {
-      await fetch("/api/forge/save", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: `Sketch/File — ${new Date().toLocaleDateString()}`,
-          content: caption || null,
-          was_timed: false,
-          response_file_url: path,
-          tool: "sketch-upload",
-          // The picker accepts image/* and .pdf; anything non-image is a document.
-          item_type: file.type.startsWith("image/") ? "sketch" : "document"
-        })
-      });
-    }
-    setSessionState("complete");
-  };
+  });
 
   // ── Reset ─────────────────────────────────────────────────────────────
   const handleReturn = () => {
     setSessionState("idle");
+    setChallengeDisplayTool(null);
     setContent("");
     setElapsed(0);
     setAudioSaved(false);
     setFileSaved(false);
   };
 
-  const remaining = Math.max(0, timerDuration - elapsed);
-  const isTextTool = ["free-write", "timed-write", "memory-recall", "vault-challenge"].includes(activeTool);
+  const remaining = Math.max(0, deadline - elapsed);
+  const isTextTool = ["free-write", "timed-write", "memory-recall", "vault-challenge"].includes(sessionTool);
 
   return (
     <div className="absolute flex flex-col md:flex-row overflow-hidden" style={{ top: 64, left: 0, right: 0, bottom: 0, background: "#040404", zIndex: 10 }}>
@@ -269,7 +241,7 @@ export default function ForgeClient({ userData }: ForgeClientProps) {
               You have an unsaved session ({formatTime(draftBanner.elapsed)} · {countWords(draftBanner.content)} words)
             </span>
             <div className="flex gap-3">
-              <button onClick={() => { setContent(draftBanner.content); setActiveTool(draftBanner.tool); setDraftBanner(null); }}
+              <button onClick={() => { handleStartSession(draftBanner.tool, draftBanner); }}
                 className="text-sm font-medium" style={{ color: "#FF5500" }}>Recover</button>
               <button onClick={() => { localStorage.removeItem(LS_KEY_PREFIX + userData.userId); setDraftBanner(null); }}
                 className="text-sm" style={{ color: "rgba(255,255,255,0.66)" }}>Discard</button>
@@ -318,7 +290,7 @@ export default function ForgeClient({ userData }: ForgeClientProps) {
                       <span style={{ color: "#FF5500" }}>{practiceSkillName}</span>
                     </h2>
                     <p className="text-base max-w-sm" style={{ color: "rgba(255,255,255,0.66)", lineHeight: 1.7 }}>
-                      Choose a tool from the left to start.<br />This session will boost your skill.
+                      Choose a tool from the left to start.<br />Your practice will be recorded.
                     </p>
                   </>
                 ) : (
@@ -335,7 +307,7 @@ export default function ForgeClient({ userData }: ForgeClientProps) {
 
                 {/* Vault challenge CTA */}
                 {userData.activeChallenge && (
-                  <motion.div onClick={() => { setActiveTool("vault-challenge"); handleStartSession(); }}
+                  <motion.div onClick={() => { handleStartSession("vault-challenge"); }}
                     className="mt-4 rounded-[20px] p-8 cursor-pointer text-center max-w-lg w-full transition-all"
                     style={{ background: "#111111", border: "1px solid rgba(255,85,0,0.20)" }}
                     whileHover={{ boxShadow: "0 0 40px rgba(255,85,0,0.08)", borderColor: "rgba(255,85,0,0.40)" }}>
@@ -353,7 +325,7 @@ export default function ForgeClient({ userData }: ForgeClientProps) {
                 )}
 
                 {/* Start button */}
-                <motion.button onClick={handleStartSession}
+                <motion.button onClick={() => handleStartSession()}
                   whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                   className="mt-2 rounded-full h-12 px-10 text-sm font-semibold text-white"
                   style={{ background: "rgba(255,85,0,0.90)", boxShadow: "0 0 40px rgba(255,85,0,0.25)" }}>
@@ -368,23 +340,26 @@ export default function ForgeClient({ userData }: ForgeClientProps) {
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <ForgeTopBar
                 tool={activeTool}
-                timerDuration={timerDuration}
+                timerDuration={deadline}
                 elapsed={elapsed}
                 content={content}
-                onEndSession={handleEndSession}
+                onEndSession={() => handleEndSession()}
               />
+              {activeTool === "vault-challenge" && userData.activeChallenge?.description && (
+                <p className="border-b border-white/10 px-5 py-3 text-sm text-white/80">{userData.activeChallenge.description}</p>
+              )}
               {/* Tool render */}
               {isTextTool ? (
                 <ForgeEditor
                   tool={activeTool}
-                  timerDuration={timerDuration}
+                  timerDuration={deadline}
                   remaining={remaining}
                   content={content}
                   memoryTopic={memoryTopic}
-                  isReadOnly={timerDuration > 0 && remaining === 0}
+                  isReadOnly={saving || (deadline > 0 && remaining === 0)}
                   onChange={setContent}
                 />
-              ) : activeTool === "voice-note" ? (
+              ) : sessionTool === "voice-note" ? (
                 <ForgeVoice onSave={handleVoiceSave} />
               ) : (
                 <ForgeSketch onSave={handleSketchSave} />
@@ -397,12 +372,11 @@ export default function ForgeClient({ userData }: ForgeClientProps) {
         <AnimatePresence>
           {sessionState === "complete" && (
             <ForgeComplete
-              tool={activeTool}
+              tool={sessionTool}
               content={content}
               elapsed={elapsed}
               audioSaved={audioSaved}
               fileSaved={fileSaved}
-              baselineVocabRichness={userData.baselineVocabRichness}
               onReturn={handleReturn}
               onDashboard={() => router.push("/dashboard")}
             />
@@ -418,7 +392,6 @@ export default function ForgeClient({ userData }: ForgeClientProps) {
         elapsed={elapsed}
         isActive={sessionState === "active" && isTextTool}
         history={userData.history}
-        baselineWordCount={userData.baselineWordCount}
       />
     </div>
   );

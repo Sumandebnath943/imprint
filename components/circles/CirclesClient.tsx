@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, Info, X } from "lucide-react";
 import CircleDetail from "@/components/circles/CircleDetail";
-import {} from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -12,6 +11,8 @@ export interface HumanCircle {
   id: string; name: string; description: string; cluster_focus: string;
   member_limit: number; invite_code: string;
 }
+
+export type PublicCircle = Omit<HumanCircle, "invite_code"> & { member_count: number };
 
 export interface CircleMember {
   id: string; circle_id: string; user_id: string; role: "admin" | "member"; joined_at: string;
@@ -22,6 +23,7 @@ interface CirclesClientProps {
   userId: string;
   circles: HumanCircle[];
   memberships: CircleMember[];
+  directory: PublicCircle[];
 }
 
 const CLUSTERS = [
@@ -33,7 +35,7 @@ const CLUSTERS = [
   { name: "Life & Personal", color: "#FF2D2D" },
 ];
 
-export default function CirclesClient({ userId, circles, memberships }: CirclesClientProps) {
+export default function CirclesClient({ userId, circles, memberships, directory }: CirclesClientProps) {
   const router = useRouter();
   const [showCreate, setShowCreate] = useState(false);
   const [showJoin, setShowJoin] = useState(false);
@@ -90,22 +92,24 @@ export default function CirclesClient({ userId, circles, memberships }: CirclesC
     }
   };
 
-  const handleJoin = async () => {
-    if (joinCode.length !== 6) return;
+  const handleJoin = async (circleId?: string) => {
+    if (!circleId && joinCode.trim().length < 4) return;
     setJoining(true); setJoinError("");
-    const res = await fetch("/api/circles/join", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ invite_code: joinCode }),
-    });
-    setJoining(false);
-    if (res.ok) {
+    try {
+      const res = await fetch("/api/circles/join", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(circleId ? { circle_id: circleId } : { invite_code: joinCode }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
       setShowJoin(false);
       setJoinCode("");
       router.refresh();
-    } else {
-      const data = await res.json();
-      setJoinError(data.error || "Failed to join");
-    }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Could not join. Try again.";
+      if (circleId) toast.error(message);
+      else setJoinError(message);
+    } finally { setJoining(false); }
   };
 
   return (
@@ -191,6 +195,22 @@ export default function CirclesClient({ userId, circles, memberships }: CirclesC
       </div>
 
       {/* Modals */}
+      <section className="relative z-10 mx-auto mt-8 max-w-6xl">
+        <h2 className="mb-4 text-xl font-semibold">Discover public circles</h2>
+        {directory.length === 0 && <p className="text-sm text-white/70">No public circles to join right now.</p>}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {directory.map((circle) => <article key={circle.id} className="rounded-2xl border border-white/10 bg-[#111] p-5">
+            <h3 className="font-semibold">{circle.name}</h3>
+            <p className="text-sm text-white/70">{circle.cluster_focus} · {circle.member_count}/{circle.member_limit} members</p>
+            {circle.description && <p className="my-2 text-sm">{circle.description}</p>}
+            <button onClick={() => void handleJoin(circle.id)} disabled={joining || circle.member_count >= circle.member_limit}
+              className="mt-3 rounded-full bg-[#ff713d] px-4 py-2 text-sm font-semibold text-black disabled:opacity-50">
+              {circle.member_count >= circle.member_limit ? "Circle full" : "Join circle"}
+            </button>
+          </article>)}
+        </div>
+      </section>
+
       <AnimatePresence>
         {showCreate && !createdCode && (
           <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ background: "rgba(0,0,0,0.80)" }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowCreate(false)}>
@@ -248,11 +268,11 @@ export default function CirclesClient({ userId, circles, memberships }: CirclesC
               <h2 className="font-bold text-white mb-1" style={{ fontSize: 24 }}>Join a Circle</h2>
               <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.66)" }}>Enter the 6-character invite code.</p>
               
-              <input value={joinCode} onChange={e => setJoinCode(e.target.value.toUpperCase())} maxLength={6} placeholder="XXXXXX" className="w-full text-center font-mono font-bold outline-none rounded-xl mb-4" style={{ background: "#1A1A1A", border: "2px solid rgba(255,255,255,0.10)", fontSize: 32, padding: "20px", color: "white", letterSpacing: "0.2em" }} />
+              <input value={joinCode} onChange={e => setJoinCode(e.target.value.toUpperCase())} maxLength={16} placeholder="XXXXXX" aria-label="Invite code" className="w-full text-center font-mono font-bold outline-none rounded-xl mb-4" style={{ background: "#1A1A1A", border: "2px solid rgba(255,255,255,0.10)", fontSize: 24, padding: "20px", color: "white", letterSpacing: "0.1em" }} />
               
               {joinError && <p className="text-sm text-red-500 mb-4">{joinError}</p>}
               
-              <button onClick={handleJoin} disabled={joining || joinCode.length !== 6} className="w-full rounded-full h-14 font-medium text-on-accent disabled:opacity-50" style={{ background: "#FF5500", fontSize: 16 }}>{joining ? "Checking..." : "Join Circle →"}</button>
+              <button onClick={() => void handleJoin()} disabled={joining || joinCode.trim().length < 4} className="w-full rounded-full h-14 font-medium text-on-accent disabled:opacity-50" style={{ background: "#FF5500", fontSize: 16 }}>{joining ? "Checking..." : "Join Circle →"}</button>
             </motion.div>
           </motion.div>
         )}
