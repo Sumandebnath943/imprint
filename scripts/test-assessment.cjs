@@ -1,4 +1,5 @@
 const { readFileSync } = require("node:fs");
+const { spawnSync } = require("node:child_process");
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const { transpileModule, ModuleKind, ScriptTarget } = require("typescript");
@@ -16,6 +17,63 @@ const { ROLE_TRACKS, findRoleTrack } = require("../lib/assessment/catalog.ts");
 const { criterionScore, overallScore, getPublicTasks, isPastGrace } = require("../lib/assessment/rules.ts");
 const { historicalComparison } = require("../lib/assessment/historical.ts");
 const { getTextMetrics } = require("../lib/forge/types.ts");
+const { getOnboardingWorkspace, getWorkspaceExercise } = require("../lib/onboarding/workspace-catalog.ts");
+const { blankWorkspaceAnswer, bookingObservation, checkWorkspaceAnswer, contrastRatio } = require("../lib/onboarding/workspace-contract.ts");
+const { createCodeCheckScript } = require("../lib/assessment/code-check-script.ts");
+const { findDeveloperExercise } = require("../lib/assessment/developer-bank.ts");
+
+test("the shared Docker and Vercel harness returns bounded, deterministic case results", () => {
+  const exercise = findDeveloperExercise("basic-invoices");
+  const run = (files, cases = exercise.cases) => {
+    const result = spawnSync(process.execPath, ["--input-type=commonjs", "-"], {
+      input: createCodeCheckScript(cases, files), encoding: "utf8", timeout: 5000,
+    });
+    assert.equal(result.status, 0, result.stderr);
+    return JSON.parse(result.stdout);
+  };
+  const passing = run({
+    "total.js": "module.exports = rows => rows.filter(row => row.paid === true).reduce((total, row) => total + row.amount, 0);",
+  });
+  assert.deepEqual(passing, exercise.cases.map(({ label }) => ({ label, outcome: "passed" })));
+  assert.equal(run({ "total.js": "module.exports = () => require('node:fs');" }, exercise.cases.slice(0, 1))[0].outcome, "failed");
+  assert.equal(run({ "total.js": "module.exports = () => { while (true) {} };" }, exercise.cases.slice(0, 1))[0].outcome, "timed-out");
+});
+
+test("every onboarding profession has two concrete work samples and a separate follow-up condition", () => {
+  const titles = new Set();
+  for (const role of ROLE_TRACKS) {
+    for (const question of [5, 6]) {
+      const original = getOnboardingWorkspace(role.id, question);
+      const next = getOnboardingWorkspace(role.id, question, 1);
+      assert.ok(original);
+      assert.ok(original.fields.length && original.criteria.every(Boolean));
+      assert.ok(!titles.has(original.name));
+      titles.add(original.name);
+      assert.equal(Boolean(checkWorkspaceAnswer(role.id, question, blankWorkspaceAnswer(), 0)), true);
+      if (role.id !== "software-developer") assert.notEqual(original.prompt, next.prompt);
+    }
+  }
+  assert.equal(titles.size, 72);
+  for (const level of ["Basic", "Intermediate", "Advanced"]) {
+    assert.notEqual(getWorkspaceExercise(0, level).id, getWorkspaceExercise(1, level).id);
+  }
+  assert.equal(contrastRatio("#000000", "#ffffff"), 21);
+  assert.match(bookingObservation(0, "Edit", "Original"), /Accepted$/);
+  assert.match(bookingObservation(0, "Edit", "Candidate"), /Rejected$/);
+});
+const { assessmentSummary, signedPoints } = require("../lib/assessment/comparison.ts");
+
+test("versioned proficiency differences use each result's own score and exclude fallback comparisons", () => {
+  const baseline = { form: 0, score: 75, scored_at: "2026-11-20", results: { provider: "gemini", model: "gemini:model-a", evaluator: "v2", difficulty: "Basic" } };
+  const latest = { ...baseline, form: 1, score: 63 };
+  const summary = assessmentSummary(latest, baseline, "enabled", false);
+  assert.equal(summary.difference, -12);
+  assert.equal(signedPoints(summary.difference), "−12");
+  assert.equal(assessmentSummary({ ...latest, form: 2 }, baseline, "enabled", false).difference, -12);
+  assert.equal(assessmentSummary(baseline, baseline, "enabled", false).comparison, "Awaiting reassessment");
+  assert.equal(assessmentSummary({ ...latest, results: { ...latest.results, provider: "groq" } }, baseline, "enabled", false).comparison, "Scoring versions differ");
+  assert.equal(assessmentSummary(null, null, "unavailable", true).nextAction, "Resume your saved work");
+});
 
 test("every selectable role has distinct work, check-in stages and alternate tasks", () => {
   assert.equal(ROLE_TRACKS.length, 36);

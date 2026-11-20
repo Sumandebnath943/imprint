@@ -1,4 +1,5 @@
 // Shared dashboard data types
+import type { AssessmentSummary } from "@/lib/assessment/comparison";
 
 export interface DashboardProfile {
   id: string;
@@ -58,7 +59,7 @@ export interface DashboardData {
   calibration: DashboardCalibration | null;
   activityByDay: { day: string; value: number; isToday: boolean }[];
   streak: number;
-  proficiency?: { score: number; date: string } | null;
+  proficiency?: AssessmentSummary | null;
   dueTask?: { kind: string; due_at: string } | null;
 }
 

@@ -42,15 +42,8 @@ export default function AIExposurePage() {
   return (
     <>
       <StepLayout
-        ghost="HONEST"
-        eyebrow="Step 3 · Your starting point"
-        title={
-          <>
-            How deep are you{" "}
-            <span style={{ color: "#FF5500" }}>already in?</span>
-          </>
-        }
-        description="No judgment. We need to know your starting point to measure your drift accurately."
+        title="How you use AI"
+        description="Record your current habits. These answers are self-reported and stay separate from your proficiency results."
         wide
       >
         {/* Two questions plus an optional note is more than one screen can
@@ -70,6 +63,7 @@ export default function AIExposurePage() {
               return (
                 <button
                   key={level.value}
+                  aria-pressed={selected}
                   onClick={() => setAiExposureLevel(level.value)}
                   className="flex items-center gap-3.5 rounded-xl px-4 py-3 text-left transition-all duration-200"
                   style={{

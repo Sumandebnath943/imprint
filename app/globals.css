@@ -4,6 +4,18 @@
 @tailwind components;
 @tailwind utilities;
 
+.onboarding-shell :is(button, a, input, textarea, summary):focus-visible {
+  outline: 2px solid #ff955f;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-shell *, .onboarding-shell *::before, .onboarding-shell *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* ─── Base Reset ─────────────────────────────────────────── */
 :root {
   --font-space-grotesk: 'Space Grotesk', Inter, sans-serif;

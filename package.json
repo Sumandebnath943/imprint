@@ -16,6 +16,8 @@
     "@hookform/resolvers": "^5.2.2",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.105.1",
+    "@vercel/oidc": "4.0.0",
+    "@vercel/sandbox": "4.1.0",
     "framer-motion": "^12.38.0",
     "gray-matter": "^4.0.3",
     "html2canvas": "^1.4.1",

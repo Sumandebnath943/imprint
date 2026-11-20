@@ -116,17 +116,18 @@ const blockedReasons = new Set(["SAFETY", "BLOCKLIST", "PROHIBITED_CONTENT", "SP
 
 export async function structuredAI<T>(context: AIContext, options: {
   model: string; name: string; schema: z.ZodType<T>; system: string; text: string;
-  image?: Media; audio?: Media; maxTokens?: number;
+  image?: Media; images?: Media[]; audio?: Media; media?: Media[]; maxTokens?: number;
 }) {
   const { provider } = context;
   const { schema, model, name, system, text, image, audio, maxTokens = 1500 } = options;
+  const visualEvidence = options.images ?? (image ? [image] : []);
   const jsonSchema = z.toJSONSchema(schema, { target: "draft-7" });
   delete jsonSchema.$schema;
   let output: string | null | undefined;
   let actualModel: string | undefined;
 
   if (provider === "gemini") {
-    const parts = [{ text }, ...(image ? [{ inlineData: image }] : []), ...(audio ? [{ inlineData: audio }] : [])];
+    const parts = [{ text }, ...[...visualEvidence, ...(audio ? [audio] : []), ...(options.media ?? [])].map((item) => ({ inlineData: item }))];
     const raw = await request(context, `/models/${encodeURIComponent(model)}:generateContent`, {
       systemInstruction: { parts: [{ text: system }] }, contents: [{ role: "user", parts }],
       generationConfig: { responseMimeType: "application/json", responseJsonSchema: jsonSchema, maxOutputTokens: maxTokens },
@@ -142,8 +143,10 @@ export async function structuredAI<T>(context: AIContext, options: {
     output = candidate.content?.parts.filter((part) => !part.thought).map((part) => part.text ?? "").join("");
     actualModel = parsed.data.modelVersion;
   } else {
-    if (audio) throw new AIProviderError("configuration", provider);
-    const content = image ? [{ type: "text", text }, { type: "image_url", image_url: { url: `data:${image.mimeType};base64,${image.data}` } }] : text;
+    if (audio || options.media?.length) throw new AIProviderError("configuration", provider);
+    const content = visualEvidence.length ? [{ type: "text", text }, ...visualEvidence.map((item) => ({
+      type: "image_url", image_url: { url: `data:${item.mimeType};base64,${item.data}` },
+    }))] : text;
     const strict = model === "openai/gpt-oss-20b" || model === "openai/gpt-oss-120b";
     const instructions = strict ? system : `${system}\nReturn one JSON object matching this schema: ${JSON.stringify(jsonSchema)}`;
     const reasoningEffort = model === groqVision ? "none" : model.startsWith("openai/gpt-oss") ? "low" : undefined;

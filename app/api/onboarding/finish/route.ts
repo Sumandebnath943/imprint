@@ -4,8 +4,9 @@ import { buildModuleList, PROFESSIONS } from "@/lib/onboarding/modules";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { whoAreYouSchema, aiExposureSchema } from "@/lib/validations/onboarding.schema";
-import { findRoleTrack } from "@/lib/assessment/catalog";
-import { isRoleScoringEnabled } from "@/lib/assessment/pilot";
+import { ADULT_ONLY_MESSAGE, hasConfirmedAdultAge } from "@/lib/auth/eligibility";
+import { loadWorkspace } from "@/lib/onboarding/workspace-access";
+import { ONBOARDING_WORK_VERSION } from "@/lib/onboarding/workspace-catalog";
 
 const finishSchema = z.object({
   profession: z.string(),
@@ -23,6 +24,7 @@ export async function POST(request: Request) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Sign in to complete onboarding." }, { status: 401 });
+  if (!hasConfirmedAdultAge(user)) return NextResponse.json({ error: ADULT_ONLY_MESSAGE }, { status: 403 });
   const parsed = finishSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Check your profession and selected skills." }, { status: 400 });
 
@@ -33,16 +35,8 @@ export async function POST(request: Request) {
   if (uniqueSkills.length < 3) return NextResponse.json({ error: "Select at least three different skills." }, { status: 400 });
 
   try {
-    const track = findRoleTrack(profession);
-    const usingAssessment = Boolean(track && isRoleScoringEnabled(track.id));
-    if (track && usingAssessment) {
-      const { data, error } = await supabase.from("role_assessments").select("id")
-        .eq("user_id", user.id).eq("role_id", track.id).eq("rubric_version", track.version)
-        .eq("form", 0).eq("status", "scored").maybeSingle();
-      if (error) throw error;
-      if (!data) return NextResponse.json({ error: "Complete the role assessment before finishing onboarding." }, { status: 409 });
-    }
-    const { error } = await createAdminClient().rpc("finish_imprint_onboarding_with_reflection", {
+    const workspace = await loadWorkspace(supabase, user.id, role.id, undefined, true);
+    const common = {
       p_user_id: user.id,
       p_profession: role.name,
       p_cluster: role.cluster,
@@ -50,11 +44,14 @@ export async function POST(request: Request) {
       p_exposure: aiExposureLevel,
       p_context: aiUseContext,
       p_skills: uniqueSkills.map(({ name, strengthLevel }) => ({ name, strength: strengthLevel })),
-      p_required_modules: usingAssessment ? [] : buildModuleList(role.cluster).map(({ id }) => id),
       p_reflection: reflection,
-    });
+    };
+    const admin = createAdminClient();
+    const { error } = workspace
+      ? await admin.rpc("finish_workspace_onboarding", { ...common, p_role: role.id, p_rubric: ONBOARDING_WORK_VERSION })
+      : await admin.rpc("finish_selected_profession_onboarding", { ...common, p_required_modules: buildModuleList(role.cluster).map(({ id }) => id) });
     if (error?.code === "P0001") {
-      return NextResponse.json({ error: "Save every required baseline response before finishing." }, { status: 409 });
+      return NextResponse.json({ error: "Your profession and all seven baseline responses must match before finishing." }, { status: 409 });
     }
     if (error) throw error;
     return NextResponse.json({ success: true });

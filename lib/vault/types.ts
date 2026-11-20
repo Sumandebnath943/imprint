@@ -40,6 +40,8 @@ export interface VaultHistoryRow {
 export interface VaultPageData {
   userId: string;
   userCluster: string;
+  profession?: string;
+  roleSkills?: string[];
   skills: VaultSkill[];
   activeChallenge: VaultChallenge | null;
   history: VaultHistoryRow[];
@@ -70,17 +72,13 @@ export function getDaysSinceExercised(last: string | null): number {
   );
 }
 
-export function getDecayStatus(days: number): { label: string; color: string } {
-  if (days === 0) return { label: "Practiced today", color: "#00D97E" };
-  if (days <= 3)  return { label: "Healthy",          color: "#00D97E" };
-  if (days <= 6)  return { label: "Cooling",           color: "#FFB800" };
-  if (days <= 13) return { label: "⚠ Weakening",       color: "#FF7A30" };
-  return             { label: "🔴 Decaying fast",     color: "#FF2D2D" };
+export function isPracticeOverdue(days: number): boolean {
+  return Number.isFinite(days) && days >= 7;
 }
 
 export function getRelativeTime(isoDate: string | null): string {
-  if (!isoDate) return "No practice yet";
   const days = getDaysSinceExercised(isoDate);
+  if (!Number.isFinite(days)) return "Never practiced";
   if (days === 0) return "Today";
   if (days === 1) return "Yesterday";
   return `${days} days ago`;

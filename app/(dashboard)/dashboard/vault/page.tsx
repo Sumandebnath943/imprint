@@ -1,5 +1,7 @@
 import VaultClient from "@/components/vault/VaultClient";
 import type { VaultPageData } from "@/lib/vault/types";
+import { findRoleTrack } from "@/lib/assessment/catalog";
+import { workspaceRole } from "@/lib/onboarding/workspace-catalog";
 
 async function getVaultData(): Promise<VaultPageData> {
   const empty: VaultPageData = {
@@ -18,7 +20,7 @@ async function getVaultData(): Promise<VaultPageData> {
     if (!user) return empty;
 
     const [profileRes, skillsRes, challengeRes, historyRes] = await Promise.all([
-      supabase.from("profiles").select("profession_cluster").eq("id", user.id).single(),
+      supabase.from("profiles").select("profession,profession_cluster").eq("id", user.id).single(),
       supabase.from("skill_vault").select("*").eq("user_id", user.id).order("strength_level", { ascending: true }),
       supabase.from("vault_challenges")
         .select("*, skill_vault(skill_name)")
@@ -63,9 +65,12 @@ async function getVaultData(): Promise<VaultPageData> {
       };
     });
 
+    const role = findRoleTrack(profileRes.data?.profession);
     return {
       userId: user.id,
       userCluster: profileRes.data?.profession_cluster ?? "life_personal",
+      profession: role?.name,
+      roleSkills: role && workspaceRole(role).tasks.map(({ skill }) => skill),
       skills: (skillsRes.data ?? []) as VaultPageData["skills"],
       activeChallenge,
       history,

@@ -3,6 +3,8 @@ import type { DashboardData } from "@/lib/dashboard/types";
 import DashboardSkeleton from "@/components/dashboard/DashboardSkeleton";
 import DashboardContent from "@/components/dashboard/DashboardContent";
 import { findRoleTrack } from "@/lib/assessment/catalog";
+import { getAssessmentSummary } from "@/lib/assessment/summary";
+import { getRoleSeries } from "@/lib/onboarding/workspace-access";
 
 // Revalidate dashboard data every 60s
 export const revalidate = 60;
@@ -57,12 +59,10 @@ async function fetchDashboardData(): Promise<DashboardData> {
     ]);
     const role = findRoleTrack(profileRes.data?.profession);
     const [assessed, due] = role ? await Promise.all([
-      supabase.from("role_assessments").select("score,scored_at").eq("user_id", user.id)
-        .eq("role_id", role.id).eq("rubric_version", role.version).eq("status", "scored")
-        .order("form", { ascending: false }).limit(1).maybeSingle(),
-      supabase.from("imprint_tasks").select("kind,due_at").eq("user_id", user.id)
-        .eq("role_id", role.id).eq("rubric_version", role.version).is("completed_at", null)
-        .order("due_at").limit(1).maybeSingle(),
+      getAssessmentSummary(supabase, user.id, role),
+      getRoleSeries(supabase, user.id, role).then(({ role: series }) => supabase.from("imprint_tasks").select("kind,due_at").eq("user_id", user.id)
+        .eq("role_id", role.id).eq("rubric_version", series.version).is("completed_at", null)
+        .order("due_at").limit(1).maybeSingle()),
     ]) : [null, null];
 
     // Build per-day activity for this week (Mon–Sun)
@@ -103,7 +103,7 @@ async function fetchDashboardData(): Promise<DashboardData> {
       calibration: calRes.data ?? null,
       activityByDay,
       streak,
-      proficiency: assessed?.data ? { score: assessed.data.score, date: assessed.data.scored_at } : null,
+      proficiency: assessed,
       dueTask: due?.data ?? null,
     };
   } catch {

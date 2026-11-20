@@ -336,7 +336,7 @@ export const CLUSTER_SKILLS: Record<string, string[]> = {
 };
 
 // ─── Profession → cluster map (subset; full list in lib/utils/profession.ts) ─
-export const PROFESSIONS = ROLE_TRACKS.map(({ name, cluster }) => ({ name, cluster }));
+export const PROFESSIONS = ROLE_TRACKS.map(({ id, name, cluster }) => ({ id, name, cluster }));
 
 export const CLUSTER_COLORS: Record<string, string> = {
   language_voice: "#FF5500",

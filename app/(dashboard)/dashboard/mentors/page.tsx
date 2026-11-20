@@ -2,6 +2,7 @@ import MentorsClient from "@/components/mentors/MentorsClient";
 import { reviewerAllowed } from "@/lib/assessment/pilot";
 import { createClient } from "@/lib/supabase/server";
 import type { Application, Mentor, MentorActivity, MentorSettings } from "@/lib/mentors/types";
+import { findRoleTrack } from "@/lib/assessment/catalog";
 
 export default async function MentorsPage() {
   const supabase = createClient();
@@ -17,7 +18,11 @@ export default async function MentorsPage() {
     return <section className="p-8"><h1 className="text-2xl font-semibold">Mentor Network</h1><p role="alert">Mentoring could not be loaded. Reload to try again.</p></section>;
   }
   const current = applications.data?.find((entry) => entry.profession === settings.data?.profession);
-  return <MentorsClient activity={activity.data as MentorActivity} directory={directory.data as Mentor[]}
+  const role = findRoleTrack(settings.data?.profession);
+  const listings = (directory.data as Mentor[]).sort((first, second) =>
+    Number(Boolean(role && findRoleTrack(second.profession)?.id === role.id)) -
+    Number(Boolean(role && findRoleTrack(first.profession)?.id === role.id)));
+  return <MentorsClient activity={activity.data as MentorActivity} directory={listings}
     settings={settings.data as MentorSettings | null} application={current as Application | undefined}
     canReview={reviewerAllowed(user.id)} />;
 }

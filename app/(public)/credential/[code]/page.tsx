@@ -27,7 +27,7 @@ export async function generateMetadata(
   const title = `${name} — IMPRINT Identity Credential`;
   const description = `${name}${
     profile.profession ? `, ${profile.profession},` : ""
-  } scores ${profile.imprint_score ?? 0}/1000 on IMPRINT — a legacy activity record in Imprint.`;
+  } has a legacy Imprint activity score of ${profile.imprint_score ?? 0}/1000.`;
 
   return {
     title,

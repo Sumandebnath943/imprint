@@ -51,7 +51,7 @@ export default function StepLayout({
   const centered = variant === "centered";
 
   return (
-    <div className="relative w-full lg:h-full lg:overflow-hidden">
+    <div className="relative w-full">
       {ghost && (
         <div
           aria-hidden
@@ -78,7 +78,7 @@ export default function StepLayout({
         className={[
           "relative z-10 mx-auto w-full h-full px-6 md:px-10",
           // Top clears the progress bar + Save & Exit; bottom clears BottomNav.
-          "pt-24 pb-32 lg:pt-[84px] lg:pb-[100px]",
+          "pt-24 pb-32 lg:pt-28 lg:pb-32",
           centered ? "max-w-[720px]" : wide ? "max-w-[1180px]" : "max-w-[1040px]",
           "flex flex-col",
         ].join(" ")}
@@ -87,7 +87,7 @@ export default function StepLayout({
           className={
             centered
               ? "flex flex-col lg:flex-1 lg:min-h-0"
-              : "flex flex-col lg:flex-row lg:gap-14 lg:flex-1 lg:min-h-0"
+              : "flex flex-col lg:flex-row lg:items-start lg:gap-12"
           }
         >
           {/* Context — never scrolls, so the question stays put while you answer. */}
@@ -98,7 +98,7 @@ export default function StepLayout({
             className={[
               centered
                 ? "text-center"
-                : "lg:w-[38%] lg:shrink-0 lg:flex lg:flex-col lg:justify-center",
+                : "lg:sticky lg:top-24 lg:w-[31%] lg:shrink-0",
               "mb-8 lg:mb-0",
             ].join(" ")}
           >
@@ -126,8 +126,7 @@ export default function StepLayout({
 
             {description && (
               <div
-                className="mt-4 text-[15px] leading-relaxed"
-                style={{ color: "rgba(255,255,255,0.62)" }}
+                className="mt-4 text-base leading-relaxed text-white/75"
               >
                 {description}
               </div>

@@ -11,6 +11,7 @@ interface BottomNavProps {
   continueLabel?: string;
   continueDisabled?: boolean;
   hideBack?: boolean;
+  inline?: boolean;
 }
 
 export default function BottomNav({
@@ -21,10 +22,11 @@ export default function BottomNav({
   continueLabel = "Continue →",
   continueDisabled = false,
   hideBack = false,
+  inline = false,
 }: BottomNavProps) {
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-between gap-3 px-5 py-4 md:px-12 md:py-5"
+      className={inline ? "mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4" : "fixed bottom-0 left-0 right-0 z-40 flex items-center justify-between gap-3 px-5 py-4 md:px-12 md:py-5"}
       style={{
         background: "rgba(8,8,8,0.90)",
         backdropFilter: "blur(20px)",
@@ -49,11 +51,7 @@ export default function BottomNav({
       </div>
 
       {/* Step indicator */}
-      <p className="text-xs whitespace-nowrap" style={{ color: "rgba(255,255,255,0.62)" }}>
-        {/* The "/" carries the gap on mobile; on desktop it is hidden, so " of "
-            needs its own trailing space or the total collides: "Step 5 of7". */}
-        <span className="hidden sm:inline">Step </span>{step}<span className="hidden sm:inline"> of </span><span className="sm:hidden">/</span>{total}
-      </p>
+      <span hidden>Step {step} of {total}</span>
 
       {/* Continue */}
       <div className="shrink-0 md:w-48 flex justify-end">
@@ -62,7 +60,7 @@ export default function BottomNav({
           disabled={continueDisabled}
           whileHover={continueDisabled ? {} : { scale: 1.02 }}
           whileTap={continueDisabled ? {} : { scale: 0.97 }}
-          className="h-10 px-6 rounded-pill text-sm font-medium text-white transition-all"
+          className="min-h-11 px-5 rounded-xl text-sm font-semibold text-on-accent transition-colors disabled:text-white/70"
           style={{
             background: continueDisabled ? "rgba(255,85,0,0.30)" : "#FF5500",
             boxShadow: continueDisabled ? "none" : "0 0 20px rgba(255,85,0,0.25)",

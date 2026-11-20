@@ -3,7 +3,10 @@
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search } from "lucide-react";
+import { CircleCheck, Clock, Minus, Search } from "lucide-react";
+import { useOnboardingScoring } from "@/components/onboarding/OnboardingShell";
+import { SCORING_LABELS } from "@/lib/assessment/availability";
+import { toast } from "sonner";
 import { useOnboardingStore } from "@/lib/store/onboarding.store";
 import { AGE_GROUPS, isAdultAgeGroup } from "@/lib/auth/age-groups";
 import BottomNav from "@/components/onboarding/BottomNav";
@@ -22,6 +25,8 @@ export default function WhoAreYouPage() {
   const { currentStep, answers, setStep, setAgeGroup, setProfession } = useOnboardingStore();
 
   const [search, setSearch] = useState("");
+  const [savingRole, setSavingRole] = useState(false);
+  const scoring = useOnboardingScoring();
 
   const filteredProfessions = useMemo(() => {
     if (!search.trim()) return PROFESSIONS;
@@ -32,8 +37,19 @@ export default function WhoAreYouPage() {
 
   const canContinue = isAdultAgeGroup(answers.ageGroup) && !!answers.profession;
 
-  const handleContinue = () => {
-    if (!canContinue) return;
+  const handleContinue = async () => {
+    if (!canContinue || savingRole) return;
+    setSavingRole(true);
+    try {
+      const response = await fetch("/api/onboarding/role", {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ role: answers.profession }),
+      });
+      if (!response.ok) throw new Error((await response.json()).error);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Your profession could not be saved.");
+      setSavingRole(false);
+      return;
+    }
     if (currentStep > STEP) {
       router.push("/onboarding/resume");
       return;
@@ -50,13 +66,7 @@ export default function WhoAreYouPage() {
   return (
     <>
       <StepLayout
-        ghost="HUMAN"
-        eyebrow="Step 2 · About you"
-        title={
-          <>
-            Tell us who <span style={{ color: "#FF5500" }}>you are.</span>
-          </>
-        }
+        title="Choose your profession"
         description={
           <>
             Choose the work you want to assess and the skills you want to preserve.
@@ -100,6 +110,7 @@ export default function WhoAreYouPage() {
               return (
                 <button
                   key={g.value}
+                  aria-pressed={selected}
                   onClick={() => setAgeGroup(g.value)}
                   className="rounded-full px-5 h-11 text-sm font-medium transition-all duration-200"
                   style={{
@@ -118,12 +129,12 @@ export default function WhoAreYouPage() {
         {/* Search — pinned, so filtering never scrolls out of reach. */}
         <div className="shrink-0 mb-3">
           <div className="flex items-baseline justify-between mb-3">
-            <p
+            <label htmlFor="profession-search"
               className="uppercase tracking-widest text-[11px] font-medium"
               style={{ color: "rgba(255,255,255,0.55)" }}
             >
               What do you do?
-            </p>
+            </label>
             <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.45)" }}>
               {filteredProfessions.length} of {PROFESSIONS.length}
             </span>
@@ -135,6 +146,7 @@ export default function WhoAreYouPage() {
               style={{ color: "rgba(255,255,255,0.5)" }}
             />
             <input
+              id="profession-search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search your profession..."
@@ -155,20 +167,21 @@ export default function WhoAreYouPage() {
           </div>
         </div>
 
-        {/* The list is 35 items — it cannot fit on one screen and should not
-            try. It scrolls in its own pane with a floor of 260px, so there is
-            always more than a sliver of it visible. */}
         <div
-          className="scroll-pane grid grid-cols-2 sm:grid-cols-3 gap-2.5 content-start pr-2 -mr-2 min-h-[260px] lg:flex-1 lg:min-h-[260px]"
+          className="grid grid-cols-1 min-[430px]:grid-cols-2 sm:grid-cols-3 gap-2.5 content-start"
         >
           {filteredProfessions.map((p) => {
             const selected = answers.profession === p.name;
             const clusterColor = CLUSTER_COLORS[p.cluster] ?? "#FF5500";
+            const availability = scoring[p.id] ?? "unavailable";
+            const StatusIcon = availability === "enabled" ? CircleCheck : availability === "unavailable" ? Clock : Minus;
             return (
               <button
                 key={p.name}
+                aria-label={`${p.name}, ${SCORING_LABELS[availability]}`}
+                aria-pressed={selected}
                 onClick={() => setProfession(p.name, p.cluster)}
-                className="relative text-left rounded-xl p-3.5 transition-all duration-200 h-fit"
+                className="relative text-left rounded-xl p-3.5 transition-colors"
                 style={{
                   background: selected ? "rgba(255,85,0,0.10)" : "#111111",
                   border: `1px solid ${selected ? "rgba(255,85,0,0.45)" : "rgba(255,255,255,0.07)"}`,
@@ -189,6 +202,10 @@ export default function WhoAreYouPage() {
                 <p className="text-[13px] font-medium text-white leading-snug">
                   {p.name}
                 </p>
+                <span className={`mt-2 flex items-start gap-1.5 text-xs ${availability === "enabled" ? "text-emerald-300" : "text-white/65"}`}>
+                  <StatusIcon aria-hidden="true" size={14} className="shrink-0" />
+                  {SCORING_LABELS[availability]}
+                </span>
               </button>
             );
           })}
@@ -209,7 +226,8 @@ export default function WhoAreYouPage() {
         total={TOTAL}
         onBack={handleBack}
         onContinue={handleContinue}
-        continueDisabled={!canContinue}
+        continueLabel={savingRole ? "Saving…" : "Continue →"}
+        continueDisabled={!canContinue || savingRole}
       />
     </>
   );

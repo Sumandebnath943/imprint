@@ -52,7 +52,7 @@ export default async function AssessmentReviewPage() {
         {answers.map((answer, index) => <p key={index} className="text-sm">{answer.text}{signed[index] && (
           <a href={signed[index]} target="_blank" rel="noopener noreferrer" className="ml-2 text-[#ff9c77] underline">Open response attachment</a>
         )}</p>)}
-        <ScoreReview id={appeal.id} resolve />
+        <ScoreReview id={appeal.id} resolve criteria={assessment?.results?.criteria ?? []} />
       </article>;
     }))}
   </main>;

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { ADULT_AGE_GROUPS } from "@/lib/auth/age-groups";
+import { findRoleTrack } from "@/lib/assessment/catalog";
 
 // Every field optional: this endpoint takes partial updates. Only keys the
 // caller actually sent are written.
@@ -18,6 +19,7 @@ const ProfileUpdateSchema = z.object({
   location: z.string().trim().max(100).optional(),
   age_group: z.enum(ADULT_AGE_GROUPS).nullable().optional(),
   profession: z.string().trim().max(100).nullable().optional(),
+  confirmProfessionChange: z.literal(true).optional(),
   profession_cluster: z.enum([
     "language_voice", "visual_creative", "technical_analytical",
     "human_social", "leadership_strategy", "life_personal",
@@ -46,9 +48,18 @@ export async function PATCH(req: Request) {
     }
 
     // Drop keys the caller omitted so we never overwrite untouched columns.
+    const { confirmProfessionChange, ...profileFields } = parsed.data;
     const updates = Object.fromEntries(
-      Object.entries(parsed.data).filter(([, v]) => v !== undefined)
+      Object.entries(profileFields).filter(([, v]) => v !== undefined)
     );
+    if ("profession" in updates || "profession_cluster" in updates) {
+      const role = findRoleTrack(parsed.data.profession);
+      if (!role || !confirmProfessionChange) {
+        return NextResponse.json({ error: "Choose and confirm a supported profession to change tracks." }, { status: 400 });
+      }
+      updates.profession = role.name;
+      updates.profession_cluster = role.cluster;
+    }
 
     if (Object.keys(updates).length === 0) {
       return NextResponse.json({ error: "No fields to update" }, { status: 400 });

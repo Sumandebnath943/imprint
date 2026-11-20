@@ -50,6 +50,7 @@ export interface ForgeChallenge {
 export interface ForgeUserData {
   userId: string;
   professionCluster: string;
+  rolePractice?: { skill: string; mode: string; prompt: string; practice: string }[];
   activeChallenge: ForgeChallenge | null;
   history: ForgeHistoryEntry[];
 }

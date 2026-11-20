@@ -159,7 +159,7 @@ export default function CredentialClient({ profile, driftScore, stats }: Credent
 
   const copyEmbed = () => copyToClipboard(embedSnippet, "Embed code copied!");
 
-  const shareText = `My IMPRINT score is ${imprintScore}/1000 — a historical record of activity in Imprint.`;
+  const shareText = `My legacy Imprint activity score is ${imprintScore}/1000.`;
 
   const shareOn = (network: "linkedin" | "x") => {
     if (!isPublic) {

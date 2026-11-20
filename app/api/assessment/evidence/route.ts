@@ -2,9 +2,9 @@ import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { findRoleTrack, getRoleTasks } from "@/lib/assessment/catalog";
-import { isRoleScoringEnabled } from "@/lib/assessment/pilot";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { ADULT_ONLY_MESSAGE, hasConfirmedAdultAge } from "@/lib/auth/eligibility";
 
 const imageTypes: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
 const voiceTypes: Record<string, string> = {
@@ -16,6 +16,7 @@ export async function POST(request: Request) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Sign in to upload evidence." }, { status: 401 });
+  if (!hasConfirmedAdultAge(user)) return NextResponse.json({ error: ADULT_ONLY_MESSAGE }, { status: 403 });
   const body = await request.formData().catch(() => null);
   const taskId = body?.get("taskId");
   const attemptId = z.uuid().safeParse(body?.get("attemptId"));
@@ -28,9 +29,14 @@ export async function POST(request: Request) {
     .select("role_id,rubric_version,form,status")
     .eq("id", attemptId.data).eq("user_id", user.id).maybeSingle();
   const role = findRoleTrack(attempt?.role_id);
+  const { data: profile, error: profileError } = await supabase.from("profiles").select("profession,onboarding_completed").eq("id", user.id).single();
+  if (profileError) return NextResponse.json({ error: "Could not read your selected profession." }, { status: 503 });
+  if (!profile.onboarding_completed || findRoleTrack(profile.profession)?.id !== role?.id) {
+    return NextResponse.json({ error: "Choose the assessment for your selected profession." }, { status: 409 });
+  }
   const task = role && attempt && getRoleTasks(role, attempt.form).find((record) => record.id === taskId);
   if (lookupError || !attempt || !role || !task || attempt.status !== "draft" ||
-      role.version !== attempt.rubric_version || !isRoleScoringEnabled(role.id)) {
+      role.version !== attempt.rubric_version) {
     return NextResponse.json({ error: "This task is unavailable." }, { status: 404 });
   }
 

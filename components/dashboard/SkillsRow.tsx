@@ -3,7 +3,8 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import type { DashboardSkill } from "@/lib/dashboard/types";
-import { getSkillColor, daysAgo } from "@/lib/dashboard/types";
+import { getSkillColor } from "@/lib/dashboard/types";
+import { getDaysSinceExercised, getRelativeTime, isPracticeOverdue } from "@/lib/vault/types";
 
 interface SkillsRowProps { skills: DashboardSkill[]; }
 
@@ -23,9 +24,7 @@ export default function SkillsRow({ skills }: SkillsRowProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {skills.slice(0, 4).map((skill, i) => {
             const color = getSkillColor(skill.strength_level);
-            const lastDays = daysAgo(skill.last_exercised);
-            const isDecaying = skill.strength_level < 50;
-            const isOld = lastDays > 7;
+            const overdue = isPracticeOverdue(getDaysSinceExercised(skill.last_exercised));
             return (
               <motion.div
                 key={skill.id}
@@ -35,13 +34,13 @@ export default function SkillsRow({ skills }: SkillsRowProps) {
                 className="rounded-2xl p-5 transition-all duration-200"
                 style={{
                   background: "#111111",
-                  border: `1px solid ${isDecaying ? "rgba(255,45,45,0.25)" : "rgba(255,255,255,0.07)"}`,
-                  borderLeft: isDecaying ? "2px solid #FF2D2D" : undefined,
+                  border: `1px solid ${overdue ? "rgba(255,45,45,0.25)" : "rgba(255,255,255,0.07)"}`,
+                  borderLeft: overdue ? "2px solid #FF2D2D" : undefined,
                 }}
               >
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                   <p className="font-medium text-white" style={{ fontSize: 15 }}>{skill.skill_name}</p>
-                  <span className="font-semibold text-xs" style={{ color }}>{skill.strength_level}%</span>
+                  <span className="font-semibold text-xs" style={{ color }}>{skill.strength_level}% self-rating</span>
                 </div>
                 <div className="w-full h-1.5 rounded-full mb-3" style={{ background: "rgba(255,255,255,0.08)" }}>
                   <motion.div className="h-full rounded-full" style={{ background: color }}
@@ -50,12 +49,12 @@ export default function SkillsRow({ skills }: SkillsRowProps) {
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <p className="text-xs" style={{ color: "rgba(255,255,255,0.58)" }}>
-                    {lastDays < 999 ? `${lastDays}d ago` : "Never practiced"}
+                    {getRelativeTime(skill.last_exercised)}
                   </p>
-                  {isOld && (
+                  {overdue && (
                     <span className="text-xs rounded-full px-2 py-0.5"
                       style={{ background: "rgba(255,45,45,0.15)", border: "1px solid rgba(255,45,45,0.30)", color: "#FF2D2D" }}>
-                      Decaying
+                      Practice overdue
                     </span>
                   )}
                 </div>

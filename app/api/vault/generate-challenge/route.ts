@@ -2,6 +2,7 @@ import { z } from "zod";
 import { NextRequest, NextResponse } from "next/server";
 import { getChallengeTemplate } from "@/lib/vault/types";
 import { findRoleTrack } from "@/lib/assessment/catalog";
+import { workspaceRole } from "@/lib/onboarding/workspace-catalog";
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,13 +22,19 @@ export async function POST(req: NextRequest) {
       .select("*").eq("user_id", user.id).eq("status", "pending").order("due_date").limit(1).maybeSingle();
     if (challengeError) throw challengeError;
     if (existing) return NextResponse.json({ error: "Complete your pending Vault challenge first." }, { status: 409 });
-    const { data: profile } = await supabase.from("profiles").select("profession").eq("id", user.id).maybeSingle();
-    const task = findRoleTrack(profile?.profession)?.tasks.find((item) =>
+    const { data: profile, error: profileError } = await supabase.from("profiles").select("profession").eq("id", user.id).single();
+    if (profileError) throw profileError;
+    const role = findRoleTrack(profile.profession);
+    const task = role && [...workspaceRole(role).tasks, ...role.tasks].find((item) =>
       item.skill.toLowerCase() === skill.skill_name.toLowerCase());
     const template = task ? {
       title: `Practice ${task.skill.toLowerCase()}`,
       description: task.practice,
       type: task.mode === "image" ? "creative_production" : task.mode === "voice" ? "explanation_exercise" : "reasoning_exercise",
+    } : role ? {
+      title: `${role.name} practice · ${skill.skill_name}`,
+      description: `Choose one small work sample from your ${role.name} practice that uses ${skill.skill_name}. Describe the constraint, the choice you made, and the evidence you checked. Use a fictional or consented example.`,
+      type: "reasoning_exercise",
     } : getChallengeTemplate(skill.cluster, skill.skill_name);
 
     const due = new Date();

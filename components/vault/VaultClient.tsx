@@ -211,7 +211,7 @@ export default function VaultClient({ pageData }: VaultClientProps) {
             </button>
             {/* Inline suggested skills when empty */}
             <div className="flex flex-wrap gap-2 justify-center max-w-lg mt-2">
-              {(SUGGESTED_SKILLS[pageData.userCluster] ?? SUGGESTED_SKILLS.life_personal).slice(0, 6).map((s) => (
+              {(pageData.roleSkills ?? SUGGESTED_SKILLS[pageData.userCluster] ?? SUGGESTED_SKILLS.life_personal).slice(0, 6).map((s) => (
                 <button key={s} onClick={() => handleAddSkill(s, 60)}
                   className="rounded-full text-xs transition-all hover:opacity-80"
                   style={{ background: "#1A1A1A", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.60)", padding: "7px 14px" }}>
@@ -228,7 +228,7 @@ export default function VaultClient({ pageData }: VaultClientProps) {
 
         {/* Add skill */}
         <div id="add-skill-toggle">
-          <AddSkillPanel userCluster={pageData.userCluster} existingSkills={skills} onAdd={handleAddSkill} />
+          <AddSkillPanel userCluster={pageData.userCluster} profession={pageData.profession} roleSkills={pageData.roleSkills} existingSkills={skills} onAdd={handleAddSkill} />
         </div>
 
         {/* History */}

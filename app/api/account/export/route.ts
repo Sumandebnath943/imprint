@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { archiveLimit, ExportArchive, ExportLimitError } from "@/lib/account/tar";
 import { createClient } from "@/lib/supabase/server";
+import { WORKSPACE_COLUMNS } from "@/lib/onboarding/workspace-contract";
 
 const headers = { "Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff" };
 const pageSize = 100;
@@ -8,10 +9,12 @@ const maxRows = 5000;
 const buckets = ["assessment-evidence", "baseline-audio", "baseline-files", "forge-audio", "forge-files", "gallery", "avatars"];
 const tables = [
   { table: "profiles", owner: "id", fields: "id,email,full_name,username,bio,location,avatar_url,profession,profession_cluster,age_group,ai_exposure_level,ai_use_context,onboarding_completed,onboarding_step,notification_preferences,leaderboard_opt_in,credential_public,created_at,updated_at" },
-  { table: "role_assessments", fields: "id,user_id,role_id,rubric_version,form,status,role_context,answers,results,score,consent_version,created_at,scored_at" },
+  { table: "role_assessments", fields: "id,user_id,role_id,rubric_version,form,status,role_context,answers,results,score,consent_version,created_at,scored_at,check_results" },
   { table: "baseline_imprints" }, { table: "drift_scores" }, { table: "skill_vault" }, { table: "vault_challenges" },
+  { table: "onboarding_workspaces", fields: WORKSPACE_COLUMNS },
   { table: "journal_entries" }, { table: "calibration_sessions" }, { table: "mirror_sessions" }, { table: "beliefs" },
   { table: "imprint_tasks" }, { table: "historical_evidence" }, { table: "assessment_review_requests" },
+  { table: "assessment_score_corrections", fields: "id,user_id,assessment_id,review_id,revision,reason,original_score,original_results,corrected_score,corrected_results,corrected_at" },
   { table: "onboarding_reflections", order: "user_id" },
   { table: "course_suggestions" }, { table: "circle_members" }, { table: "circle_checkins" }, { table: "checkin_reactions" },
   { table: "human_circles", owner: "created_by", fields: "id,name,description,cluster_focus,member_limit,is_private,created_at" },

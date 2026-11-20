@@ -47,20 +47,12 @@ export default function SkillVaultPage() {
   };
 
   const handleBack = () => {
-    setStep(5);
+    setStep(4);
     router.push("/onboarding/baseline-intro");
   };
 
   return (
     <div className="relative min-h-screen flex flex-col px-6 pt-28 pb-28 md:pt-[72px] md:pb-[96px] md:h-full md:min-h-0 md:overflow-y-auto">
-      {/* Ghost word */}
-      <div
-        className="fixed select-none pointer-events-none"
-        style={{ fontSize: 200, fontWeight: 700, color: "#FFFFFF", opacity: 0.03, top: "40%", left: "50%", transform: "translate(-50%,-50%)", whiteSpace: "nowrap", letterSpacing: "-0.04em", zIndex: 0 }}
-      >
-        SKILLS
-      </div>
-
       <div className="relative z-10 max-w-[720px] w-full mx-auto">
         {/* Headline */}
         <motion.div
@@ -70,8 +62,7 @@ export default function SkillVaultPage() {
           className="mb-4"
         >
           <h1 className="font-bold" style={{ fontSize: "clamp(36px,5vw,48px)", lineHeight: 1.1 }}>
-            <span className="text-white">What can you do </span>
-            <span style={{ color: "#FF5500" }}>without AI?</span>
+            Choose skills for your Vault
           </h1>
         </motion.div>
 
@@ -82,7 +73,7 @@ export default function SkillVaultPage() {
           className="mb-12"
           style={{ fontSize: 17, color: "rgba(255,255,255,0.50)", maxWidth: 520, lineHeight: 1.7 }}
         >
-          These are the skills we&apos;ll track, challenge, and protect. Be honest — only add skills you actually have right now, not ones you want.
+          Choose at least three skills that you already use. You can set a self-rating for each skill.
         </motion.p>
 
         {/* Suggested skills */}
@@ -162,6 +153,7 @@ export default function SkillVaultPage() {
                       </p>
                       <input
                         type="range"
+                        aria-label={`${skill.name} self-rating`}
                         min={0}
                         max={100}
                         value={skill.strengthLevel}

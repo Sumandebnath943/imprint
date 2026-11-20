@@ -3,6 +3,7 @@ import { z } from "zod";
 import { buildModuleList, PROFESSIONS } from "@/lib/onboarding/modules";
 import { createClient } from "@/lib/supabase/server";
 import { getTextMetrics } from "@/lib/forge/types";
+import { ADULT_ONLY_MESSAGE, hasConfirmedAdultAge } from "@/lib/auth/eligibility";
 
 const captureSchema = z.object({
   profession: z.string(),
@@ -17,6 +18,7 @@ export async function POST(request: Request) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Sign in to save your baseline." }, { status: 401 });
+  if (!hasConfirmedAdultAge(user)) return NextResponse.json({ error: ADULT_ONLY_MESSAGE }, { status: 403 });
   const parsed = captureSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Invalid baseline response." }, { status: 400 });
 
@@ -24,6 +26,11 @@ export async function POST(request: Request) {
   const role = PROFESSIONS.find(({ name }) => name === profession);
   const baselineTask = role && buildModuleList(role.cluster).find(({ id }) => id === moduleId);
   if (!baselineTask) return NextResponse.json({ error: "This baseline task is unavailable." }, { status: 400 });
+  const { data: profile, error: profileError } = await supabase.from("profiles").select("profession").eq("id", user.id).single();
+  if (profileError) return NextResponse.json({ error: "Could not check your saved profession." }, { status: 503 });
+  if (profile.profession && profile.profession !== role.name) {
+    return NextResponse.json({ error: "Your profession changed. Return to Step 2 to select your track." }, { status: 409 });
+  }
   const modes = baselineTask.id === "FINAL" ? ["text", "audio", "file"] : [
     baselineTask.responseType, ...(baselineTask.allowVoiceAlternative ? ["audio"] : []),
   ];

@@ -110,7 +110,7 @@ export default function PrivacyPage() {
             />
             <Row
               what="Role assessments and progress"
-              why="Role tasks, submitted responses and attachments, rubric ratings and evidence, assessment history, legacy Drift results, and task and AI-use check-in records."
+              why="Private onboarding responses, submitted work and attachments, isolated code test outcomes, rubric ratings and evidence, independent review corrections, legacy results, and task and AI-use check-ins."
             />
             <Row what="Earlier work and score reviews" why="Selected work, dated source references, your contribution and tool disclosures, and any evidence or explanation you choose to share with an authorized reviewer." />
             <Row what="Optional onboarding reflection" why="If you leave a note about your AI use, Imprint saves it privately when you finish onboarding. It appears in your progress page 90 days later and is included in your export. Imprint keeps it out of AI inputs, public pages, notifications and visit logging." />
@@ -214,7 +214,7 @@ export default function PrivacyPage() {
           <div className="mt-2">
             <Row what="Supabase" why="Database, authentication and file storage." />
             <Row what="Vercel" why="Hosting and content delivery. Supplies the approximate location associated with your IP address." />
-            <Row what="Google Gemini" why="When AI features are enabled, processes recent Mirror dialogue for safety checks, questions and requested summaries. With your consent, processes selected assessment responses, media and earlier work for rubric scoring or transcription." />
+            <Row what="Google Gemini" why="When AI features are enabled, processes recent Mirror dialogue for safety checks, questions and requested summaries. With your consent, processes selected profession work samples and any reasoning you choose to share. Your emotional and personal onboarding reflections stay in Imprint." />
             <Row what="Groq" why="Handles the same processing if Gemini is temporarily unavailable. Provider retention depends on the endpoint and account configuration." />
             <Row what="Resend" why="Delivers signup confirmation and password reset emails when configured as our authentication email sender. It also delivers opted-in task reminders. Reminder emails do not include assessment scores or submitted work." />
             <Row what="ipwho.is" why="Resolves an IP address to an approximate location and network operator for the visit logging described above." />

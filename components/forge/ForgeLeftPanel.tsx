@@ -25,6 +25,7 @@ interface ForgeLeftPanelProps {
   challenge: ForgeChallenge | null;
   elapsed: number;
   professionCluster: string;
+  roleTopics?: string[];
   timerDuration: number;
   selectedMemoryTopic: string;
   history: { date: string; tool: string; words: number }[];
@@ -35,12 +36,12 @@ interface ForgeLeftPanelProps {
 
 export default function ForgeLeftPanel({
   activeTool, sessionState, session, challenge, elapsed,
-  professionCluster, timerDuration, selectedMemoryTopic,
+  professionCluster, roleTopics, timerDuration, selectedMemoryTopic,
   history, onSelectTool, onSetDuration, onSetMemoryTopic,
 }: ForgeLeftPanelProps) {
   const [customDuration, setCustomDuration] = useState("");
   const [customTopic, setCustomTopic] = useState("");
-  const topics = MEMORY_TOPICS[professionCluster] ?? MEMORY_TOPICS.life_personal;
+  const topics = roleTopics ?? MEMORY_TOPICS[professionCluster] ?? MEMORY_TOPICS.life_personal;
 
   const isActive = sessionState === "active";
 

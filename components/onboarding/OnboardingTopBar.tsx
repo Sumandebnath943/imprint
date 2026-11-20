@@ -4,9 +4,11 @@ import Link from "next/link";
 
 interface OnboardingTopBarProps {
   onSaveExit: () => void;
+  step: number;
+  total: number;
 }
 
-export default function OnboardingTopBar({ onSaveExit }: OnboardingTopBarProps) {
+export default function OnboardingTopBar({ onSaveExit, step, total }: OnboardingTopBarProps) {
   return (
     <>
       <style>{`
@@ -17,7 +19,7 @@ export default function OnboardingTopBar({ onSaveExit }: OnboardingTopBarProps) 
         .ob-pulse-dot { animation: ob-pulse 2s ease-in-out infinite; }
       `}</style>
 
-      <div className="fixed top-2 left-0 right-0 z-40 flex items-center justify-between px-8 h-12">
+      <header className="fixed top-[3px] left-0 right-0 z-40 flex h-14 items-center justify-between border-b border-white/10 bg-[#0b0b0c]/95 px-5 sm:px-8">
         {/* Wordmark */}
         <Link href="/" className="flex items-center">
           <span
@@ -32,6 +34,8 @@ export default function OnboardingTopBar({ onSaveExit }: OnboardingTopBarProps) 
           />
         </Link>
 
+        <p className="text-sm font-medium text-white/75">Step {step} of {total}</p>
+
         {/* Save & Exit */}
         <button
           onClick={onSaveExit}
@@ -40,7 +44,7 @@ export default function OnboardingTopBar({ onSaveExit }: OnboardingTopBarProps) 
         >
           Save &amp; Exit
         </button>
-      </div>
+      </header>
     </>
   );
 }

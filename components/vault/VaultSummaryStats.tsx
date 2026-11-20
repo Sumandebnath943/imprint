@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { ArrowUp } from "lucide-react";
 import type { VaultSkill, VaultChallenge } from "@/lib/vault/types";
-import { getStrengthColor, getDaysSinceExercised } from "@/lib/vault/types";
+import { getStrengthColor, getDaysSinceExercised, isPracticeOverdue } from "@/lib/vault/types";
 
 // ── Summary Stats Row ────────────────────────────────────────────────────
 
@@ -17,21 +17,11 @@ export function VaultSummaryStats({ skills, decayedStrengths }: SummaryStatsProp
   const avg = total > 0
     ? Math.round(Object.values(decayedStrengths).reduce((s, v) => s + v, 0) / total)
     : 0;
-  // A skill needs attention if it has decayed below healthy strength OR has
-  // gone unpractised long enough that its card shows "⚠ Weakening" (7+ days,
-  // per getDecayStatus). Counting strength alone let the summary claim "All
-  // skills healthy" on the same screen as two cards flagged as weakening.
-  const decaying = skills.filter(
-    (s) =>
-      (decayedStrengths[s.id] ?? s.strength_level) < 50 ||
-      getDaysSinceExercised(s.last_exercised) >= 7
-  ).length;
+  const overdue = skills.filter((skill) => isPracticeOverdue(getDaysSinceExercised(skill.last_exercised))).length;
   const avgColor = getStrengthColor(avg);
 
-  const lastDays = skills.length > 0
-    ? Math.min(...skills.map((s) => getDaysSinceExercised(s.last_exercised)))
-    : null;
-  const lastLabel = lastDays === null ? "—" : lastDays === 0 ? "Today" : `${lastDays}d ago`;
+  const lastDays = Math.min(...skills.map((s) => getDaysSinceExercised(s.last_exercised)).filter(Number.isFinite));
+  const lastLabel = !Number.isFinite(lastDays) ? "Never practiced" : lastDays === 0 ? "Today" : `${lastDays}d ago`;
 
   const cards = [
     {
@@ -49,11 +39,10 @@ export function VaultSummaryStats({ skills, decayedStrengths }: SummaryStatsProp
       sub: null,
     },
     {
-      value: String(decaying),
-      label: "Need attention",
-      sub: decaying > 0 ? "Practice these this week" : "No practice overdue",
-      subColor: decaying > 0 ? "#FFB800" : "#00D97E",
-      valueColor: decaying > 0 ? "#FF2D2D" : "#00D97E",
+      value: String(overdue),
+      label: "Skills overdue for practice",
+      sub: null,
+      valueColor: overdue > 0 ? "#FF2D2D" : "white",
     },
     {
       value: lastLabel,

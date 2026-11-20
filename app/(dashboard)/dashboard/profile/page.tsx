@@ -3,6 +3,7 @@ import ProfileClient from "@/components/profile/ProfileClient";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
+import { getAssessmentSummary } from "@/lib/assessment/summary";
 
 export const metadata: Metadata = {
   title: "Your IMPRINT Profile",
@@ -21,6 +22,7 @@ export default async function ProfilePage() {
     { data: profile },
     { data: driftScores },
     { count: calibrationsCount },
+    { count: assessmentCount },
     { data: skills },
     { data: challenges },
     { data: journalEntries },
@@ -28,15 +30,14 @@ export default async function ProfilePage() {
     supabase.from("profiles").select("*").eq("id", user.id).single(),
     supabase.from("drift_scores").select("score, score_label, created_at").eq("user_id", user.id).not("calibration_session_id", "is", null).order("created_at", { ascending: false }),
     supabase.from("calibration_sessions").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("status", "completed"),
+    supabase.from("role_assessments").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("status", "scored"),
     supabase.from("skill_vault").select("id, strength_level, times_practiced").eq("user_id", user.id),
     supabase.from("vault_challenges").select("id, status, completed_at").eq("user_id", user.id),
     supabase.from("journal_entries").select("id, word_count, is_forge_entry, has_ai_assistance, created_at").eq("user_id", user.id).order("created_at", { ascending: false }),
   ]);
 
   const role = findRoleTrack(profile?.profession);
-  const assessed = role ? await supabase.from("role_assessments").select("score,scored_at")
-    .eq("user_id", user.id).eq("role_id", role.id).eq("rubric_version", role.version)
-    .eq("status", "scored").order("form", { ascending: false }).limit(1).maybeSingle() : null;
+  const assessed = role ? await getAssessmentSummary(supabase, user.id, role) : null;
 
   // ── Real stats ──────────────────────────────────────────────────────────
   const completedChallenges = (challenges || []).filter(c => c.status === "completed");
@@ -69,16 +70,17 @@ export default async function ProfilePage() {
 
   const stats = {
     calibrations: calibrationsCount ?? 0,
+    assessments: assessmentCount ?? 0,
     streak,
     skillsTracked: (skills || []).length,
     vaultChallenges: completedChallenges.length,
-    journalEntries: (journalEntries || []).length,
-    daysActive: activeDays || (profile?.created_at ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / 86400000) + 1 : 1),
+    journalEntries: (journalEntries || []).filter((entry) => !entry.is_forge_entry).length,
+    daysActive: activeDays,
     wordsWritten: totalWords,
     forgeWords,
     journalWords,
     calibrationWords: 0,
-    consistencyRate: totalChallenges > 0 ? Math.round((completedChallenges.length / totalChallenges) * 100) : 0,
+    consistencyRate: totalChallenges > 0 ? Math.round((completedChallenges.length / totalChallenges) * 100) : null,
     bestDriftScore: bestDrift?.score ?? null,
     bestDriftDate: bestDrift?.created_at
       ? new Date(bestDrift.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" })
@@ -88,7 +90,7 @@ export default async function ProfilePage() {
   return (
     <ProfileClient
       profile={profile || {}}
-      proficiency={assessed?.data ?? null}
+      proficiency={assessed}
       stats={stats}
     />
   );

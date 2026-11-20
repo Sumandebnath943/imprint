@@ -2,6 +2,14 @@ import { getRoleTasks, type RoleTrack } from "./catalog";
 
 export const ASSESSMENT_CONSENT_VERSION = "assessment-ai-pilot-2";
 
+export const BASE_RUBRIC_ANCHORS = [
+  "The submitted work visibly fails the core criterion.",
+  "One relevant element is visible, with a major gap in the required behavior.",
+  "The work demonstrates part of the core behavior.",
+  "The work meets the core criterion with minor gaps.",
+  "The work consistently meets the criterion and handles the stated constraints.",
+];
+
 export const CONTRIBUTIONS = ["none", "hint-or-critique", "partial-draft", "core-step"] as const;
 export const VERIFICATIONS = ["independently-checked", "ai-checked-only", "unchecked", "not-applicable"] as const;
 export const TASK_CONTEXTS = ["optional", "required-tool", "accessibility", "no-ai"] as const;
@@ -36,6 +44,8 @@ export function getPublicTasks(role: RoleTrack, form: number) {
   return getRoleTasks(role, form).map((task, index) => ({
     id: task.id, skill: task.skill, mode: task.mode, prompt: task.prompt, criterion: task.evidence,
     check: getObjectiveCheck(role.id, form, index)?.label,
+    anchors: task.anchors ?? BASE_RUBRIC_ANCHORS,
+    exercise: task.exercise,
   }));
 }
 

@@ -31,9 +31,11 @@ export default function ForgeClient({ userData }: ForgeClientProps) {
 
   const practiceSkillId = searchParams.get("practice_skill_id");
   const practiceSkillName = searchParams.get("practice_skill_name");
+  const rolePractice = userData.rolePractice?.find(({ skill }) => skill === (searchParams.get("role_practice") ?? practiceSkillName));
+  const practiceTool = rolePractice?.mode === "image" ? "sketch-upload" : rolePractice?.mode === "voice" ? "voice-note" : "free-write";
 
   // Tool & config
-  const [activeTool, setActiveTool] = useState<ForgeTool>("free-write");
+  const [activeTool, setActiveTool] = useState<ForgeTool>(practiceTool);
   const [timerDuration, setTimerDuration] = useState(600); // 10min default
   const [memoryTopic, setMemoryTopic] = useState("");
   const [rightPanelOpen, setRightPanelOpen] = useState(true);
@@ -258,6 +260,7 @@ export default function ForgeClient({ userData }: ForgeClientProps) {
         challenge={userData.activeChallenge}
         elapsed={elapsed}
         professionCluster={userData.professionCluster}
+        roleTopics={userData.rolePractice && [...userData.rolePractice.map(({ skill }) => `Explain how you practice ${skill.toLowerCase()}`), "Custom topic"]}
         timerDuration={timerDuration}
         selectedMemoryTopic={memoryTopic}
         history={userData.history.map((h) => ({
@@ -283,7 +286,13 @@ export default function ForgeClient({ userData }: ForgeClientProps) {
 
               <div className="relative z-10 text-center flex flex-col items-center gap-5">
                 <p className="text-xs font-medium uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.54)" }}>IMPRINT</p>
-                {practiceSkillName ? (
+                {rolePractice ? (
+                  <section className="mx-4 max-w-xl space-y-3 rounded-2xl border border-white/15 p-5 text-left">
+                    <h2 className="text-2xl font-semibold">Practice {rolePractice.skill}</h2>
+                    <p className="text-white/75">{rolePractice.prompt}</p>
+                    <p className="text-sm text-white/65">{rolePractice.practice} This practice is unscored.</p>
+                  </section>
+                ) : practiceSkillName ? (
                   <>
                     <h2 className="font-bold leading-none" style={{ fontSize: "clamp(36px,5vw,56px)" }}>
                       <span className="text-white">Practicing: </span>

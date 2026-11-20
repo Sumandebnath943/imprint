@@ -113,7 +113,7 @@ export async function GET(
 
           <div style={{ display: "flex", flexDirection: "column" }}>
             <span style={{ color: "rgba(255,255,255,0.66)", fontSize: 14, letterSpacing: 2 }}>
-              DRIFT
+              LEGACY DRIFT
             </span>
             <span
               style={{

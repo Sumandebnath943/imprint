@@ -10,7 +10,7 @@ interface ProgressBarProps {
 export default function ProgressBar({ step, total }: ProgressBarProps) {
   const pct = Math.round((step / total) * 100);
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 h-[2px]" style={{ background: "rgba(255,255,255,0.08)" }}>
+    <div aria-hidden="true" className="fixed top-0 left-0 right-0 z-50 h-[3px]" style={{ background: "rgba(255,255,255,0.08)" }}>
       <motion.div
         className="h-full"
         style={{ background: "#FF5500", boxShadow: "0 0 8px rgba(255,85,0,0.6)" }}

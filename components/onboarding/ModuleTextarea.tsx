@@ -27,7 +27,7 @@ function formatTime(secs: number): string {
 export default function ModuleTextarea({
   value,
   onChange,
-  placeholder = "Write from your mind. No editing. No perfection. Just you.",
+  placeholder = "Write your response…",
   minHeight = 200,
   disableBackspace = false,
   timerSeconds = 0,
@@ -77,6 +77,8 @@ export default function ModuleTextarea({
       {/* Timer */}
       {timerSeconds > 0 && (
         <div
+          role="timer"
+          aria-label="Time remaining"
           className="absolute top-4 right-4 text-sm font-medium font-mono z-10 transition-colors duration-300"
           style={{ color: timerColor, fontFamily: "monospace" }}
         >
@@ -98,6 +100,7 @@ export default function ModuleTextarea({
       )}
 
       <textarea
+        aria-label="Your response"
         ref={ref}
         value={value}
         onChange={(e) => onChange(e.target.value)}

@@ -1,14 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import { toast } from "sonner";
 import { Timer, Lock, Brain } from "lucide-react";
 import { useOnboardingStore } from "@/lib/store/onboarding.store";
-import { buildModuleList, CLUSTER_LABELS } from "@/lib/onboarding/modules";
+import { buildModuleList } from "@/lib/onboarding/modules";
 import BottomNav from "@/components/onboarding/BottomNav";
 import StepLayout from "@/components/onboarding/StepLayout";
+import { findRoleTrack } from "@/lib/assessment/catalog";
+import { getOnboardingWorkspace } from "@/lib/onboarding/workspace-catalog";
+import { workspaceRequest } from "@/components/onboarding/WorkspaceFlow";
 
 const STEP = 4;
 const TOTAL = 7;
@@ -33,24 +34,30 @@ const RULE_CARDS = [
 
 export default function BaselineIntroPage() {
   const router = useRouter();
-  const { answers, setStep, setBaselineModules } = useOnboardingStore();
-  const [fading, setFading] = useState(false);
-
-  const clusterLabel = CLUSTER_LABELS[answers.professionCluster] ?? "Your Cluster";
-
+  const { answers, setStep, setBaselineModules, setWorkspaceId } = useOnboardingStore();
+  const role = findRoleTrack(answers.profession);
+  const legacy = Boolean(!answers.workspaceId && (answers.baselineModules.length || Object.keys(answers.baselineResponses).length));
+  const [difficulty, setDifficulty] = useState("Basic");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
   const handleBegin = async () => {
-    if (fading) return;
-    setFading(true);
+    if (busy) return;
+    setBusy(true);
+    setError("");
     try {
-      const response = await fetch(`/api/assessment?role=${encodeURIComponent(answers.profession)}`);
-      if (!response.ok) throw new Error("Could not check assessment availability.");
-      const data = await response.json();
-      if (!data.available) setBaselineModules(buildModuleList(answers.professionCluster));
+      if (legacy) {
+        const modules = buildModuleList(answers.professionCluster);
+        if (answers.baselineModules.map(({ id }) => id).join() !== modules.map(({ id }) => id).join()) setBaselineModules(modules);
+      } else {
+        const { workspace } = await workspaceRequest({ action: "open", difficulty });
+        if (!workspace) throw new Error("Your workspace could not be opened.");
+        setWorkspaceId(workspace.id);
+      }
       setStep(5);
-      router.push(data.available ? "/onboarding/assessment" : "/onboarding/baseline");
-    } catch (error) {
-      setFading(false);
-      toast.error(error instanceof Error ? error.message : "Could not start onboarding.");
+      router.push("/onboarding/baseline");
+    } catch (failure) {
+      setError(failure instanceof Error ? failure.message : "Your workspace could not be opened.");
+      setBusy(false);
     }
   };
 
@@ -61,51 +68,26 @@ export default function BaselineIntroPage() {
 
   return (
     <>
-      {/* Fade to black on exit */}
-      <AnimatePresence>
-        {fading && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8 }}
-            className="fixed inset-0 z-50"
-            style={{ background: "#080808" }}
-          />
-        )}
-      </AnimatePresence>
-
       <StepLayout
-        ghost="BASELINE"
-        eyebrow="Step 4 · Before you start"
-        title={
-          <>
-            Now for the{" "}
-            <span style={{ color: "#FF5500" }}>important part.</span>
-          </>
-        }
-        description={
-          <>
-            Your Baseline Imprint is about to be captured — a series of short
-            prompts designed for{" "}
-            <span className="text-white font-medium">
-              {answers.profession || "you"}
-            </span>
-            , in the <span style={{ color: "#FF5500" }}>{clusterLabel}</span>{" "}
-            cluster.
-            <br />
-            <br />
-            No AI assistance. No Google. No notes. Answer from your own mind,
-            right now. There are no right or wrong answers —{" "}
-            <span className="text-white font-medium">
-              your honesty is the only thing that matters.
-            </span>
-          </>
-        }
+        title="Capture your baseline"
+        description={legacy ? "Continue the seven questions in your saved baseline." : "Answer seven questions. Questions 5 and 6 use your profession’s workspace. At the end you can choose whether to send your work samples for evaluation."}
       >
         {/* Beside the rules rather than under them, which is what keeps this
             step on one screen without a scroll region. */}
         <div className="flex flex-col gap-3 lg:justify-center lg:h-full">
-          {RULE_CARDS.map(({ icon: Icon, title, sub }) => (
+          {role && !legacy && <section className="space-y-2 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+            <h2 className="font-medium text-white">{role.name} workspace</h2>
+            {[5, 6].map((question) => <p key={question} className="text-sm text-white/75">Question {question} · {getOnboardingWorkspace(role.id, question)?.name}</p>)}
+            {role.id === "software-developer" && !answers.workspaceId && <div className="text-sm text-white/75">
+              <label htmlFor="workspace-difficulty">Level</label>
+              <select id="workspace-difficulty" value={difficulty} onChange={(event) => setDifficulty(event.target.value)} className="ml-3 rounded-lg border border-white/10 bg-[#171717] px-3 py-2">
+                {["Basic", "Intermediate", "Advanced"].map((level) => <option key={level}>{level}</option>)}
+              </select>
+            </div>}
+          </section>}
+          {(legacy ? RULE_CARDS : RULE_CARDS.slice(1).map((card) => card.icon === Lock ? {
+            ...card, title: "Private reflections", sub: "Emotional and personal reflections stay private. Evaluation always requires your consent.",
+          } : { ...card, title: "Use your own work", sub: "Use the provided fictional scenario or materials you have permission to share." })).map(({ icon: Icon, title, sub }) => (
             <div
               key={title}
               className="rounded-2xl p-5 flex items-start gap-4"
@@ -129,6 +111,7 @@ export default function BaselineIntroPage() {
               </div>
             </div>
           ))}
+          {error && <p role="alert" className="text-sm text-[#ffad89]">{error}</p>}
         </div>
       </StepLayout>
 
@@ -137,7 +120,8 @@ export default function BaselineIntroPage() {
         total={TOTAL}
         onBack={handleBack}
         onContinue={handleBegin}
-        continueLabel="Begin My Baseline →"
+        continueLabel={busy ? "Opening workspace…" : "Begin My Baseline →"}
+        continueDisabled={busy}
       />
     </>
   );

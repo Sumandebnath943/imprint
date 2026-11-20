@@ -3,6 +3,8 @@ import { setTimeout as delay } from "node:timers/promises";
 import { NextResponse } from "next/server";
 import { hasConfirmedAdultAge } from "@/lib/auth/eligibility";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { findRoleTrack } from "@/lib/assessment/catalog";
+import { getRoleSeries } from "@/lib/onboarding/workspace-access";
 
 export const maxDuration = 60;
 type Reminder = { task_id: string; event: string; task_kind: string; schedule_revision: number };
@@ -36,11 +38,16 @@ export async function POST(request: Request) {
   const deadline = AbortSignal.timeout(43000);
   async function sendReminder(item: Reminder) {
     const { data: current, error: lookupError } = await admin.from("imprint_tasks")
-      .select("user_id,completed_at,schedule_revision,profiles!inner(notification_preferences)")
+      .select("user_id,role_id,rubric_version,completed_at,schedule_revision,profiles!inner(profession,notification_preferences)")
       .eq("id", item.task_id).maybeSingle();
     if (lookupError) throw lookupError;
     const profile = Array.isArray(current?.profiles) ? current.profiles[0] : current?.profiles;
+    const configuredRole = findRoleTrack(profile?.profession);
+    const { role } = current && configuredRole
+      ? await getRoleSeries(admin, current.user_id, configuredRole)
+      : { role: configuredRole };
     if (!current || current.completed_at || current.schedule_revision !== item.schedule_revision ||
+        role?.id !== current.role_id || role?.version !== current.rubric_version ||
         profile?.notification_preferences?.imprint_task_emails !== true) return false;
 
     const { data: { user }, error: authError } = await admin.auth.admin.getUserById(current.user_id);

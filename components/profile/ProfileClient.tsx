@@ -4,6 +4,8 @@ import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Camera, ChevronDown } from "lucide-react";
 import Link from "next/link";
+import type { AssessmentSummary } from "@/lib/assessment/comparison";
+import ProficiencySummary from "@/components/assessment/ProficiencySummary";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { PROFESSIONS, CLUSTER_LABELS } from "@/lib/onboarding/modules";
@@ -25,9 +27,10 @@ interface ProfileData {
 
 interface ProfileClientProps {
   profile: ProfileData;
-  proficiency: { score: number; scored_at: string } | null;
+  proficiency: AssessmentSummary | null;
   stats: {
     calibrations: number;
+    assessments: number;
     streak: number;
     skillsTracked: number;
     vaultChallenges: number;
@@ -37,7 +40,7 @@ interface ProfileClientProps {
     forgeWords: number;
     journalWords: number;
     calibrationWords: number;
-    consistencyRate: number;
+    consistencyRate: number | null;
     bestDriftScore: number | null;
     bestDriftDate: string | null;
   };
@@ -116,12 +119,14 @@ export default function ProfileClient({
       if (value !== savedFields[key].trim()) changes[key] = value || (key === "age_group" || key === "profession" || key === "profession_cluster" ? null : "");
     }
     if (Object.keys(changes).length === 0) { setIsEditing(false); return; }
+    const changingProfession = "profession" in changes || "profession_cluster" in changes;
+    if (changingProfession && !window.confirm(`Switch to ${formData.profession}? Each profession keeps its own assessment history.`)) return;
     setSaving(true);
     try {
       const res = await fetch("/api/profile/update", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(changes)
+        body: JSON.stringify({ ...changes, ...(changingProfession ? { confirmProfessionChange: true } : {}) })
       });
       if (res.ok) {
         const saved = { ...formData };
@@ -130,6 +135,7 @@ export default function ProfileClient({
         setFormData(saved);
         toast.success("Profile updated.");
         setIsEditing(false);
+        if (changingProfession) window.location.reload();
       } else {
         const result = await res.json().catch(() => null);
         toast.error(result?.error ?? "Failed to update profile.");
@@ -199,14 +205,13 @@ export default function ProfileClient({
                       time. Beside "member since June" the old wording — "days
                       preserving identity" — read as membership length, so an
                       account 74 days old appeared to claim it was 6 days old. */}
-                  <span>{stats.daysActive} active {stats.daysActive === 1 ? "day" : "days"}</span>
+                  <span>{stats.daysActive ? `${stats.daysActive} ${stats.daysActive === 1 ? "day" : "days"} in Journal or Forge` : "No Journal or Forge activity yet"}</span>
                 </div>
               </div>
             </div>
 
             <div className="rounded-2xl border border-white/10 px-5 py-4 text-center">
-              <p className="mb-2 text-sm text-white/70">Role proficiency</p>
-              <p className="text-3xl font-semibold text-[#ff9c77]">{proficiency ? `${proficiency.score}/100` : "—"}</p>
+              <ProficiencySummary summary={proficiency} />
               <Link href="/dashboard/drift" className="mt-2 inline-block text-sm text-[#ff9c77] underline">View progress</Link>
             </div>
             <div className="flex flex-col gap-3">
@@ -217,7 +222,8 @@ export default function ProfileClient({
 
           <div className="mt-10 pt-6 border-t border-white/5 flex flex-wrap justify-between gap-4">
             {[
-              { val: stats.calibrations, label: "Calibrations" },
+              { val: stats.assessments, label: "Scored assessments" },
+              { val: stats.calibrations, label: "Legacy Calibration sessions" },
               { val: `${stats.streak} Day`, label: "Streak" },
               { val: stats.skillsTracked, label: "Skills Tracked" },
               { val: stats.vaultChallenges, label: "Vault Challenges" },
@@ -235,7 +241,7 @@ export default function ProfileClient({
         <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           <div className="rounded-[16px] p-6" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
             <span className="block font-bold text-white mb-1" style={{ fontSize: 32, lineHeight: 1 }}>{stats.daysActive}</span>
-            <span className="text-[13px]" style={{ color: "rgba(255,255,255,0.66)" }}>Days active on IMPRINT</span>
+            <span className="text-[13px]" style={{ color: "rgba(255,255,255,0.66)" }}>Days with Journal or Forge entries</span>
           </div>
           <div className="rounded-[16px] p-6" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
             <span className="block font-bold mb-1" style={{ fontSize: 32, lineHeight: 1, color: "#00D97E" }}>{stats.bestDriftScore ?? "—"}</span>
@@ -244,10 +250,10 @@ export default function ProfileClient({
           </div>
           <div className="rounded-[16px] p-6" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
             <span className="block font-bold text-white mb-1" style={{ fontSize: 32, lineHeight: 1 }}>{formatNumber(stats.wordsWritten)}</span>
-            <span className="text-[13px]" style={{ color: "rgba(255,255,255,0.66)" }}>Words written in IMPRINT</span>
+            <span className="text-[13px]" style={{ color: "rgba(255,255,255,0.66)" }}>Words in Journal and Forge</span>
           </div>
           <div className="rounded-[16px] p-6" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.07)" }}>
-            <span className="block font-bold mb-1" style={{ fontSize: 32, lineHeight: 1, color: "#FF5500" }}>{stats.consistencyRate}%</span>
+            <span className="block font-bold mb-1" style={{ fontSize: 32, lineHeight: 1, color: "#FF5500" }}>{stats.consistencyRate === null ? "—" : `${stats.consistencyRate}%`}</span>
             <span className="text-[13px]" style={{ color: "rgba(255,255,255,0.66)" }}>Challenge completion rate</span>
           </div>
         </motion.div>
@@ -302,7 +308,7 @@ export default function ProfileClient({
                         className="w-full text-[15px] outline-none text-white rounded-[10px]"
                         style={{ background: "#1A1A1A", padding: "12px 16px", border: "1px solid transparent" }}
                       >
-                        <option value="">Select profession</option>
+                        <option value="" disabled>Select profession</option>
                         {Object.entries(CLUSTER_LABELS).map(([cluster, clusterLabel]) => (
                           <optgroup key={cluster} label={clusterLabel}>
                             {PROFESSIONS.filter(p => p.cluster === cluster).map(p => (

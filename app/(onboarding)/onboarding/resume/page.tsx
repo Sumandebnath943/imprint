@@ -22,13 +22,10 @@ export default function ResumeOnboardingPage() {
       if (currentStep === 4) return path("baseline-intro");
       if (currentStep === 6) return path("skill-vault");
       if (currentStep >= 7) return path("complete");
-      if (answers.baselineModules.length) return path("baseline");
-      const response = await fetch(`/api/assessment?role=${encodeURIComponent(answers.profession)}`, { signal: controller.signal });
-      if (!response.ok) throw new Error();
-      const result = await response.json();
-      if (controller.signal.aborted) return;
-      if (!result.available) setBaselineModules(buildModuleList(answers.professionCluster));
-      path(result.available ? "assessment" : "baseline");
+      if (!answers.workspaceId && !answers.baselineModules.length && Object.keys(answers.baselineResponses).length) {
+        setBaselineModules(buildModuleList(answers.professionCluster));
+      }
+      return path("baseline");
     }
     void resume().catch(() => { if (!controller.signal.aborted) setFailed(true); });
     return () => controller.abort();

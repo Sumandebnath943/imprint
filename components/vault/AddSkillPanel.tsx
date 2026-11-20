@@ -9,21 +9,23 @@ import { CLUSTER_LABELS } from "@/lib/onboarding/modules";
 
 interface AddSkillPanelProps {
   userCluster: string;
+  profession?: string;
+  roleSkills?: string[];
   existingSkills: VaultSkill[];
   onAdd: (name: string, strength: number) => Promise<void>;
 }
 
-export function AddSkillPanel({ userCluster, existingSkills, onAdd }: AddSkillPanelProps) {
+export function AddSkillPanel({ userCluster, profession, roleSkills, existingSkills, onAdd }: AddSkillPanelProps) {
   const [open, setOpen] = useState(false);
   const [customName, setCustomName] = useState("");
   const [strength, setStrength] = useState(60);
   const [adding, setAdding] = useState(false);
 
   const existingNames = new Set(existingSkills.map((s) => s.skill_name.toLowerCase()));
-  const suggested = (SUGGESTED_SKILLS[userCluster] ?? SUGGESTED_SKILLS.life_personal)
+  const suggested = (roleSkills ?? SUGGESTED_SKILLS[userCluster] ?? SUGGESTED_SKILLS.life_personal)
     .filter((s) => !existingNames.has(s.toLowerCase()));
 
-  const clusterLabel = CLUSTER_LABELS[userCluster] ?? userCluster.replace(/_/g, " ");
+  const clusterLabel = profession ?? CLUSTER_LABELS[userCluster] ?? userCluster.replace(/_/g, " ");
 
   const handleAdd = async (name: string, str: number) => {
     if (!name.trim() || adding) return;
@@ -90,10 +92,10 @@ export function AddSkillPanel({ userCluster, existingSkills, onAdd }: AddSkillPa
                   />
                 </div>
                 <div style={{ minWidth: 160 }}>
-                  <label className="text-xs mb-2 block" style={{ color: "rgba(255,255,255,0.66)" }}>
-                    Current strength: <span style={{ color: "#FF5500" }}>{strength}%</span>
+                  <label htmlFor="vault-skill-self-rating" className="text-xs mb-2 block" style={{ color: "rgba(255,255,255,0.66)" }}>
+                    Self-rating <span style={{ color: "#FF5500" }}>{strength}%</span>
                   </label>
-                  <input type="range" min={0} max={100} value={strength} onChange={(e) => setStrength(parseInt(e.target.value))}
+                  <input id="vault-skill-self-rating" type="range" min={0} max={100} value={strength} onChange={(e) => setStrength(parseInt(e.target.value))}
                     className="w-full accent-orange-500" style={{ height: 4 }} />
                 </div>
                 <button onClick={() => handleAdd(customName, strength)} disabled={!customName.trim() || adding}

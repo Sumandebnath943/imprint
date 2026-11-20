@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import type { VaultSkill } from "@/lib/vault/types";
 import {
   getStrengthColor,
-  getRelativeTime, getDaysSinceExercised,
+  getRelativeTime, getDaysSinceExercised, isPracticeOverdue,
 } from "@/lib/vault/types";
 
 interface SkillCardProps {
@@ -91,8 +91,9 @@ export default function SkillCard({ skill, decayedStrength, hasActiveChallenge, 
       {/* Decay indicator row */}
       <div className="flex items-center justify-between mb-3">
         <span className="text-xs" style={{ color: "rgba(255,255,255,0.62)" }}>
-          Last practiced: {getRelativeTime(skill.last_exercised)}
+          {skill.last_exercised ? `Last practiced: ${getRelativeTime(skill.last_exercised)}` : getRelativeTime(null)}
         </span>
+        {isPracticeOverdue(daysSince) && <span className="text-xs text-orange-300">Practice overdue</span>}
       </div>
 
       {/* Times practiced + dots */}

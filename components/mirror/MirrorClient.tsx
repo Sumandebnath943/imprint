@@ -24,11 +24,11 @@ type SessionState = "idle" | "active" | "complete";
 const LS_KEY = (uid: string) => `imprint_mirror_session_${uid}`;
 const MAX_CHARS = 1500;
 
-interface MirrorClientProps { userData: MirrorUserData; aiEnabled: boolean; }
+interface MirrorClientProps { userData: MirrorUserData; aiEnabled: boolean; workQuestion?: string; }
 
 function nanoid() { return Math.random().toString(36).slice(2, 11); }
 
-export default function MirrorClient({ userData, aiEnabled }: MirrorClientProps) {
+export default function MirrorClient({ userData, aiEnabled, workQuestion }: MirrorClientProps) {
   const router = useRouter();
 
   // ── Core state ────────────────────────────────────────────────────────
@@ -125,7 +125,8 @@ export default function MirrorClient({ userData, aiEnabled }: MirrorClientProps)
   const beginSession = () => {
     if (!aiEnabled) return;
     const topic = selectedContext ?? "Something Else";
-    setMessages([{ id: nanoid(), role: "mirror", content: OPENING_QUESTIONS[topic] ?? OPENING_FALLBACK, timestamp: Date.now() }]);
+    const opening = (topic === "My Work" && workQuestion) || OPENING_QUESTIONS[topic] || OPENING_FALLBACK;
+    setMessages([{ id: nanoid(), role: "mirror", content: opening, timestamp: Date.now() }]);
     setElapsed(0);
     setSessionState("active");
     setDraftBanner(false);

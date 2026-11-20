@@ -1,3 +1,5 @@
+import { isWorkspaceRole, WORKSPACE_RUBRIC_VERSION, workspaceTask } from "./workspaces.ts";
+
 export type AssessmentMode = "text" | "code" | "image" | "voice";
 
 export interface RoleTrack {
@@ -148,7 +150,7 @@ function toTask([skill, mode, prompt, alternate, evidence, practice]: TaskDefini
 }
 
 export const ROLE_TRACKS: RoleTrack[] = definitions.map(([id, name, cluster, intake, workStages, first, second]) => ({
-  id, name, cluster, workStages, intake, version: "pilot-1", tasks: [toTask(first), toTask(second)],
+  id, name, cluster, workStages, intake, version: isWorkspaceRole(id) ? WORKSPACE_RUBRIC_VERSION : "pilot-1", tasks: [toTask(first), toTask(second)],
 }));
 
 export function findRoleTrack(value: string | null | undefined) {
@@ -158,9 +160,12 @@ export function findRoleTrack(value: string | null | undefined) {
 }
 
 export function getRoleTasks(role: RoleTrack, form: number) {
-  return role.tasks.map((task, index) => ({
-    ...task,
-    id: `${role.id}-${index + 1}`,
-    prompt: form % 2 === 0 ? task.prompt : task.alternate,
-  }));
+  return role.tasks.map((task, index) => {
+    const workspace = role.version === WORKSPACE_RUBRIC_VERSION ? workspaceTask(role.id, form, index) : undefined;
+    return {
+      ...task, id: `${role.id}-${index + 1}`,
+      prompt: workspace?.prompt ?? (form % 2 === 0 ? task.prompt : task.alternate),
+      anchors: workspace?.anchors, exercise: workspace?.exercise,
+    };
+  });
 }

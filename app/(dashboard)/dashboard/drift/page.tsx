@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { findRoleTrack } from "@/lib/assessment/catalog";
-import { isRolePilotEnabled, isRoleScoringEnabled } from "@/lib/assessment/pilot";
+import { getScoringAvailability } from "@/lib/assessment/pilot";
 import { isPastGrace, type CriterionScore } from "@/lib/assessment/rules";
 import { createClient } from "@/lib/supabase/server";
 import FollowThrough from "@/components/assessment/FollowThrough";
@@ -8,8 +8,11 @@ import PastWork from "@/components/assessment/PastWork";
 import { historicalComparison, historicalCriteria } from "@/lib/assessment/historical";
 import ProgressPreferences from "@/components/assessment/ProgressPreferences";
 import RescheduleTask from "@/components/assessment/RescheduleTask";
+import { assessmentSummary, compatibleAssessments, signedPoints as signed, type AssessmentScore } from "@/lib/assessment/comparison";
+import { getRoleSeries } from "@/lib/onboarding/workspace-access";
+import { ONBOARDING_WORK_VERSION } from "@/lib/onboarding/workspace-catalog";
 
-type Result = { score: number; form: number; scored_at: string; results: { criteria: CriterionScore[]; model?: string; evaluator?: string } };
+type Result = AssessmentScore & { results: { criteria: CriterionScore[]; reviewRevision?: number } };
 type Completion = {
   skill?: string; attemptedFirst?: boolean; contribution?: string; verification?: string; context?: string;
 };
@@ -17,14 +20,13 @@ type Assigned = { id: string; kind: string; due_at: string; completed_at: string
 
 const box = "rounded-2xl border border-white/10 bg-[#111010] p-5";
 const date = (value: string) => new Date(value).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-const signed = (value: number) => value > 0 ? `+${value}` : String(value);
 
 export default async function ImprintProgressPage() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return <p className="p-6">Sign in to view your progress.</p>;
 
-  const [profile, legacy, journal, reflection] = await Promise.all([
+  const [profile, legacy, journal, reflection, history] = await Promise.all([
     supabase.from("profiles").select("profession,notification_preferences").eq("id", user.id).maybeSingle(),
     supabase.from("drift_scores").select("score,created_at,calibration_session_id,contributing_signals")
       .eq("user_id", user.id).not("calibration_session_id", "is", null)
@@ -32,10 +34,14 @@ export default async function ImprintProgressPage() {
     supabase.from("journal_entries").select("created_at").eq("user_id", user.id).eq("is_forge_entry", false)
       .gte("created_at", new Date(Date.now() - 8 * 86400000).toISOString()),
     supabase.rpc("due_onboarding_reflection").maybeSingle<{ note: string; captured_at: string }>(),
+    supabase.from("role_assessments").select("id,role_id,rubric_version,form,status,score,created_at,scored_at")
+      .eq("user_id", user.id).order("created_at", { ascending: false }).limit(100),
   ]);
-  const role = findRoleTrack(profile.data?.profession);
-  const enabled = role && isRolePilotEnabled(role.id);
-  const scoringEnabled = Boolean(role && isRoleScoringEnabled(role.id));
+  const selectedRole = findRoleTrack(profile.data?.profession);
+  const series = selectedRole ? await getRoleSeries(supabase, user.id, selectedRole) : null;
+  const role = series?.role;
+  const availability = role ? getScoringAvailability(role.id) : "disabled";
+  const scoringEnabled = availability === "enabled";
   const comparisons = role ? await Promise.all([
     supabase.from("role_assessments").select("score,form,scored_at,results").eq("user_id", user.id)
       .eq("role_id", role.id).eq("rubric_version", role.version).eq("status", "scored")
@@ -54,10 +60,12 @@ export default async function ImprintProgressPage() {
   const original = comparisons?.[1].data as Result | null | undefined;
   const current = records[0];
   const previousRecord = records[1];
-  const compatible = (record?: Result | null) => record?.results.model === current?.results.model &&
-    record?.results.evaluator === current?.results.evaluator;
+  const compatible = (record?: Result | null) => record?.form !== current?.form && compatibleAssessments(current, record);
+  const archived = (history.data ?? []).filter((record) => record.role_id !== role?.id || record.rubric_version !== role?.version);
+  const draft = Boolean(series?.draft) || (history.data ?? []).some((record) => record.role_id === role?.id && record.rubric_version === role?.version && record.status === "draft");
+  const summary = assessmentSummary(current ?? null, original ?? null, availability, draft);
   const samples = comparisons?.[3].data ?? [];
-  const historyOptions = role ? historicalCriteria(role) : [];
+  const historyOptions = role && role.version !== ONBOARDING_WORK_VERSION ? historicalCriteria(role) : [];
   const approvedSamples = samples.filter((sample) => sample.status === "approved");
   const earlier = current ? historicalComparison(approvedSamples, current.results.criteria, current.results.model, current.results.evaluator) : [];
   const earlierAtBaseline = original ? historicalComparison(approvedSamples, original.results.criteria, original.results.model, original.results.evaluator) : [];
@@ -94,13 +102,13 @@ export default async function ImprintProgressPage() {
       {current && original ? (
         <>
           <div className="grid gap-4 sm:grid-cols-3">
-            <div className={box}><p className="text-white/70">Pilot proficiency</p><p className="my-2 text-3xl font-semibold">{current.score}/100</p><p className="text-sm text-white/65">{date(current.scored_at)}</p></div>
+            <div className={box}><p className="text-white/70">Current proficiency</p><p className="my-2 text-3xl font-semibold">{current.score}/100</p><p className="text-sm text-white/65">{date(current.scored_at)}</p></div>
             <div className={box}><p className="text-white/70">Original Imprint</p><p className="my-2 text-3xl font-semibold">{original.score}/100</p><p className="text-sm text-white/65">{date(original.scored_at)}</p></div>
-            <div className={box}><p className="text-white/70">Observed difference</p><p className="my-2 text-3xl font-semibold">{compatible(original) ? signed(current.score - original.score) : "—"}</p><p className="text-sm text-white/65">{compatible(original) ? "Points since your original result" : "Scoring versions differ"}</p></div>
+            <div className={box}><p className="text-white/70">Change from your baseline</p><p className="my-2 text-3xl font-semibold">{summary.difference === null ? "—" : `${signed(summary.difference)} points`}</p><p className="text-sm text-white/65">{summary.comparison}</p></div>
           </div>
           <section className={box}>
             <h2 className="text-xl font-semibold">Change since your Imprint</h2>
-            <p className="mt-2 text-sm text-white/65">Pilot differences are descriptive while repeatability is being evaluated.</p>
+            <p className="mt-2 text-sm text-white/65">Point differences describe these submissions. A trend requires repeated comparable evidence and a validated estimate of normal variation.</p>
             <dl className="mt-3 divide-y divide-white/10">
               {current.results.criteria.map((criterion) => {
                 const baselineCriterion = compatible(original) ? original.results.criteria.find((item) => item.taskId === criterion.taskId) : undefined;
@@ -116,16 +124,19 @@ export default async function ImprintProgressPage() {
           <section className={box}>
             <h2 className="text-xl font-semibold">Assessment history</h2>
             <ol className="mt-3 space-y-2 text-sm text-white/80">
-              {records.map((record) => <li key={record.form}>{date(record.scored_at)} · {record.form === 0 ? "Original Imprint" : `Reassessment ${record.form}`} · {record.score}/100</li>)}
+              {records.map((record) => <li key={record.form}>{date(record.scored_at)} · {record.form === 0 ? "Original Imprint" : `Reassessment ${record.form}`} · {record.score}/100{record.results.reviewRevision ? ` · Review revision ${record.results.reviewRevision}` : ""}</li>)}
             </ol>
           </section>
         </>
       ) : <section className={box}>
-        <h2 className="text-xl font-semibold">Your first proficiency result</h2>
-        <p className="mt-2 text-white/70">{scoringEnabled ? "Complete your role assessment to establish your original Imprint." : "Pilot scoring is currently unavailable for this profession."}</p>
-        {scoringEnabled && <Link href="/dashboard/calibration" className="mt-4 inline-block text-[#ff9c77] underline">Open assessment</Link>}
+        <h2 className="text-xl font-semibold">Current proficiency</h2>
+        <p className="my-2 text-3xl font-semibold">—</p>
+        <p className="mt-2 text-white/70">{role ? summary.nextAction : "Choose a profession in Profile to see its assessment options."}</p>
+        <Link href={role ? "/dashboard/calibration" : "/dashboard/profile"} className="mt-4 inline-block text-[#ff9c77] underline">
+          {scoringEnabled ? "Open assessment" : role ? "Open role practice" : "Open Profile"}
+        </Link>
       </section>}
-      {enabled && role && current && (
+      {role && current && (
         <>
           <section className={box}>
             <h2 className="text-xl font-semibold">Practice and AI use</h2>
@@ -172,6 +183,15 @@ export default async function ImprintProgressPage() {
           </section>
         </>
       )}
+      {archived.length > 0 && <details className={box}>
+        <summary className="cursor-pointer font-medium">Other professions and earlier assessment versions</summary>
+        <ul className="mt-3 space-y-2 text-sm text-white/80">
+          {archived.map((record) => <li key={record.id}>
+            {date(record.scored_at ?? record.created_at)} · {findRoleTrack(record.role_id)?.name ?? record.role_id} · {record.rubric_version} · {record.status === "draft" ? "Saved draft" : `${record.score}/100`}
+          </li>)}
+        </ul>
+        <Link href="/dashboard/settings" className="mt-3 inline-block text-sm text-[#ffad89] underline">Export your saved responses and evidence</Link>
+      </details>}
       {legacy.data?.length ? (
         <details className={box}>
           <summary className="cursor-pointer font-medium">Legacy text comparisons</summary>

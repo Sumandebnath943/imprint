@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import ForgeClient from "@/components/forge/ForgeClient";
 import type { ForgeUserData } from "@/lib/forge/types";
+import { findRoleTrack } from "@/lib/assessment/catalog";
+import { workspaceRole } from "@/lib/onboarding/workspace-catalog";
 
 async function getForgeData(): Promise<ForgeUserData> {
   const empty: ForgeUserData = {
@@ -22,7 +24,7 @@ async function getForgeData(): Promise<ForgeUserData> {
     if (!user) return empty;
 
     const [profileRes, challengeRes, historyRes] = await Promise.all([
-      supabase.from("profiles").select("profession_cluster").eq("id", user.id).single(),
+      supabase.from("profiles").select("profession,profession_cluster").eq("id", user.id).single(),
       supabase.from("vault_challenges").select("*").eq("user_id", user.id)
         .eq("status", "pending").order("due_date", { ascending: true }).limit(1).single(),
       supabase.from("journal_entries").select("id,created_at,word_count,drift_signals,content,title")
@@ -57,10 +59,13 @@ async function getForgeData(): Promise<ForgeUserData> {
       };
     });
 
+    const role = findRoleTrack(profileRes.data?.profession);
+    const practice = role && [...workspaceRole(role).tasks, ...role.tasks];
     return {
       userId: user.id,
       professionCluster: profileRes.data?.profession_cluster ?? "life_personal",
-            activeChallenge: challengeRes.data ? {
+      rolePractice: practice?.map(({ skill, mode, prompt, practice }) => ({ skill, mode, prompt, practice })),
+      activeChallenge: challengeRes.data ? {
         id: challengeRes.data.id, title: challengeRes.data.challenge_title,
         description: challengeRes.data.challenge_description, due_date: challengeRes.data.due_date,
         submissionMode: challengeRes.data.challenge_type === "creative_production" ? "sketch-upload" :

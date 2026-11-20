@@ -27,6 +27,7 @@ interface OnboardingAnswers {
   aiReflectionNote: string;
   baselineModules: BaselineModule[];
   baselineResponses: Record<string, BaselineResponse>;
+  workspaceId?: string;
   skills: OnboardingSkill[];
 }
 
@@ -44,6 +45,7 @@ interface OnboardingState {
   setAiUseContext: (v: string[]) => void;
   setAiReflectionNote: (v: string) => void;
   setBaselineModules: (modules: BaselineModule[]) => void;
+  setWorkspaceId: (id: string) => void;
   saveBaselineResponse: (response: BaselineResponse) => void;
   addSkill: (skill: OnboardingSkill) => void;
   removeSkill: (name: string) => void;
@@ -94,6 +96,7 @@ export const useOnboardingStore = create<OnboardingState>()(
 
       setBaselineModules: (modules) =>
         set((s) => ({ answers: { ...s.answers, baselineModules: modules } })),
+      setWorkspaceId: (id) => set((s) => ({ answers: { ...s.answers, workspaceId: id } })),
 
       saveBaselineResponse: (response) =>
         set((s) => {
