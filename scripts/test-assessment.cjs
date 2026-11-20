@@ -18,9 +18,22 @@ const { criterionScore, overallScore, getPublicTasks, isPastGrace } = require(".
 const { historicalComparison } = require("../lib/assessment/historical.ts");
 const { getTextMetrics } = require("../lib/forge/types.ts");
 const { getOnboardingWorkspace, getWorkspaceExercise } = require("../lib/onboarding/workspace-catalog.ts");
-const { blankWorkspaceAnswer, bookingObservation, checkWorkspaceAnswer, contrastRatio } = require("../lib/onboarding/workspace-contract.ts");
+const { blankWorkspaceAnswer, bookingObservation, checkWorkspaceAnswer, contrastRatio, matchesWorkspaceEvidence } = require("../lib/onboarding/workspace-contract.ts");
 const { createCodeCheckScript } = require("../lib/assessment/code-check-script.ts");
 const { findDeveloperExercise } = require("../lib/assessment/developer-bank.ts");
+
+test("workspace citations accept exact excerpts or criterion-specific verified outcomes", () => {
+  const answer = { ...blankWorkspaceAnswer(), fields: ["The empty list returns zero."], files: { "total.js": "return 0;" } };
+  const verified = ["Empty input: passed", "Mixed entries: timed-out"];
+  assert.equal(matchesWorkspaceEvidence("empty list returns zero", answer), true);
+  assert.equal(matchesWorkspaceEvidence("return 0;", answer), true);
+  assert.equal(matchesWorkspaceEvidence("Empty input: passed", answer, verified), true);
+  assert.equal(matchesWorkspaceEvidence("Mixed entries: timed-out", answer, verified), true);
+  assert.equal(matchesWorkspaceEvidence("Empty input: passed", answer), false);
+  assert.equal(matchesWorkspaceEvidence("Mixed entries: passed", answer, verified), false);
+  assert.equal(matchesWorkspaceEvidence("The empty list returns no invoices.", answer, verified), false);
+  assert.equal(matchesWorkspaceEvidence(" ", answer, verified), false);
+});
 
 test("the shared Docker and Vercel harness returns bounded, deterministic case results", () => {
   const exercise = findDeveloperExercise("basic-invoices");

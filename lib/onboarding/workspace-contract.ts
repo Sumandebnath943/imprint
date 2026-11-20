@@ -64,6 +64,16 @@ export const REFLECTIONS: Record<number, { fields: string[]; mechanism: string; 
 
 export function blankWorkspaceAnswer(): WorkspaceAnswer { return { fields: [], choices: [], order: [] }; }
 
+export function matchesWorkspaceEvidence(evidence: string, answer: WorkspaceAnswer, verifiedChecks: string[] = []) {
+  const normalize = (value: string) => value.trim().replace(/\s+/g, " ").toLowerCase();
+  const excerpt = normalize(evidence);
+  if (!excerpt) return false;
+  if (verifiedChecks.includes(evidence.trim())) return true;
+  const lines = [...answer.fields, ...answer.choices, ...answer.order, ...(answer.observations ?? []),
+    ...(answer.beatGrid ?? []), ...(answer.palette ?? []), ...Object.values(answer.files ?? {})];
+  return lines.some((line) => normalize(line).includes(excerpt));
+}
+
 export function bookingObservation(value: number, flow: string, build: string) {
   const inRange = Number.isInteger(value) && value >= 1 && value <= 6;
   const permitted = inRange || (flow === "Edit" && build === "Original" && value === 0);
